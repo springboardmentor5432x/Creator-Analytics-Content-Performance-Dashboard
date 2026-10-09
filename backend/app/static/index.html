@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CreatorIQ - Module 1: User Management & Database Schema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(18, 24, 38, 0.85);
+      --bg-card-hover: rgba(26, 35, 56, 0.9);
+      --accent-purple: #7c3aed;
+      --accent-indigo: #6366f1;
+      --accent-pink: #ec4899;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --glow-purple: rgba(124, 58, 237, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(124, 58, 237, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(9, 13, 22, 0.8);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+    }
+
+    .header-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--glow-purple);
+      font-weight: 900;
+      color: white;
+    }
+
+    .brand-title {
+      background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge-module {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+      background: rgba(124, 58, 237, 0.2);
+      color: #c084fc;
+      border: 1px solid rgba(192, 132, 252, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.3rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.5rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-indigo));
+      color: white;
+      box-shadow: 0 4px 12px var(--glow-purple);
+    }
+
+    .api-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-green);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    /* AUTH SECTION */
+    .auth-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 968px) {
+      .auth-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2.2rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .auth-header {
+      margin-bottom: 1.8rem;
+    }
+
+    .auth-toggle {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.8rem;
+    }
+
+    .toggle-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .toggle-tab.active {
+      color: var(--text-main);
+    }
+
+    .toggle-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-pink));
+      border-radius: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 1.3rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: white;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
+    }
+
+    select.form-control {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.95rem;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-indigo));
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      margin-top: 0.8rem;
+      box-shadow: 0 8px 20px var(--glow-purple);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(124, 58, 237, 0.4);
+    }
+
+    .quick-demo-section {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .quick-demo-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.8rem;
+    }
+
+    .demo-btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
+    }
+
+    .demo-btn {
+      padding: 0.6rem 0.8rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+
+    .demo-btn:hover {
+      background: rgba(124, 58, 237, 0.15);
+      border-color: rgba(124, 58, 237, 0.4);
+    }
+
+    .role-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .role-creator { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .role-agency { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .role-marketing { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .role-admin { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+    /* AUTH RESPONSE CARD */
+    .session-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2rem;
+    }
+
+    .token-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #a5b4fc;
+      word-break: break-all;
+      max-height: 110px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+    }
+
+    .rbac-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+
+    .rbac-table th, .rbac-table td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+    }
+
+    .rbac-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* SCHEMA SECTION */
+    .schema-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .table-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .table-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(124, 58, 237, 0.4);
+    }
+
+    .table-header {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-name {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .col-list {
+      padding: 1rem 1.2rem;
+    }
+
+    .col-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.45rem 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+      font-size: 0.85rem;
+    }
+
+    .col-item:last-child {
+      border-bottom: none;
+    }
+
+    .col-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .col-key {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-weight: 700;
+      margin-left: 0.4rem;
+    }
+
+    .pk { background: rgba(245, 158, 11, 0.25); color: #fbbf24; }
+    .fk { background: rgba(59, 130, 246, 0.25); color: #60a5fa; }
+    .uk { background: rgba(168, 85, 247, 0.25); color: #c084fc; }
+
+    .col-type {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .alert {
+      padding: 0.8rem 1rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      margin-bottom: 1.2rem;
+      display: none;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    pre code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      display: block;
+      padding: 1.2rem;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-logo">IQ</div>
+        <div>
+          <span class="brand-title">CreatorIQ</span>
+          <span class="badge-module" style="margin-left: 0.5rem;">Module 1</span>
+        </div>
+      </div>
+
+      <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchNavTab('auth')">Authentication Portal</button>
+        <button class="tab-btn" onclick="switchNavTab('schema')">Database Schema Design</button>
+      </div>
+
+      <div class="api-status">
+        <span class="status-dot"></span>
+        <span>FastAPI & SQLite Active</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- TAB 1: AUTHENTICATION & LOGIN PAGE -->
+    <div id="tab-auth" class="auth-grid">
+      <!-- FORM CARD -->
+      <div class="card">
+        <div class="auth-toggle">
+          <div id="tab-login-btn" class="toggle-tab active" onclick="setAuthMode('login')">Sign In</div>
+          <div id="tab-register-btn" class="toggle-tab" onclick="setAuthMode('register')">Register Account</div>
+        </div>
+
+        <div id="alert-msg" class="alert"></div>
+
+        <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+          <!-- REGISTER ONLY FIELDS -->
+          <div id="register-fields" class="hidden">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="full_name" class="form-control" placeholder="e.g. Alex Rivera">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Select System Role</label>
+              <select id="role" class="form-control" onchange="handleRoleChange()">
+                <option value="Creator">Creator (Content & Growth)</option>
+                <option value="Agency">Agency (Talent Management)</option>
+                <option value="Marketing Team">Marketing Team</option>
+                <option value="Administrator">Administrator</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- COMMON FIELDS -->
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="email" class="form-control" placeholder="creator@creatoriq.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="password" class="form-control" placeholder="••••••••••••" required>
+          </div>
+
+          <button type="submit" id="btn-submit" class="btn-submit">Sign In to Dashboard</button>
+        </form>
+
+        <div class="quick-demo-section">
+          <div class="quick-demo-title">⚡ 1-Click Role Login Demo</div>
+          <div class="demo-btn-grid">
+            <button class="demo-btn" onclick="quickLogin('creator@creatoriq.com', 'Password123!')">
+              <span class="role-badge role-creator">Creator</span> Alex Rivera
+            </button>
+            <button class="demo-btn" onclick="quickLogin('agency@creatoriq.com', 'Password123!')">
+              <span class="role-badge role-agency">Agency</span> Apex Agency
+            </button>
+            <button class="demo-btn" onclick="quickLogin('marketing@creatoriq.com', 'Password123!')">
+              <span class="role-badge role-marketing">Marketing</span> Marcus Vance
+            </button>
+            <button class="demo-btn" onclick="quickLogin('admin@creatoriq.com', 'Password123!')">
+              <span class="role-badge role-admin">Admin</span> System Admin
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SESSION & RESPONSE DISPLAY -->
+      <div class="session-card">
+        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+          <span>Authenticated Session State</span>
+          <span id="session-badge" class="role-badge role-creator">Guest</span>
+        </h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">
+          Real-time JWT authentication verification via <code style="color: #a5b4fc;">/api/v1/auth/me</code>
+        </p>
+
+        <div id="unauthenticated-state">
+          <div style="text-align: center; padding: 2.5rem 1rem; border: 2px dashed var(--border-color); border-radius: 12px; color: var(--text-muted);">
+            <svg style="width: 42px; height: 42px; stroke: var(--text-muted); fill: none; margin-bottom: 0.8rem;" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke-width="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-width="2"/>
+            </svg>
+            <div style="font-size: 0.95rem; font-weight: 600;">No Active Session</div>
+            <div style="font-size: 0.8rem; margin-top: 0.3rem;">Sign in or use 1-Click Quick Demo to inspect live JWT token issuance.</div>
+          </div>
+        </div>
+
+        <div id="authenticated-state" class="hidden">
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">ACTIVE USER</div>
+            <div id="user-display-name" style="font-size: 1.2rem; font-weight: 800; color: white;">Alex Rivera</div>
+            <div id="user-display-email" style="font-size: 0.85rem; color: #a5b4fc;">creator@creatoriq.com</div>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">ISSUED JWT BEARER TOKEN</div>
+            <div id="token-display" class="token-box">No token</div>
+          </div>
+
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">RBAC ACCESS LEVEL MATRIX</div>
+            <table class="rbac-table">
+              <thead>
+                <tr>
+                  <th>Endpoint</th>
+                  <th>Permission</th>
+                </tr>
+              </thead>
+              <tbody id="rbac-matrix-body">
+                <!-- Dynamic RBAC rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <button onclick="logout()" style="margin-top: 1.2rem; width: 100%; padding: 0.7rem; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #f87171; font-weight: 700; cursor: pointer;">
+            Sign Out Session
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: DATABASE SCHEMA DESIGN -->
+    <div id="tab-schema" class="hidden">
+      <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.6rem; font-weight: 800;">Relational Database Schema (Module 1)</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
+          Designed using SQLAlchemy ORM with support for PostgreSQL (Production) and SQLite (Development).
+        </p>
+      </div>
+
+      <div class="schema-grid">
+        <!-- TABLE 1: USERS -->
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-name">users</div>
+            <span class="role-badge role-admin">Identity Table</span>
+          </div>
+          <div class="col-list">
+            <div class="col-item">
+              <div><span class="col-name">id</span><span class="col-key pk">PK</span></div>
+              <span class="col-type">INTEGER</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">full_name</span></div>
+              <span class="col-type">VARCHAR(100)</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">email</span><span class="col-key uk">UK</span></div>
+              <span class="col-type">VARCHAR(100)</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">hashed_password</span></div>
+              <span class="col-type">VARCHAR(255)</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">role</span></div>
+              <span class="col-type">ENUM</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">is_active</span></div>
+              <span class="col-type">BOOLEAN</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">created_at</span></div>
+              <span class="col-type">TIMESTAMP</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE 2: CREATOR_PROFILES -->
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-name">creator_profiles</div>
+            <span class="role-badge role-creator">Creator Profile</span>
+          </div>
+          <div class="col-list">
+            <div class="col-item">
+              <div><span class="col-name">id</span><span class="col-key pk">PK</span></div>
+              <span class="col-type">INTEGER</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">user_id</span><span class="col-key fk">FK</span><span class="col-key uk">UK</span></div>
+              <span class="col-type">INTEGER</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">handle</span></div>
+              <span class="col-type">VARCHAR(50)</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">niche</span></div>
+              <span class="col-type">VARCHAR(100)</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">youtube_channel</span></div>
+              <span class="col-type">VARCHAR(100)</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">total_followers</span></div>
+              <span class="col-type">INTEGER</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">monthly_views</span></div>
+              <span class="col-type">INTEGER</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE 3: AGENCY_PROFILES -->
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-name">agency_profiles</div>
+            <span class="role-badge role-agency">Agency Profile</span>
+          </div>
+          <div class="col-list">
+            <div class="col-item">
+              <div><span class="col-name">id</span><span class="col-key pk">PK</span></div>
+              <span class="col-type">INTEGER</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">user_id</span><span class="col-key fk">FK</span><span class="col-key uk">UK</span></div>
+              <span class="col-type">INTEGER</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">agency_name</span></div>
+              <span class="col-type">VARCHAR(100)</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">company_website</span></div>
+              <span class="col-type">VARCHAR(150)</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">managed_creators</span></div>
+              <span class="col-type">INTEGER</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">tier</span></div>
+              <span class="col-type">VARCHAR(50)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE 4: USER_SETTINGS -->
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-name">user_settings</div>
+            <span class="role-badge role-marketing">Settings</span>
+          </div>
+          <div class="col-list">
+            <div class="col-item">
+              <div><span class="col-name">id</span><span class="col-key pk">PK</span></div>
+              <span class="col-type">INTEGER</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">user_id</span><span class="col-key fk">FK</span><span class="col-key uk">UK</span></div>
+              <span class="col-type">INTEGER</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">theme</span></div>
+              <span class="col-type">VARCHAR(20)</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">email_notifications</span></div>
+              <span class="col-type">BOOLEAN</span>
+            </div>
+            <div class="col-item">
+              <div><span class="col-name">two_factor_enabled</span></div>
+              <span class="col-type">BOOLEAN</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 2.5rem;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 0.8rem;">SQL DDL Definition Code</h3>
+        <pre><code>-- SQL Schema DDL Script for Module 1
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    hashed_password VARCHAR(255) NOT NULL,
+    role VARCHAR(30) NOT NULL CHECK (role IN ('Creator', 'Agency', 'Marketing Team', 'Administrator')),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE creator_profiles (
+    id SERIAL PRIMARY KEY,
+    user_id INT UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    handle VARCHAR(50),
+    niche VARCHAR(100) DEFAULT 'Tech & Content',
+    youtube_channel VARCHAR(100),
+    total_followers INT DEFAULT 0
+);</code></pre>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let currentAuthMode = 'login';
+
+    function switchNavTab(tabName) {
+      document.querySelectorAll('.nav-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+      if (tabName === 'auth') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('tab-auth').classList.remove('hidden');
+        document.getElementById('tab-schema').classList.add('hidden');
+      } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('tab-schema').classList.remove('hidden');
+        document.getElementById('tab-auth').classList.add('hidden');
+      }
+    }
+
+    function setAuthMode(mode) {
+      currentAuthMode = mode;
+      const loginTab = document.getElementById('tab-login-btn');
+      const regTab = document.getElementById('tab-register-btn');
+      const regFields = document.getElementById('register-fields');
+      const submitBtn = document.getElementById('btn-submit');
+
+      if (mode === 'login') {
+        loginTab.classList.add('active');
+        regTab.classList.remove('active');
+        regFields.classList.add('hidden');
+        submitBtn.textContent = 'Sign In to Dashboard';
+      } else {
+        regTab.classList.add('active');
+        loginTab.classList.remove('active');
+        regFields.classList.remove('hidden');
+        submitBtn.textContent = 'Create CreatorIQ Account';
+      }
+    }
+
+    function showAlert(msg, type) {
+      const alertBox = document.getElementById('alert-msg');
+      alertBox.textContent = msg;
+      alertBox.className = `alert alert-${type}`;
+      alertBox.style.display = 'block';
+      setTimeout(() => { alertBox.style.display = 'none'; }, 4000);
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (currentAuthMode === 'login') {
+        await executeLogin(email, password);
+      } else {
+        const full_name = document.getElementById('full_name').value;
+        const role = document.getElementById('role').value;
+        await executeRegister(full_name, email, password, role);
+      }
+    }
+
+    async function executeLogin(email, password) {
+      try {
+        const res = await fetch('/api/v1/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Login failed');
+
+        localStorage.setItem('token', data.access_token);
+        showAlert(`Welcome back, ${data.full_name}! Login successful.`, 'success');
+        updateSessionState(data);
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    }
+
+    async function executeRegister(full_name, email, password, role) {
+      try {
+        const res = await fetch('/api/v1/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ full_name, email, password, role })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Registration failed');
+
+        localStorage.setItem('token', data.access_token);
+        showAlert(`Account created successfully as ${role}!`, 'success');
+        updateSessionState(data);
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    }
+
+    async function quickLogin(email, password) {
+      document.getElementById('email').value = email;
+      document.getElementById('password').value = password;
+      setAuthMode('login');
+      await executeLogin(email, password);
+    }
+
+    function updateSessionState(userData) {
+      document.getElementById('unauthenticated-state').classList.add('hidden');
+      document.getElementById('authenticated-state').classList.remove('hidden');
+
+      document.getElementById('user-display-name').textContent = userData.full_name;
+      document.getElementById('user-display-email').textContent = userData.email;
+      document.getElementById('token-display').textContent = userData.access_token;
+
+      const badge = document.getElementById('session-badge');
+      badge.textContent = userData.role;
+      badge.className = `role-badge role-${getRoleClass(userData.role)}`;
+
+      // Render RBAC Matrix based on role
+      const matrixBody = document.getElementById('rbac-matrix-body');
+      matrixBody.innerHTML = getRbacRows(userData.role);
+    }
+
+    function getRoleClass(role) {
+      if (role === 'Creator') return 'creator';
+      if (role === 'Agency') return 'agency';
+      if (role === 'Marketing Team') return 'marketing';
+      return 'admin';
+    }
+
+    function getRbacRows(role) {
+      const isCreator = role === 'Creator' || role === 'Administrator';
+      const isAgency = role === 'Agency' || role === 'Administrator';
+      const isAdmin = role === 'Administrator';
+
+      return `
+        <tr><td>GET /api/v1/creator/profile</td><td>${isCreator ? '✅ Allowed' : '❌ Forbidden (403)'}</td></tr>
+        <tr><td>GET /api/v1/agency/profile</td><td>${isAgency ? '✅ Allowed' : '❌ Forbidden (403)'}</td></tr>
+        <tr><td>GET /api/v1/users/ (All Users)</td><td>${isAdmin ? '✅ Allowed' : '❌ Forbidden (403)'}</td></tr>
+        <tr><td>PUT /api/v1/settings/</td><td>✅ Allowed (All Authenticated)</td></tr>
+      `;
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      document.getElementById('unauthenticated-state').classList.remove('hidden');
+      document.getElementById('authenticated-state').classList.add('hidden');
+      showAlert('Logged out successfully.', 'success');
+    }
+  </script>
+</body>
+</html>
