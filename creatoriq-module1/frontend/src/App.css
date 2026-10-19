@@ -1,0 +1,38 @@
+:root {
+  --ink: #14213d;
+  --paper: #f7f9fc;
+  --accent: #1f6feb;
+  --accent-dark: #1757b8;
+  --line: #d5dce8;
+  --danger: #b42318;
+  --danger-bg: #fdecea;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; color: var(--ink); background: var(--paper); }
+
+.auth-page { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+.auth-side { background: var(--ink); color: #fff; padding: 64px; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+.auth-side h1 { font-size: 2.6rem; margin: 0; }
+.auth-side p { max-width: 36ch; line-height: 1.5; color: #c9d3e6; }
+.bars { display: flex; align-items: flex-end; gap: 10px; height: 140px; margin-top: 32px; }
+.bars span { width: 28px; background: var(--accent); border-radius: 3px 3px 0 0; }
+
+.auth-form-wrap { display: flex; align-items: center; justify-content: center; padding: 32px; }
+.auth-form { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 6px; }
+.auth-form h2 { margin: 0 0 12px; font-size: 1.6rem; }
+label { font-size: 0.9rem; font-weight: 600; margin-top: 10px; }
+input, select { padding: 11px 12px; border: 1px solid var(--line); border-radius: 6px; font-size: 1rem; background: #fff; }
+input:focus, select:focus, .btn:focus-visible { outline: 3px solid #a9c8fb; border-color: var(--accent); }
+.btn { margin-top: 18px; padding: 12px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+.btn:hover { background: var(--accent-dark); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.error { background: var(--danger-bg); color: var(--danger); padding: 10px 12px; border-radius: 6px; font-size: 0.92rem; }
+.muted { color: #5c6b85; font-size: 0.92rem; }
+a { color: var(--accent); }
+.dash { max-width: 560px; margin: 80px auto; padding: 0 24px; }
+
+@media (max-width: 760px) {
+  .auth-page { grid-template-columns: 1fr; }
+  .auth-side { padding: 32px; }
+  .bars { display: none; }
+}
