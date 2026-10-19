@@ -7,3 +7,8 @@
 *.py[cod]
 **/node_modules/
 **/dist/
+backend/main_backup.py
+database/schema_backup.sql
+frontend/src/App.backup.css
+frontend/src/App.backup.jsx
+frontend/src/App_backup.txt
