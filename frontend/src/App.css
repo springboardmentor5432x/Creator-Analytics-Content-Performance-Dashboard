@@ -1,0 +1,114 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #111827;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background: #f0f7f7;
+}
+
+.card {
+  width: 100%;
+  max-width: 425px;
+  padding: 38px 35px;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.09);
+}
+
+.card h1 {
+  margin: 8px 0 14px;
+  text-align: center;
+  font-size: 32px;
+}
+
+.subtitle {
+  margin: 0 0 38px;
+  text-align: center;
+  color: #687386;
+}
+
+label {
+  display: block;
+  margin: 14px 0 8px;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+  outline-color: #0866ed;
+}
+
+button {
+  width: 100%;
+  margin-top: 22px;
+  padding: 13px;
+  border: none;
+  border-radius: 8px;
+  background: #0866ed;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0755c5;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.register-text {
+  margin-top: 25px;
+  text-align: center;
+}
+
+.register-text a {
+  color: #0866ed;
+  font-weight: 600;
+}
+
+.error {
+  color: #c62828;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.profile-card {
+  text-align: center;
+}
+
+.avatar {
+  width: 70px;
+  height: 70px;
+  margin: 24px auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e5efff;
+  color: #0866ed;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.role {
+  margin-top: 20px;
+  font-weight: 600;
+}

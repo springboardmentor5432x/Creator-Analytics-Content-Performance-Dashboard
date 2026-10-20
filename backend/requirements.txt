@@ -1,0 +1,11 @@
+
+fastapi[standard]
+uvicorn[standard]
+sqlalchemy>=2.0,<3.0
+psycopg[binary]
+pydantic-settings
+email-validator
+alembic
+pwdlib[argon2]
+PyJWT
+python-multipart
