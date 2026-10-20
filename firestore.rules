@@ -1,0 +1,172 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function getUserRole() {
+      return isAuthenticated() ? getUserData().role : null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (getUserRole() == 'Admin' || request.auth.token.role == 'Admin');
+    }
+
+    function isMarketing() {
+      return isAuthenticated() && (getUserRole() == 'Marketing Team' || getUserRole() == 'Marketing');
+    }
+
+    function isCreator() {
+      return isAuthenticated() && getUserRole() == 'Creator';
+    }
+
+    function isAgency() {
+      return isAuthenticated() && getUserRole() == 'Agency';
+    }
+
+    // 1. Users collection: Users can read/write their own profile; Admin can read all
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin() || isMarketing() || isAgency());
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // 2. Email Registry: Lookup table for role and email uniqueness
+    match /email_registry/{emailDoc} {
+      allow read: if true;
+      allow write: if isAuthenticated() || request.auth == null;
+    }
+
+    // 3. Campaigns collection
+    // Marketing can create and manage their campaigns; Creators and Agencies can view active campaigns
+    match /campaigns/{campaignId} {
+      allow read: if isAuthenticated();
+      allow create: if isMarketing() || isAdmin();
+      allow update: if (isMarketing() && (resource.data.marketingId == request.auth.uid || resource.data.marketingEmail == request.auth.token.email)) || isAdmin();
+      allow delete: if isAdmin() || (isMarketing() && resource.data.marketingId == request.auth.uid);
+    }
+
+    // 4. Campaign Invitations
+    // Marketing can create/view; Creator can view and respond to their own invitation
+    match /campaign_invitations/{invitationId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        isMarketing() ||
+        (isCreator() && (resource.data.creatorId == request.auth.uid || resource.data.creatorEmail == request.auth.token.email)) ||
+        isAgency()
+      );
+      allow create: if isMarketing() || isAdmin();
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (isMarketing() && resource.data.marketingId == request.auth.uid) ||
+        (isCreator() && (resource.data.creatorId == request.auth.uid || resource.data.creatorEmail == request.auth.token.email) &&
+          // Creators can only update status and respondedAt
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'respondedAt'])
+        )
+      );
+      allow delete: if isAdmin() || (isMarketing() && resource.data.marketingId == request.auth.uid);
+    }
+
+    // 5. Campaign Deliverables
+    // Marketing can assign/review for their campaigns; Creators can only submit/resubmit their assigned items
+    match /campaign_deliverables/{deliverableId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        (isMarketing() && (resource.data.marketingId == request.auth.uid || resource.data.marketingEmail == request.auth.token.email || resource.data.marketingId == null)) ||
+        (isCreator() && (resource.data.creatorId == request.auth.uid || resource.data.creatorEmail == request.auth.token.email)) ||
+        isAgency()
+      );
+      allow create: if isAdmin() || (isMarketing() && (request.resource.data.marketingId == request.auth.uid || request.resource.data.marketingEmail == request.auth.token.email));
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        // Marketing can only review deliverables for campaigns they own/manage
+        (isMarketing() && 
+          (resource.data.marketingId == request.auth.uid || resource.data.marketingEmail == request.auth.token.email || resource.data.marketingId == null) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'revisionFeedback', 'reviewedAt', 'updatedAt']) &&
+          request.resource.data.status in ['approved', 'revision_requested']
+        ) ||
+        // Creator can submit/resubmit only their assigned deliverable (cannot approve own submission)
+        (isCreator() && 
+          (resource.data.creatorId == request.auth.uid || resource.data.creatorEmail == request.auth.token.email) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['submissionUrl', 'submissionNotes', 'status', 'submittedAt', 'submissionHistory', 'updatedAt']) &&
+          request.resource.data.status in ['submitted', 'resubmitted'] &&
+          request.resource.data.creatorId == resource.data.creatorId &&
+          request.resource.data.campaignId == resource.data.campaignId
+        )
+      );
+      allow delete: if isAdmin() || (isMarketing() && (resource.data.marketingId == request.auth.uid || resource.data.marketingEmail == request.auth.token.email));
+    }
+
+    // 6. Campaign Metrics
+    match /campaign_metrics/{metricId} {
+      allow read: if isAuthenticated();
+      allow write: if isMarketing() || isAdmin();
+    }
+
+    // 7. Notifications
+    // Users can read and update their own notifications
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.recipientId == request.auth.uid ||
+        resource.data.recipientEmail == request.auth.token.email
+      );
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.recipientId == request.auth.uid ||
+        resource.data.recipientEmail == request.auth.token.email
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 8. Brand Workspaces
+    // Marketing users manage their own brand workspace; Admin has full access
+    match /brand_workspaces/{workspaceId} {
+      allow read: if isAuthenticated() && (request.auth.uid == workspaceId || isAdmin() || isMarketing());
+      allow write: if isAuthenticated() && (request.auth.uid == workspaceId || isAdmin() || isMarketing());
+    }
+
+    // 9. Agency Brand Assignments
+    // Brands assign campaigns to Agencies; Agencies accept/decline and manage
+    match /agency_brand_assignments/{assignmentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (isMarketing() || isAgency() || isAdmin());
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (isAgency() && (resource.data.agencyId == request.auth.uid || resource.data.agencyEmail == request.auth.token.email)) ||
+        (isMarketing() && (resource.data.brandId == request.auth.uid || resource.data.brandEmail == request.auth.token.email))
+      );
+      allow delete: if isAdmin() || (isMarketing() && resource.data.brandId == request.auth.uid);
+    }
+
+    // 10. Agency Creator Relationships (Representation Roster)
+    // Creators and Agencies request/accept representation and negotiate splits
+    match /agency_creator_relationships/{relationshipId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (isCreator() || isAgency() || isAdmin());
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (isAgency() && (resource.data.agencyId == request.auth.uid || resource.data.agencyEmail == request.auth.token.email)) ||
+        (isCreator() && (resource.data.creatorId == request.auth.uid || resource.data.creatorEmail == request.auth.token.email))
+      );
+      allow delete: if isAdmin() || (isAgency() && resource.data.agencyId == request.auth.uid);
+    }
+
+    // 11. Agency Recommendations
+    // Agencies pitch roster creators to brand campaigns; Brands review recommendations
+    match /agency_recommendations/{recommendationId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (isAgency() || isMarketing() || isAdmin());
+      allow update: if isAuthenticated() && (isAdmin() || isAgency() || isMarketing());
+      allow delete: if isAdmin() || isAgency();
+    }
+  }
+}
+
