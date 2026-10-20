@@ -21,3 +21,13 @@
 .role-feature p{font-size:11px;line-height:1.7;color:#8e94a7;flex:1;margin:0 0 18px}
 .role-feature .secondary-btn{margin-top:auto}
 @media(max-width:850px){.role-feature-grid{grid-template-columns:1fr}.role-banner{padding:18px}.role-banner-mark{width:48px;height:48px;flex-basis:48px}}
+
+/* Social API connection status */
+.api-status-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border:1px solid #e9ebf4;border-radius:10px;background:#fbfbfe;color:#687087;font-size:12px}
+.api-status-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#d6a23a}
+.api-status-dot.live{background:#22a06b;box-shadow:0 0 0 3px #22a06b1c}
+.api-status-dot.loading{background:#6d62e8;animation:api-pulse 1.2s infinite}
+.api-status-dot.demo{background:#d6a23a}
+.api-status-row .text-btn{margin-left:auto;font-size:12px}
+.api-status-row .text-btn:disabled{opacity:.55;cursor:wait}
+@keyframes api-pulse{50%{opacity:.35}}
