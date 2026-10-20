@@ -1,0 +1,440 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2052" height="1310" viewBox="0 0 2052 1310" font-family="DejaVu Sans, Arial, sans-serif">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1e293b"/></marker></defs>
+<rect width="2052" height="1310" fill="#f8fafc"/>
+<rect width="2052" height="82" fill="#0f2742"/>
+<text x="1026.0" y="40" text-anchor="middle" fill="#fff" font-size="27" font-weight="700">CreatorIQ – Database Structure (PostgreSQL)</text>
+<text x="1026.0" y="66" text-anchor="middle" fill="#cbd5e1" font-size="15">Full project schema · 13 tables · Module 1 builds users, creators, agencies, agency_creators</text>
+<path d="M386,190 L466,190" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="400.0" y="163" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="426.0" y="178" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — 1</text>
+<path d="M226.0,130 L226.0,106 L1026.0,106 L1026.0,130" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="720.0" y="95" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="746.0" y="110" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — 1</text>
+<path d="M226.0,354 L226.0,494" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="200.0" y="413.0" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="226.0" y="428.0" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — N</text>
+<path d="M66,240 L36,240 L36,981 L66,981" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="10" y="599.5" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="36" y="614.5" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — N</text>
+<path d="M626.0,378 L626.0,494" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="600.0" y="425.0" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="626.0" y="440.0" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — N</text>
+<path d="M866,353 L826.0,353 L826.0,545 L786,545" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="800.0" y="450.5" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="826.0" y="465.5" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — N</text>
+<path d="M1186,190 L1266,190" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="1200.0" y="163" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="1226.0" y="178" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — N</text>
+<path d="M1026.0,378 L1026.0,494" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="1000.0" y="425.0" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="1026.0" y="440.0" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — N</text>
+<path d="M1186,353 L1208.0,353 L1208.0,1005 L1186,1005" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="1182.0" y="629" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="1208.0" y="644" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — N</text>
+<path d="M1266,401 L1244.0,401 L1244.0,1053 L1266,1053" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="1218.0" y="779" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="1244.0" y="794" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — N</text>
+<path d="M1426.0,426 L1426.0,494" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="1400.0" y="449.0" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="1426.0" y="464.0" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — N</text>
+<path d="M1586,190 L1666,190" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="1600.0" y="163" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="1626.0" y="178" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — N</text>
+<path d="M1826.0,402 L1826.0,494" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="1800.0" y="437.0" width="52" height="20" rx="5" fill="#f8fafc"/>
+<text x="1826.0" y="452.0" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1 — 1</text>
+<rect x="66" y="130" width="320" height="224" rx="9" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<path d="M66,139 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#2563eb"/>
+<text x="80" y="152" font-size="16" font-weight="700" fill="#fff">users</text>
+<rect x="302.8" y="138" width="73.2" height="17" rx="8.5" fill="#fff" fill-opacity="0.92"/>
+<text x="339.4" y="150.5" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">MODULE 1</text>
+<text x="78" y="178.5" font-size="12.5" font-weight="700" fill="#0f172a">user_id</text>
+<text x="198" y="178.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="288" y="178.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="67.1" y="186" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="78" y="202.5" font-size="12.5" fill="#0f172a">name</text>
+<text x="198" y="202.5" font-size="11.5" fill="#475569">VARCHAR(100)</text>
+<text x="78" y="226.5" font-size="12.5" fill="#0f172a">email</text>
+<text x="198" y="226.5" font-size="11.5" fill="#475569">VARCHAR(100)</text>
+<text x="288" y="226.5" font-size="10.5" fill="#64748b">UNIQUE</text>
+<rect x="67.1" y="234" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="78" y="250.5" font-size="12.5" fill="#0f172a">password_hash</text>
+<text x="198" y="250.5" font-size="11.5" fill="#475569">VARCHAR(255)</text>
+<text x="78" y="274.5" font-size="12.5" fill="#0f172a">role</text>
+<text x="198" y="274.5" font-size="11.5" fill="#475569">VARCHAR(50)</text>
+<text x="288" y="274.5" font-size="10.5" fill="#64748b">CHECK (4 roles)</text>
+<rect x="67.1" y="282" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="78" y="298.5" font-size="12.5" fill="#0f172a">is_active</text>
+<text x="198" y="298.5" font-size="11.5" fill="#475569">BOOLEAN</text>
+<text x="288" y="298.5" font-size="10.5" fill="#64748b">DEFAULT TRUE</text>
+<text x="78" y="322.5" font-size="12.5" fill="#0f172a">created_at</text>
+<text x="198" y="322.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="288" y="322.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="67.1" y="330" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="78" y="346.5" font-size="12.5" fill="#0f172a">updated_at</text>
+<text x="198" y="346.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="288" y="346.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="866" y="130" width="320" height="248" rx="9" fill="#fff" stroke="#16a34a" stroke-width="2.2"/>
+<path d="M866,139 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#16a34a"/>
+<text x="880" y="152" font-size="16" font-weight="700" fill="#fff">creators</text>
+<rect x="1102.8" y="138" width="73.2" height="17" rx="8.5" fill="#fff" fill-opacity="0.92"/>
+<text x="1139.4" y="150.5" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">MODULE 1</text>
+<text x="878" y="178.5" font-size="12.5" font-weight="700" fill="#0f172a">creator_id</text>
+<text x="998" y="178.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="1088" y="178.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="867.1" y="186" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="878" y="202.5" font-size="12.5" fill="#0f172a">user_id</text>
+<text x="998" y="202.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1088" y="202.5" font-size="10.5" fill="#64748b">FK, UNIQUE</text>
+<text x="878" y="226.5" font-size="12.5" fill="#0f172a">creator_name</text>
+<text x="998" y="226.5" font-size="11.5" fill="#475569">VARCHAR(100)</text>
+<rect x="867.1" y="234" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="878" y="250.5" font-size="12.5" fill="#0f172a">bio</text>
+<text x="998" y="250.5" font-size="11.5" fill="#475569">TEXT</text>
+<text x="878" y="274.5" font-size="12.5" fill="#0f172a">profile_image</text>
+<text x="998" y="274.5" font-size="11.5" fill="#475569">VARCHAR(255)</text>
+<rect x="867.1" y="282" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="878" y="298.5" font-size="12.5" fill="#0f172a">website</text>
+<text x="998" y="298.5" font-size="11.5" fill="#475569">VARCHAR(255)</text>
+<text x="878" y="322.5" font-size="12.5" fill="#0f172a">location</text>
+<text x="998" y="322.5" font-size="11.5" fill="#475569">VARCHAR(100)</text>
+<rect x="867.1" y="330" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="878" y="346.5" font-size="12.5" fill="#0f172a">created_at</text>
+<text x="998" y="346.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="1088" y="346.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<text x="878" y="370.5" font-size="12.5" fill="#0f172a">updated_at</text>
+<text x="998" y="370.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="1088" y="370.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="466" y="130" width="320" height="248" rx="9" fill="#fff" stroke="#6366f1" stroke-width="2.2" stroke-dasharray="7 5"/>
+<path d="M466,139 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#6366f1"/>
+<text x="480" y="152" font-size="16" font-weight="700" fill="#fff">agencies</text>
+<rect x="739.8" y="138" width="36.2" height="17" rx="8.5" fill="#fff" fill-opacity="0.92"/>
+<text x="757.9" y="150.5" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">NEW</text>
+<rect x="660.5999999999999" y="138" width="73.2" height="17" rx="8.5" fill="#fff" fill-opacity="0.92"/>
+<text x="697.1999999999999" y="150.5" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">MODULE 1</text>
+<text x="478" y="178.5" font-size="12.5" font-weight="700" fill="#0f172a">agency_id</text>
+<text x="598" y="178.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="688" y="178.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="467.1" y="186" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="478" y="202.5" font-size="12.5" fill="#0f172a">user_id</text>
+<text x="598" y="202.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="688" y="202.5" font-size="10.5" fill="#64748b">FK, UNIQUE</text>
+<text x="478" y="226.5" font-size="12.5" fill="#0f172a">agency_name</text>
+<text x="598" y="226.5" font-size="11.5" fill="#475569">VARCHAR(150)</text>
+<rect x="467.1" y="234" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="478" y="250.5" font-size="12.5" fill="#0f172a">description</text>
+<text x="598" y="250.5" font-size="11.5" fill="#475569">TEXT</text>
+<text x="478" y="274.5" font-size="12.5" fill="#0f172a">logo</text>
+<text x="598" y="274.5" font-size="11.5" fill="#475569">VARCHAR(255)</text>
+<rect x="467.1" y="282" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="478" y="298.5" font-size="12.5" fill="#0f172a">website</text>
+<text x="598" y="298.5" font-size="11.5" fill="#475569">VARCHAR(255)</text>
+<text x="478" y="322.5" font-size="12.5" fill="#0f172a">location</text>
+<text x="598" y="322.5" font-size="11.5" fill="#475569">VARCHAR(100)</text>
+<rect x="467.1" y="330" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="478" y="346.5" font-size="12.5" fill="#0f172a">created_at</text>
+<text x="598" y="346.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="688" y="346.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<text x="478" y="370.5" font-size="12.5" fill="#0f172a">updated_at</text>
+<text x="598" y="370.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="688" y="370.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="466" y="494" width="320" height="104" rx="9" fill="#fff" stroke="#64748b" stroke-width="2.2" stroke-dasharray="7 5"/>
+<path d="M466,503 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#64748b"/>
+<text x="480" y="516" font-size="16" font-weight="700" fill="#fff">agency_creators</text>
+<rect x="739.8" y="502" width="36.2" height="17" rx="8.5" fill="#fff" fill-opacity="0.92"/>
+<text x="757.9" y="514.5" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">NEW</text>
+<rect x="660.5999999999999" y="502" width="73.2" height="17" rx="8.5" fill="#fff" fill-opacity="0.92"/>
+<text x="697.1999999999999" y="514.5" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">MODULE 1</text>
+<text x="478" y="542.5" font-size="12.5" font-weight="700" fill="#0f172a">agency_id</text>
+<text x="598" y="542.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="688" y="542.5" font-size="10.5" fill="#64748b">PK, FK</text>
+<rect x="467.1" y="550" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="478" y="566.5" font-size="12.5" font-weight="700" fill="#0f172a">creator_id</text>
+<text x="598" y="566.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="688" y="566.5" font-size="10.5" fill="#64748b">PK, FK</text>
+<text x="478" y="590.5" font-size="12.5" fill="#0f172a">added_at</text>
+<text x="598" y="590.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="688" y="590.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="1266" y="130" width="320" height="296" rx="9" fill="#fff" stroke="#facc15" stroke-width="2.2"/>
+<path d="M1266,139 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#facc15"/>
+<text x="1280" y="152" font-size="16" font-weight="700" fill="#1f2937">social_accounts</text>
+<text x="1278" y="178.5" font-size="12.5" font-weight="700" fill="#0f172a">account_id</text>
+<text x="1398" y="178.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="1488" y="178.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="1267.1" y="186" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="202.5" font-size="12.5" fill="#0f172a">creator_id</text>
+<text x="1398" y="202.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1488" y="202.5" font-size="10.5" fill="#64748b">FK</text>
+<text x="1278" y="226.5" font-size="12.5" fill="#0f172a">platform</text>
+<text x="1398" y="226.5" font-size="11.5" fill="#475569">VARCHAR(50)</text>
+<rect x="1267.1" y="234" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="250.5" font-size="12.5" fill="#0f172a">username</text>
+<text x="1398" y="250.5" font-size="11.5" fill="#475569">VARCHAR(100)</text>
+<text x="1278" y="274.5" font-size="12.5" fill="#0f172a">platform_user_id</text>
+<text x="1398" y="274.5" font-size="11.5" fill="#475569">VARCHAR(255)</text>
+<rect x="1267.1" y="282" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="298.5" font-size="12.5" fill="#0f172a">followers</text>
+<text x="1398" y="298.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1488" y="298.5" font-size="10.5" fill="#64748b">DEFAULT 0</text>
+<text x="1278" y="322.5" font-size="12.5" fill="#0f172a">access_token</text>
+<text x="1398" y="322.5" font-size="11.5" fill="#475569">TEXT</text>
+<text x="1488" y="322.5" font-size="10.5" fill="#64748b">encrypted</text>
+<rect x="1267.1" y="330" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="346.5" font-size="12.5" fill="#0f172a">refresh_token</text>
+<text x="1398" y="346.5" font-size="11.5" fill="#475569">TEXT</text>
+<text x="1488" y="346.5" font-size="10.5" fill="#64748b">encrypted</text>
+<text x="1278" y="370.5" font-size="12.5" fill="#0f172a">token_expires_at</text>
+<text x="1398" y="370.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<rect x="1267.1" y="378" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="394.5" font-size="12.5" fill="#0f172a">is_active</text>
+<text x="1398" y="394.5" font-size="11.5" fill="#475569">BOOLEAN</text>
+<text x="1488" y="394.5" font-size="10.5" fill="#64748b">DEFAULT TRUE</text>
+<text x="1278" y="418.5" font-size="12.5" fill="#0f172a">connected_at</text>
+<text x="1398" y="418.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="1488" y="418.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="1666" y="130" width="320" height="272" rx="9" fill="#fff" stroke="#f9a8d4" stroke-width="2.2"/>
+<path d="M1666,139 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#f9a8d4"/>
+<text x="1680" y="152" font-size="16" font-weight="700" fill="#1f2937">posts</text>
+<text x="1678" y="178.5" font-size="12.5" font-weight="700" fill="#0f172a">post_id</text>
+<text x="1798" y="178.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="1888" y="178.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="1667.1" y="186" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1678" y="202.5" font-size="12.5" fill="#0f172a">account_id</text>
+<text x="1798" y="202.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1888" y="202.5" font-size="10.5" fill="#64748b">FK</text>
+<text x="1678" y="226.5" font-size="12.5" fill="#0f172a">platform_post_id</text>
+<text x="1798" y="226.5" font-size="11.5" fill="#475569">VARCHAR(255)</text>
+<rect x="1667.1" y="234" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1678" y="250.5" font-size="12.5" fill="#0f172a">content_type</text>
+<text x="1798" y="250.5" font-size="11.5" fill="#475569">VARCHAR(50)</text>
+<text x="1678" y="274.5" font-size="12.5" fill="#0f172a">caption</text>
+<text x="1798" y="274.5" font-size="11.5" fill="#475569">TEXT</text>
+<rect x="1667.1" y="282" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1678" y="298.5" font-size="12.5" fill="#0f172a">hashtags</text>
+<text x="1798" y="298.5" font-size="11.5" fill="#475569">TEXT</text>
+<text x="1678" y="322.5" font-size="12.5" fill="#0f172a">thumbnail_url</text>
+<text x="1798" y="322.5" font-size="11.5" fill="#475569">VARCHAR(255)</text>
+<rect x="1667.1" y="330" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1678" y="346.5" font-size="12.5" fill="#0f172a">post_url</text>
+<text x="1798" y="346.5" font-size="11.5" fill="#475569">TEXT</text>
+<text x="1678" y="370.5" font-size="12.5" fill="#0f172a">published_at</text>
+<text x="1798" y="370.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<rect x="1667.1" y="378" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1678" y="394.5" font-size="12.5" fill="#0f172a">fetched_at</text>
+<text x="1798" y="394.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="1888" y="394.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="1666" y="494" width="320" height="320" rx="9" fill="#fff" stroke="#ef4444" stroke-width="2.2"/>
+<path d="M1666,503 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#ef4444"/>
+<text x="1680" y="516" font-size="16" font-weight="700" fill="#fff">post_analytics</text>
+<text x="1678" y="542.5" font-size="12.5" font-weight="700" fill="#0f172a">analytics_id</text>
+<text x="1798" y="542.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="1888" y="542.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="1667.1" y="550" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1678" y="566.5" font-size="12.5" fill="#0f172a">post_id</text>
+<text x="1798" y="566.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1888" y="566.5" font-size="10.5" fill="#64748b">FK, UNIQUE</text>
+<text x="1678" y="590.5" font-size="12.5" fill="#0f172a">views</text>
+<text x="1798" y="590.5" font-size="11.5" fill="#475569">BIGINT</text>
+<text x="1888" y="590.5" font-size="10.5" fill="#64748b">DEFAULT 0</text>
+<rect x="1667.1" y="598" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1678" y="614.5" font-size="12.5" fill="#0f172a">likes</text>
+<text x="1798" y="614.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1888" y="614.5" font-size="10.5" fill="#64748b">DEFAULT 0</text>
+<text x="1678" y="638.5" font-size="12.5" fill="#0f172a">comments</text>
+<text x="1798" y="638.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1888" y="638.5" font-size="10.5" fill="#64748b">DEFAULT 0</text>
+<rect x="1667.1" y="646" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1678" y="662.5" font-size="12.5" fill="#0f172a">shares</text>
+<text x="1798" y="662.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1888" y="662.5" font-size="10.5" fill="#64748b">DEFAULT 0</text>
+<text x="1678" y="686.5" font-size="12.5" fill="#0f172a">saves</text>
+<text x="1798" y="686.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1888" y="686.5" font-size="10.5" fill="#64748b">DEFAULT 0</text>
+<rect x="1667.1" y="694" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1678" y="710.5" font-size="12.5" fill="#0f172a">reach</text>
+<text x="1798" y="710.5" font-size="11.5" fill="#475569">BIGINT</text>
+<text x="1678" y="734.5" font-size="12.5" fill="#0f172a">impressions</text>
+<text x="1798" y="734.5" font-size="11.5" fill="#475569">BIGINT</text>
+<rect x="1667.1" y="742" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1678" y="758.5" font-size="12.5" fill="#0f172a">watch_time</text>
+<text x="1798" y="758.5" font-size="11.5" fill="#475569">FLOAT</text>
+<text x="1678" y="782.5" font-size="12.5" fill="#0f172a">engagement_rate</text>
+<text x="1798" y="782.5" font-size="11.5" fill="#475569">FLOAT</text>
+<rect x="1667.1" y="790" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1678" y="806.5" font-size="12.5" fill="#0f172a">recorded_at</text>
+<text x="1798" y="806.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="1888" y="806.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="1266" y="494" width="320" height="344" rx="9" fill="#fff" stroke="#7dd3fc" stroke-width="2.2"/>
+<path d="M1266,503 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#7dd3fc"/>
+<text x="1280" y="516" font-size="16" font-weight="700" fill="#1f2937">audience_analytics</text>
+<text x="1278" y="542.5" font-size="12.5" font-weight="700" fill="#0f172a">audience_id</text>
+<text x="1398" y="542.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="1488" y="542.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="1267.1" y="550" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="566.5" font-size="12.5" fill="#0f172a">account_id</text>
+<text x="1398" y="566.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1488" y="566.5" font-size="10.5" fill="#64748b">FK</text>
+<text x="1278" y="590.5" font-size="12.5" fill="#0f172a">date</text>
+<text x="1398" y="590.5" font-size="11.5" fill="#475569">DATE</text>
+<rect x="1267.1" y="598" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="614.5" font-size="12.5" fill="#0f172a">followers</text>
+<text x="1398" y="614.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1278" y="638.5" font-size="12.5" fill="#0f172a">following</text>
+<text x="1398" y="638.5" font-size="11.5" fill="#475569">INTEGER</text>
+<rect x="1267.1" y="646" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="662.5" font-size="12.5" fill="#0f172a">impressions</text>
+<text x="1398" y="662.5" font-size="11.5" fill="#475569">BIGINT</text>
+<text x="1278" y="686.5" font-size="12.5" fill="#0f172a">reach</text>
+<text x="1398" y="686.5" font-size="11.5" fill="#475569">BIGINT</text>
+<rect x="1267.1" y="694" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="710.5" font-size="12.5" fill="#0f172a">profile_visits</text>
+<text x="1398" y="710.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1278" y="734.5" font-size="12.5" fill="#0f172a">male_percentage</text>
+<text x="1398" y="734.5" font-size="11.5" fill="#475569">FLOAT</text>
+<rect x="1267.1" y="742" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="758.5" font-size="12.5" fill="#0f172a">female_percentage</text>
+<text x="1398" y="758.5" font-size="11.5" fill="#475569">FLOAT</text>
+<text x="1278" y="782.5" font-size="12.5" fill="#0f172a">top_location</text>
+<text x="1398" y="782.5" font-size="11.5" fill="#475569">VARCHAR(100)</text>
+<rect x="1267.1" y="790" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="806.5" font-size="12.5" fill="#0f172a">active_hours</text>
+<text x="1398" y="806.5" font-size="11.5" fill="#475569">JSONB</text>
+<text x="1278" y="830.5" font-size="12.5" fill="#0f172a">created_at</text>
+<text x="1398" y="830.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="1488" y="830.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="866" y="494" width="320" height="248" rx="9" fill="#fff" stroke="#a855f7" stroke-width="2.2"/>
+<path d="M866,503 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#a855f7"/>
+<text x="880" y="516" font-size="16" font-weight="700" fill="#fff">revenue</text>
+<text x="878" y="542.5" font-size="12.5" font-weight="700" fill="#0f172a">revenue_id</text>
+<text x="998" y="542.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="1088" y="542.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="867.1" y="550" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="878" y="566.5" font-size="12.5" fill="#0f172a">creator_id</text>
+<text x="998" y="566.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1088" y="566.5" font-size="10.5" fill="#64748b">FK</text>
+<text x="878" y="590.5" font-size="12.5" fill="#0f172a">title</text>
+<text x="998" y="590.5" font-size="11.5" fill="#475569">VARCHAR(255)</text>
+<rect x="867.1" y="598" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="878" y="614.5" font-size="12.5" fill="#0f172a">source</text>
+<text x="998" y="614.5" font-size="11.5" fill="#475569">VARCHAR(50)</text>
+<text x="1088" y="614.5" font-size="10.5" fill="#64748b">CHECK (5 values)</text>
+<text x="878" y="638.5" font-size="12.5" fill="#0f172a">amount</text>
+<text x="998" y="638.5" font-size="11.5" fill="#475569">DECIMAL(12,2)</text>
+<rect x="867.1" y="646" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="878" y="662.5" font-size="12.5" fill="#0f172a">currency</text>
+<text x="998" y="662.5" font-size="11.5" fill="#475569">VARCHAR(10)</text>
+<text x="1088" y="662.5" font-size="10.5" fill="#64748b">DEFAULT 'INR'</text>
+<text x="878" y="686.5" font-size="12.5" fill="#0f172a">date</text>
+<text x="998" y="686.5" font-size="11.5" fill="#475569">DATE</text>
+<rect x="867.1" y="694" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="878" y="710.5" font-size="12.5" fill="#0f172a">description</text>
+<text x="998" y="710.5" font-size="11.5" fill="#475569">TEXT</text>
+<text x="878" y="734.5" font-size="12.5" fill="#0f172a">created_at</text>
+<text x="998" y="734.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="1088" y="734.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="866" y="906" width="320" height="200" rx="9" fill="#fff" stroke="#fb923c" stroke-width="2.2"/>
+<path d="M866,915 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#fb923c"/>
+<text x="880" y="928" font-size="16" font-weight="700" fill="#1f2937">reports</text>
+<text x="878" y="954.5" font-size="12.5" font-weight="700" fill="#0f172a">report_id</text>
+<text x="998" y="954.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="1088" y="954.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="867.1" y="962" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="878" y="978.5" font-size="12.5" fill="#0f172a">creator_id</text>
+<text x="998" y="978.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1088" y="978.5" font-size="10.5" fill="#64748b">FK</text>
+<text x="878" y="1002.5" font-size="12.5" fill="#0f172a">report_type</text>
+<text x="998" y="1002.5" font-size="11.5" fill="#475569">VARCHAR(50)</text>
+<text x="1088" y="1002.5" font-size="10.5" fill="#64748b">CHECK</text>
+<rect x="867.1" y="1010" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="878" y="1026.5" font-size="12.5" fill="#0f172a">file_path</text>
+<text x="998" y="1026.5" font-size="11.5" fill="#475569">VARCHAR(255)</text>
+<text x="878" y="1050.5" font-size="12.5" fill="#0f172a">file_format</text>
+<text x="998" y="1050.5" font-size="11.5" fill="#475569">VARCHAR(10)</text>
+<text x="1088" y="1050.5" font-size="10.5" fill="#64748b">pdf / excel</text>
+<rect x="867.1" y="1058" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="878" y="1074.5" font-size="12.5" fill="#0f172a">generated_at</text>
+<text x="998" y="1074.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="878" y="1098.5" font-size="12.5" fill="#0f172a">created_at</text>
+<text x="998" y="1098.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="1088" y="1098.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="66" y="494" width="320" height="176" rx="9" fill="#fff" stroke="#2dd4bf" stroke-width="2.2"/>
+<path d="M66,503 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#2dd4bf"/>
+<text x="80" y="516" font-size="16" font-weight="700" fill="#1f2937">notifications</text>
+<text x="78" y="542.5" font-size="12.5" font-weight="700" fill="#0f172a">notification_id</text>
+<text x="198" y="542.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="288" y="542.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="67.1" y="550" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="78" y="566.5" font-size="12.5" fill="#0f172a">user_id</text>
+<text x="198" y="566.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="288" y="566.5" font-size="10.5" fill="#64748b">FK</text>
+<text x="78" y="590.5" font-size="12.5" fill="#0f172a">message</text>
+<text x="198" y="590.5" font-size="11.5" fill="#475569">TEXT</text>
+<rect x="67.1" y="598" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="78" y="614.5" font-size="12.5" fill="#0f172a">type</text>
+<text x="198" y="614.5" font-size="11.5" fill="#475569">VARCHAR(50)</text>
+<text x="288" y="614.5" font-size="10.5" fill="#64748b">3 types</text>
+<text x="78" y="638.5" font-size="12.5" fill="#0f172a">is_read</text>
+<text x="198" y="638.5" font-size="11.5" fill="#475569">BOOLEAN</text>
+<text x="288" y="638.5" font-size="10.5" fill="#64748b">DEFAULT FALSE</text>
+<rect x="67.1" y="646" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="78" y="662.5" font-size="12.5" fill="#0f172a">created_at</text>
+<text x="198" y="662.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="288" y="662.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="66" y="906" width="320" height="152" rx="9" fill="#fff" stroke="#c4b5fd" stroke-width="2.2"/>
+<path d="M66,915 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#c4b5fd"/>
+<text x="80" y="928" font-size="16" font-weight="700" fill="#1f2937">saved_reports</text>
+<text x="78" y="954.5" font-size="12.5" font-weight="700" fill="#0f172a">saved_report_id</text>
+<text x="198" y="954.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="288" y="954.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="67.1" y="962" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="78" y="978.5" font-size="12.5" fill="#0f172a">user_id</text>
+<text x="198" y="978.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="288" y="978.5" font-size="10.5" fill="#64748b">FK</text>
+<text x="78" y="1002.5" font-size="12.5" fill="#0f172a">name</text>
+<text x="198" y="1002.5" font-size="11.5" fill="#475569">VARCHAR(100)</text>
+<rect x="67.1" y="1010" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="78" y="1026.5" font-size="12.5" fill="#0f172a">filters</text>
+<text x="198" y="1026.5" font-size="11.5" fill="#475569">JSONB</text>
+<text x="78" y="1050.5" font-size="12.5" fill="#0f172a">created_at</text>
+<text x="198" y="1050.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="288" y="1050.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="1266" y="906" width="320" height="296" rx="9" fill="#fff" stroke="#f472b6" stroke-width="2.2"/>
+<path d="M1266,915 a9,9 0 0 1 9,-9 h302 a9,9 0 0 1 9,9 v23 h-320 z" fill="#f472b6"/>
+<text x="1280" y="928" font-size="16" font-weight="700" fill="#1f2937">platform_stats</text>
+<text x="1278" y="954.5" font-size="12.5" font-weight="700" fill="#0f172a">stat_id</text>
+<text x="1398" y="954.5" font-size="11.5" fill="#475569">SERIAL</text>
+<text x="1488" y="954.5" font-size="10.5" fill="#64748b">PK</text>
+<rect x="1267.1" y="962" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="978.5" font-size="12.5" fill="#0f172a">account_id</text>
+<text x="1398" y="978.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1488" y="978.5" font-size="10.5" fill="#64748b">FK</text>
+<text x="1278" y="1002.5" font-size="12.5" fill="#0f172a">date</text>
+<text x="1398" y="1002.5" font-size="11.5" fill="#475569">DATE</text>
+<rect x="1267.1" y="1010" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="1026.5" font-size="12.5" fill="#0f172a">total_posts</text>
+<text x="1398" y="1026.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1278" y="1050.5" font-size="12.5" fill="#0f172a">total_views</text>
+<text x="1398" y="1050.5" font-size="11.5" fill="#475569">BIGINT</text>
+<rect x="1267.1" y="1058" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="1074.5" font-size="12.5" fill="#0f172a">total_likes</text>
+<text x="1398" y="1074.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1278" y="1098.5" font-size="12.5" fill="#0f172a">total_comments</text>
+<text x="1398" y="1098.5" font-size="11.5" fill="#475569">INTEGER</text>
+<rect x="1267.1" y="1106" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="1122.5" font-size="12.5" fill="#0f172a">total_shares</text>
+<text x="1398" y="1122.5" font-size="11.5" fill="#475569">INTEGER</text>
+<text x="1278" y="1146.5" font-size="12.5" fill="#0f172a">follower_gain</text>
+<text x="1398" y="1146.5" font-size="11.5" fill="#475569">INTEGER</text>
+<rect x="1267.1" y="1154" width="317.8" height="24" fill="#f1f5f9"/>
+<text x="1278" y="1170.5" font-size="12.5" fill="#0f172a">engagement_rate</text>
+<text x="1398" y="1170.5" font-size="11.5" fill="#475569">FLOAT</text>
+<text x="1278" y="1194.5" font-size="12.5" fill="#0f172a">created_at</text>
+<text x="1398" y="1194.5" font-size="11.5" fill="#475569">TIMESTAMP</text>
+<text x="1488" y="1194.5" font-size="10.5" fill="#64748b">DEFAULT NOW()</text>
+<rect x="66" y="1228" width="1920" height="56" rx="10" fill="#fff" stroke="#e2e8f0"/>
+<rect x="86" y="1244" width="34" height="22" rx="4" fill="#fff" stroke="#2563eb" stroke-width="2.2"/>
+<text x="130" y="1260" font-size="13" fill="#0f172a">Table from the mentor's reference schema</text>
+<rect x="466" y="1244" width="34" height="22" rx="4" fill="#fff" stroke="#6366f1" stroke-width="2.2" stroke-dasharray="6 4"/>
+<text x="510" y="1260" font-size="13" fill="#0f172a">Added for the spec (NEW) – confirm with mentor</text>
+<text x="926" y="1260" font-size="13" fill="#0f172a">Arrow = parent → child.   1 — 1 one-to-one,   1 — N one-to-many.   Composite PK on agency_creators gives many-to-many.</text>
+</svg>
