@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1150 720" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #0f172a; }
+      .header-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 26px; font-weight: 800; fill: #ffffff; }
+      .header-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; fill: #94a3b8; }
+      .card { fill: #1e293b; stroke: #334155; stroke-width: 1.5; rx: 12; }
+      .tbl-head { fill: #192233; rx: 12; }
+      .tbl-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #ffffff; }
+      .tbl-tag { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; font-weight: 600; fill: #94a3b8; }
+      .col-txt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; fill: #e2e8f0; }
+      .col-type { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; fill: #64748b; }
+      .pk-badge { fill: #f59e0b; font-family: sans-serif; font-size: 10px; font-weight: 800; }
+      .fk-badge { fill: #38bdf8; font-family: sans-serif; font-size: 10px; font-weight: 800; }
+      .line-connector { stroke: #6366f1; stroke-width: 2.2; stroke-dasharray: 4,4; fill: none; }
+      .line-solid { stroke: #38bdf8; stroke-width: 2; fill: none; }
+      .rel-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 600; fill: #a5b4fc; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1150" height="720" class="bg" />
+
+  <!-- Title Header -->
+  <text x="575" y="45" text-anchor="middle" class="header-title">CreatorIQ — Module 1 Database Schema</text>
+  <text x="575" y="70" text-anchor="middle" class="header-sub">PostgreSQL 17 Relational Schema (Implemented in Alembic Revision 0001)</text>
+
+  <!-- 1. USERS TABLE (Center Top) -->
+  <g transform="translate(425, 100)">
+    <rect width="300" height="270" class="card" />
+    <path d="M 0 12 Q 0 0 12 0 L 288 0 Q 300 0 300 12 L 300 42 L 0 42 Z" class="tbl-head" />
+    <text x="18" y="27" class="tbl-title">👤 users</text>
+    <text x="282" y="27" text-anchor="end" class="tbl-tag">Auth & Roles</text>
+
+    <!-- Columns -->
+    <text x="18" y="65" class="pk-badge">PK</text>
+    <text x="42" y="65" class="col-txt">user_id</text>
+    <text x="282" y="65" text-anchor="end" class="col-type">INTEGER</text>
+
+    <text x="42" y="93" class="col-txt">name</text>
+    <text x="282" y="93" text-anchor="end" class="col-type">VARCHAR(100)</text>
+
+    <text x="42" y="121" class="col-txt">email</text>
+    <text x="282" y="121" text-anchor="end" class="col-type">VARCHAR(100) UQ</text>
+
+    <text x="42" y="149" class="col-txt">password_hash</text>
+    <text x="282" y="149" text-anchor="end" class="col-type">VARCHAR(255)</text>
+
+    <text x="42" y="177" class="col-txt">role</text>
+    <text x="282" y="177" text-anchor="end" class="col-type">VARCHAR(50) CK</text>
+
+    <text x="42" y="205" class="col-txt">is_active</text>
+    <text x="282" y="205" text-anchor="end" class="col-type">BOOLEAN</text>
+
+    <text x="42" y="233" class="col-txt">created_at</text>
+    <text x="282" y="233" text-anchor="end" class="col-type">TIMESTAMP</text>
+
+    <text x="42" y="261" class="col-txt">updated_at</text>
+    <text x="282" y="261" text-anchor="end" class="col-type">TIMESTAMP</text>
+  </g>
+
+  <!-- 2. CREATORS TABLE (Bottom Left) -->
+  <g transform="translate(60, 420)">
+    <rect width="290" height="260" class="card" />
+    <path d="M 0 12 Q 0 0 12 0 L 278 0 Q 290 0 290 12 L 290 42 L 0 42 Z" class="tbl-head" />
+    <text x="18" y="27" class="tbl-title">🎨 creators</text>
+    <text x="272" y="27" text-anchor="end" class="tbl-tag">Profile</text>
+
+    <text x="18" y="65" class="pk-badge">PK</text>
+    <text x="42" y="65" class="col-txt">creator_id</text>
+    <text x="272" y="65" text-anchor="end" class="col-type">INTEGER</text>
+
+    <text x="18" y="93" class="fk-badge">FK</text>
+    <text x="42" y="93" class="col-txt">user_id</text>
+    <text x="272" y="93" text-anchor="end" class="col-type">INTEGER UQ</text>
+
+    <text x="42" y="121" class="col-txt">creator_name</text>
+    <text x="272" y="121" text-anchor="end" class="col-type">VARCHAR(100)</text>
+
+    <text x="42" y="149" class="col-txt">bio</text>
+    <text x="272" y="149" text-anchor="end" class="col-type">TEXT</text>
+
+    <text x="42" y="177" class="col-txt">profile_image</text>
+    <text x="272" y="177" text-anchor="end" class="col-type">VARCHAR(255)</text>
+
+    <text x="42" y="205" class="col-txt">website</text>
+    <text x="272" y="205" text-anchor="end" class="col-type">VARCHAR(255)</text>
+
+    <text x="42" y="233" class="col-txt">location</text>
+    <text x="272" y="233" text-anchor="end" class="col-type">VARCHAR(100)</text>
+  </g>
+
+  <!-- 3. AGENCIES TABLE (Bottom Right) -->
+  <g transform="translate(800, 420)">
+    <rect width="290" height="260" class="card" />
+    <path d="M 0 12 Q 0 0 12 0 L 278 0 Q 290 0 290 12 L 290 42 L 0 42 Z" class="tbl-head" />
+    <text x="18" y="27" class="tbl-title">🏢 agencies</text>
+    <text x="272" y="27" text-anchor="end" class="tbl-tag">Profile</text>
+
+    <text x="18" y="65" class="pk-badge">PK</text>
+    <text x="42" y="65" class="col-txt">agency_id</text>
+    <text x="272" y="65" text-anchor="end" class="col-type">INTEGER</text>
+
+    <text x="18" y="93" class="fk-badge">FK</text>
+    <text x="42" y="93" class="col-txt">user_id</text>
+    <text x="272" y="93" text-anchor="end" class="col-type">INTEGER UQ</text>
+
+    <text x="42" y="121" class="col-txt">agency_name</text>
+    <text x="272" y="121" text-anchor="end" class="col-type">VARCHAR(150)</text>
+
+    <text x="42" y="149" class="col-txt">description</text>
+    <text x="272" y="149" text-anchor="end" class="col-type">TEXT</text>
+
+    <text x="42" y="177" class="col-txt">logo</text>
+    <text x="272" y="177" text-anchor="end" class="col-type">VARCHAR(255)</text>
+
+    <text x="42" y="205" class="col-txt">website</text>
+    <text x="272" y="205" text-anchor="end" class="col-type">VARCHAR(255)</text>
+
+    <text x="42" y="233" class="col-txt">location</text>
+    <text x="272" y="233" text-anchor="end" class="col-type">VARCHAR(100)</text>
+  </g>
+
+  <!-- 4. AGENCY_CREATORS TABLE (Bottom Middle) -->
+  <g transform="translate(435, 470)">
+    <rect width="280" height="150" class="card" />
+    <path d="M 0 12 Q 0 0 12 0 L 268 0 Q 280 0 280 12 L 280 42 L 0 42 Z" class="tbl-head" />
+    <text x="18" y="27" class="tbl-title">🔗 agency_creators</text>
+    <text x="262" y="27" text-anchor="end" class="tbl-tag">M : N</text>
+
+    <text x="18" y="68" class="pk-badge">PK</text>
+    <text x="36" y="68" class="fk-badge">FK</text>
+    <text x="58" y="68" class="col-txt">agency_id</text>
+    <text x="262" y="68" text-anchor="end" class="col-type">INTEGER</text>
+
+    <text x="18" y="98" class="pk-badge">PK</text>
+    <text x="36" y="98" class="fk-badge">FK</text>
+    <text x="58" y="98" class="col-txt">creator_id</text>
+    <text x="262" y="98" text-anchor="end" class="col-type">INTEGER</text>
+
+    <text x="58" y="128" class="col-txt">added_at</text>
+    <text x="262" y="128" text-anchor="end" class="col-type">TIMESTAMP</text>
+  </g>
+
+  <!-- RELATIONSHIP LINES -->
+  <!-- users -> creators (1:1) -->
+  <path d="M 425 220 L 205 220 L 205 420" class="line-solid" />
+  <rect x="250" y="208" width="70" height="22" rx="4" fill="#1e293b" stroke="#38bdf8" />
+  <text x="285" y="223" text-anchor="middle" class="rel-text">1 : 1 FK</text>
+
+  <!-- users -> agencies (1:1) -->
+  <path d="M 725 220 L 945 220 L 945 420" class="line-solid" />
+  <rect x="830" y="208" width="70" height="22" rx="4" fill="#1e293b" stroke="#38bdf8" />
+  <text x="865" y="223" text-anchor="middle" class="rel-text">1 : 1 FK</text>
+
+  <!-- creators -> agency_creators (M:N) -->
+  <path d="M 350 540 L 435 540" class="line-connector" />
+
+  <!-- agencies -> agency_creators (M:N) -->
+  <path d="M 800 540 L 715 540" class="line-connector" />
+
+</svg>
