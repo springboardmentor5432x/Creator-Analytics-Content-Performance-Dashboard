@@ -1,0 +1,115 @@
+:root {
+  --violet: #6d4ae8;
+  --violet-dark: #4b2fc4;
+  --violet-soft: #f1eeff;
+  --ink: #171a2b;
+  --muted: #6b7088;
+  --line: #e4e6f0;
+  --bg: #f7f8fc;
+  --danger: #c62d4a;
+  --danger-bg: #fdecef;
+  --surface: #fff;
+  --soft: #f1eeff;
+  --ring: #cfc5fb;
+  color-scheme: light;
+}
+
+
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 { font-size: 1.75rem; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.02em; }
+.sub { color: var(--muted); margin: 0 0 24px; line-height: 1.5; }
+
+/* ---------- auth layout ---------- */
+.auth { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+
+.auth-form-side { display: flex; flex-direction: column; padding: 28px 40px; background: var(--surface); }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; }
+.auth-card { width: 100%; max-width: 400px; margin: auto; padding: 24px 0; }
+
+form { display: flex; flex-direction: column; gap: 16px; }
+label { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; font-weight: 600; }
+input {
+  font: inherit; font-weight: 500; padding: 12px 14px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--surface); color: var(--ink);
+}
+input::placeholder { color: #a3a7bc; }
+input:focus-visible, .btn:focus-visible, .btn-outline:focus-visible {
+  outline: 3px solid var(--ring); outline-offset: 1px; border-color: var(--violet);
+}
+
+.btn {
+  font: inherit; font-weight: 700; padding: 13px 16px; border: 0; border-radius: 10px;
+  background: var(--violet); color: #fff; cursor: pointer; margin-top: 4px;
+}
+.btn:hover:not(:disabled) { background: var(--violet-dark); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-outline {
+  font: inherit; font-weight: 600; padding: 9px 16px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--surface); color: var(--ink); cursor: pointer;
+}
+
+.error {
+  background: var(--danger-bg); color: var(--danger); padding: 10px 12px;
+  border-radius: 10px; font-size: 0.88rem; font-weight: 600;
+}
+
+.switch { text-align: center; color: var(--muted); margin-top: 22px; font-size: 0.92rem; }
+.switch a { color: var(--violet); font-weight: 700; text-decoration: none; }
+.switch a:hover { text-decoration: underline; }
+
+/* role picker */
+.roles { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.roles legend { font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; padding: 0; }
+.role {
+  border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; cursor: pointer; gap: 2px;
+}
+.role input { position: absolute; opacity: 0; pointer-events: none; }
+.role span { font-weight: 500; color: var(--muted); font-size: 0.82rem; }
+.role.active { border-color: var(--violet); background: var(--violet-soft); }
+.role:has(input:focus-visible) { outline: 3px solid var(--ring); }
+
+/* right-hand visual */
+.auth-visual {
+  background: linear-gradient(160deg, #6d4ae8 0%, #4b2fc4 100%);
+  color: #fff; padding: 64px 56px; display: flex; flex-direction: column; justify-content: center; gap: 12px;
+}
+.auth-visual h2 { font-size: 2rem; line-height: 1.15; margin: 0; letter-spacing: -0.02em; max-width: 14em; }
+.auth-visual p { margin: 0; color: #dcd4ff; max-width: 26em; line-height: 1.5; }
+.mini-chart {
+  margin-top: 28px; background: rgba(255, 255, 255, 0.12); border-radius: 18px;
+  padding: 20px 22px 0; max-width: 380px; overflow: hidden;
+}
+.mini-stat { display: flex; flex-direction: column; gap: 2px; }
+.mini-stat span { font-size: 0.82rem; color: #dcd4ff; }
+.mini-stat strong { font-size: 1.9rem; letter-spacing: -0.02em; }
+.mini-stat em { font-style: normal; font-size: 0.82rem; color: #b9f3d0; font-weight: 600; }
+.mini-chart svg { width: 100%; height: 110px; display: block; margin-top: 8px; }
+
+/* ---------- placeholder home ---------- */
+.home header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 32px; background: #fff; border-bottom: 1px solid var(--line);
+}
+.home-brand { font-size: 1.1rem; font-weight: 800; }
+.home section { padding: 48px 32px; max-width: 720px; }
+.pill {
+  background: var(--violet-soft); color: var(--violet-dark); padding: 2px 10px;
+  border-radius: 999px; font-weight: 700; font-size: 0.85rem;
+}
+
+@media (max-width: 860px) {
+  .auth { grid-template-columns: 1fr; }
+  .auth-visual { display: none; }
+  .auth-form-side { padding: 24px 20px; }
+}
