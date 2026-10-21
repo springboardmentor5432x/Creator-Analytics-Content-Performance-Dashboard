@@ -1,0 +1,1231 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CreatorIQ Dashboard</title>
+
+<style>
+:root {
+    --primary: #6847f5;
+    --primary-dark: #5030d5;
+    --primary-light: #eee9ff;
+    --primary-soft: #f7f4ff;
+    --background: #f5f6fc;
+    --surface: #ffffff;
+    --text: #191936;
+    --muted: #777b98;
+    --border: #e7e8f3;
+    --green: #12a875;
+    --red: #e65369;
+    --orange: #e9a23b;
+    --blue: #4e91f5;
+    --shadow: 0 3px 14px rgba(39, 35, 91, .035);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+}
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+button:disabled { opacity: .6; cursor: wait; }
+
+.app { display: flex; min-height: 100vh; }
+
+.sidebar {
+    width: 235px;
+    flex-shrink: 0;
+    padding: 23px 14px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+.logo {
+    margin: 0 9px 6px;
+    font-size: 24px;
+    font-weight: 850;
+    letter-spacing: -.8px;
+    color: var(--primary);
+}
+.logo span { color: var(--text); }
+.logo-caption {
+    color: var(--muted);
+    margin: 0 9px 27px;
+    font-size: 11px;
+}
+.workspace-label {
+    margin: 0 10px 10px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+.nav { display: grid; gap: 5px; }
+.nav a {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 11px 12px;
+    border-radius: 9px;
+    color: #626580;
+    text-decoration: none;
+    font-size: 12px;
+    transition: background .15s, color .15s;
+}
+.nav a:hover, .nav a.active {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-weight: 750;
+}
+.nav-icon {
+    width: 19px;
+    font-size: 16px;
+    text-align: center;
+}
+.sidebar-bottom { margin-top: auto; padding-top: 22px; }
+.account {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding: 16px 5px 13px;
+}
+.avatar {
+    width: 37px;
+    height: 37px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 12px;
+    color: var(--primary);
+    background: var(--primary-light);
+    font-weight: 800;
+}
+.account-info { min-width: 0; }
+.account-name {
+    font-size: 12px;
+    font-weight: 750;
+    overflow-wrap: anywhere;
+}
+.account-role { margin-top: 4px; font-size: 11px; color: var(--muted); }
+.logout {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 9px;
+    padding: 11px;
+    color: var(--text);
+}
+.logout:hover { background: var(--primary-light); color: var(--primary-dark); }
+
+.main { flex: 1; min-width: 0; padding: 24px 26px; }
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 21px;
+}
+.eyebrow {
+    color: var(--primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+}
+h1 { margin: 0; font-size: 26px; letter-spacing: -.6px; }
+.subtitle { margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.top-actions { display: flex; align-items: center; gap: 9px; }
+.select-date, .btn {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 11px;
+}
+.btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    font-weight: 750;
+}
+.btn-primary:hover { background: var(--primary-dark); }
+.icon-btn {
+    width: 37px;
+    height: 37px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    color: var(--primary);
+    font-size: 16px;
+}
+.error {
+    display: none;
+    padding: 13px;
+    margin-bottom: 16px;
+    border-radius: 9px;
+    color: #a52338;
+    background: #ffeaed;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+.notice {
+    background: var(--primary-soft);
+    border: 1px solid #e3dcff;
+    border-radius: 10px;
+    color: #5743a4;
+    font-size: 11px;
+    line-height: 1.7;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+}
+.welcome {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    background: linear-gradient(110deg, var(--primary-light), #fff 90%);
+    border: 1px solid #e3dcff;
+    padding: 19px 21px;
+    border-radius: 13px;
+    margin-bottom: 17px;
+}
+.welcome h2 { margin: 0 0 7px; font-size: 18px; }
+.welcome p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.pill {
+    display: inline-block;
+    white-space: nowrap;
+    border-radius: 20px;
+    padding: 6px 9px;
+    color: var(--primary-dark);
+    background: white;
+    font-size: 10px;
+    font-weight: 750;
+}
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 17px;
+}
+.metrics.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.metric {
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    min-width: 0;
+    box-shadow: var(--shadow);
+}
+.metric-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 7px;
+    margin-bottom: 14px;
+}
+.metric-title { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.metric-icon {
+    width: 31px;
+    height: 31px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 9px;
+    color: var(--primary);
+    background: var(--primary-light);
+    font-size: 15px;
+}
+.metric-value { font-size: clamp(18px, 1.7vw, 25px); font-weight: 850; overflow-wrap: anywhere; letter-spacing: -.5px; }
+.metric-foot { margin-top: 8px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+.positive { color: var(--green); }
+.muted { color: var(--muted); }
+.grid-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(250px, 1fr);
+    gap: 14px;
+    margin-bottom: 15px;
+}
+.grid-half {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 15px;
+}
+.grid-thirds {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 15px;
+}
+.panel {
+    min-width: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 17px;
+    box-shadow: var(--shadow);
+}
+.panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.panel h3 { margin: 0; font-size: 13px; font-weight: 800; }
+.panel-sub { color: var(--muted); font-size: 10px; margin-top: 5px; line-height: 1.6; }
+.badge {
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 20px;
+    color: var(--primary-dark);
+    background: var(--primary-light);
+    font-size: 10px;
+    font-weight: 750;
+    white-space: nowrap;
+}
+.chart { width: 100%; height: 215px; display: block; }
+.chart-empty {
+    min-height: 160px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.8;
+    padding: 15px;
+}
+.legend { display: flex; gap: 13px; flex-wrap: wrap; font-size: 10px; color: var(--muted); margin-bottom: 8px; }
+.legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+.donut-wrap { display: flex; align-items: center; gap: 15px; min-height: 155px; }
+.donut {
+    width: 125px;
+    height: 125px;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+    background: conic-gradient(var(--primary) 0 42%, #9079fa 42% 70%, #b8a8ff 70% 82%, #d3c9ff 82% 92%, #e9e3ff 92% 100%);
+}
+.donut:after {
+    content: "";
+    position: absolute;
+    inset: 27px;
+    border-radius: 50%;
+    background: white;
+}
+.donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 1;
+    font-weight: 850;
+    font-size: 16px;
+}
+.donut-center small { margin-top: 4px; color: var(--muted); font-weight: 400; font-size: 9px; }
+.donut-legend { display: grid; gap: 11px; min-width: 0; flex: 1; }
+.legend-row { display: flex; justify-content: space-between; gap: 8px; font-size: 10px; }
+.legend-label { display: flex; align-items: center; gap: 6px; color: var(--muted); min-width: 0; }
+.legend-color { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+.bars { display: grid; gap: 15px; }
+.bar-item { min-width: 0; }
+.bar-top { display: flex; justify-content: space-between; gap: 9px; margin-bottom: 7px; font-size: 11px; }
+.bar-top span:first-child { color: var(--muted); }
+.bar-track { height: 8px; background: #efedf9; border-radius: 20px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--primary); border-radius: 20px; }
+.platform-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.platform-card { border: 1px solid var(--border); padding: 12px; border-radius: 10px; min-width: 0; }
+.platform-name { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; margin-bottom: 12px; }
+.platform-logo {
+    width: 25px;
+    height: 25px;
+    display: grid;
+    place-items: center;
+    border-radius: 7px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 850;
+}
+.platform-count { font-size: 18px; font-weight: 850; overflow-wrap: anywhere; }
+.platform-note { margin-top: 6px; color: var(--muted); font-size: 9px; line-height: 1.5; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
+th {
+    text-align: left;
+    padding: 11px 9px;
+    background: #f8f7ff;
+    color: #74728e;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    font-weight: 800;
+}
+td { padding: 11px 9px; border-bottom: 1px solid #efeff7; }
+tbody tr:last-child td { border-bottom: 0; }
+.person { display: flex; align-items: center; gap: 8px; }
+.person-avatar {
+    width: 29px;
+    height: 29px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    color: var(--primary);
+    background: var(--primary-light);
+    font-weight: 850;
+}
+.person-name { font-weight: 750; font-size: 11px; }
+.person-sub { color: var(--muted); font-size: 9px; margin-top: 3px; }
+.status {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 5px 8px;
+    background: #e5f8ef;
+    color: #087b52;
+    font-size: 9px;
+    font-weight: 750;
+}
+.status.pending { background: #fff4df; color: #98630b; }
+.status.inactive { background: #ffe9ed; color: #bb3049; }
+.activity-list { display: grid; gap: 15px; }
+.activity { display: flex; gap: 9px; align-items: flex-start; }
+.activity-icon {
+    width: 31px;
+    height: 31px;
+    border-radius: 9px;
+    background: var(--primary-light);
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+.activity-main { flex: 1; min-width: 0; }
+.activity-title { font-size: 11px; font-weight: 750; line-height: 1.5; }
+.activity-desc { font-size: 10px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
+.activity-time { font-size: 9px; color: var(--muted); margin-top: 4px; }
+.tag { color: var(--primary-dark); background: var(--primary-light); border-radius: 6px; padding: 4px 6px; font-size: 9px; font-weight: 750; }
+.content-thumb {
+    width: 43px;
+    height: 35px;
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 16px;
+}
+.content-title { font-size: 10px; font-weight: 750; }
+.content-meta { color: var(--muted); font-size: 9px; margin-top: 4px; }
+.inline-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+.section-anchor { scroll-margin-top: 18px; }
+.footer { text-align: center; padding: 24px 0 8px; font-size: 10px; color: var(--muted); }
+
+@media(max-width:1200px) {
+    .sidebar { width: 210px; }
+    .main { padding: 20px; }
+    .metrics.five { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-thirds { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media(max-width:850px) {
+    .grid-main, .grid-half { grid-template-columns: minmax(0, 1fr); }
+    .metrics, .metrics.five { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .topbar { align-items: flex-start; flex-direction: column; }
+    .top-actions { width: 100%; flex-wrap: wrap; }
+}
+@media(max-width:650px) {
+    .app { display: block; }
+    .sidebar { width: 100%; padding: 15px; }
+    .logo { margin-bottom: 4px; }
+    .logo-caption { margin-bottom: 15px; }
+    .nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .sidebar-bottom { padding-top: 10px; }
+    .main { padding: 15px 12px; }
+    h1 { font-size: 23px; }
+    .welcome { align-items: flex-start; flex-direction: column; }
+    .grid-thirds { grid-template-columns: minmax(0, 1fr); }
+    .metrics, .metrics.five { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .metric { padding: 12px; }
+    .metric-value { font-size: 19px; }
+    .panel { padding: 13px; }
+    .donut-wrap { flex-wrap: wrap; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="logo">▰ <span>CreatorIQ</span></div>
+        <div class="logo-caption">Creator intelligence platform</div>
+        <div class="workspace-label" id="workspaceLabel">Workspace</div>
+        <nav class="nav" id="navigation"></nav>
+
+        <div class="sidebar-bottom">
+            <div class="account">
+                <div class="avatar" id="avatar">U</div>
+                <div class="account-info">
+                    <div class="account-name" id="accountName">Loading...</div>
+                    <div class="account-role" id="accountRole">Account</div>
+                </div>
+            </div>
+            <button class="logout" id="logoutBtn">↪ &nbsp; Log out</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <div class="eyebrow" id="eyebrow">Workspace overview</div>
+                <h1 id="pageTitle">Loading dashboard...</h1>
+                <div class="subtitle" id="pageSubtitle">Verifying your account...</div>
+            </div>
+            <div class="top-actions">
+                <select class="select-date" id="dateRange" aria-label="Dashboard date range">
+                    <option value="30">▦ Last 30 Days</option>
+                    <option value="7">Last 7 Days</option>
+                    <option value="90">Last 90 Days</option>
+                </select>
+                <button class="icon-btn" type="button" title="Refresh dashboard" id="refreshIcon">↻</button>
+                <button class="btn btn-primary" type="button" id="refreshBtn">Refresh data</button>
+            </div>
+        </header>
+
+        <div class="error" id="errorBox" role="alert"></div>
+        <div id="dashboardContent">
+            <div class="panel">Loading your dashboard...</div>
+        </div>
+        <div class="footer">CreatorIQ · Your data, your growth, your decisions</div>
+    </main>
+</div>
+
+<script>
+"use strict";
+
+const API_URL = "http://127.0.0.1:8000";
+const TOKEN_KEY = "creatoriq_token";
+const USER_KEY = "creatoriq_user";
+const token = sessionStorage.getItem(TOKEN_KEY);
+
+const COLORS = ["#6847f5", "#9079fa", "#b8a8ff", "#d3c9ff", "#e9e3ff"];
+
+const PLATFORM_NAMES = {
+    instagram: "Instagram",
+    youtube: "YouTube",
+    x: "X (Twitter)",
+    linkedin: "LinkedIn"
+};
+
+const ROLE_CONFIG = {
+    creator: {
+        title: "Creator Dashboard",
+        eyebrow: "Creator studio",
+        subtitle: "Track your content performance, audience insights and grow your personal brand.",
+        greeting: "Your creative journey, all in one place.",
+        nav: [
+            ["overview", "⌂", "Dashboard"],
+            ["content", "▣", "My Content"],
+            ["analytics", "▥", "Analytics"],
+            ["social", "◎", "Social Accounts"],
+            ["audience", "♙", "Audience"],
+            ["earnings", "▤", "Earnings"],
+            ["brands", "◇", "Brand Deals"],
+            ["activity", "⚙", "Settings"]
+        ]
+    },
+    agency: {
+        title: "Agency Dashboard",
+        eyebrow: "Agency workspace",
+        subtitle: "Manage multiple creators, track campaign performance and compare results across your roster.",
+        greeting: "Your agency performance, at a glance.",
+        nav: [
+            ["overview", "⌂", "Dashboard"],
+            ["creators", "♙", "Creators"],
+            ["campaigns", "▣", "Campaigns"],
+            ["analytics", "▥", "Analytics"],
+            ["content", "▤", "Content Library"],
+            ["team", "♧", "Team Members"],
+            ["reports", "▧", "Reports"],
+            ["billing", "₹", "Billing"]
+        ]
+    },
+    marketing_team: {
+        title: "Marketing Team Dashboard",
+        eyebrow: "Marketing workspace",
+        subtitle: "Plan and manage campaigns, track performance and analyze content impact.",
+        greeting: "Turn campaign data into better decisions.",
+        nav: [
+            ["overview", "⌂", "Dashboard"],
+            ["campaigns", "▣", "Campaigns"],
+            ["planning", "▤", "Content Planning"],
+            ["analytics", "▥", "Analytics"],
+            ["influencers", "♙", "Influencers"],
+            ["reports", "▧", "Reports"],
+            ["assets", "▧", "Brand Assets"],
+            ["tasks", "✓", "Task Management"]
+        ]
+    },
+    admin: {
+        title: "Admin Dashboard",
+        eyebrow: "Platform administration",
+        subtitle: "Manage users, monitor platform usage and oversee system performance.",
+        greeting: "Your CreatorIQ administration center.",
+        nav: [
+            ["overview", "⌂", "Dashboard"],
+            ["users", "♙", "User Management"],
+            ["creators", "◎", "Creators"],
+            ["agencies", "♧", "Agencies"],
+            ["marketing", "▣", "Marketing Teams"],
+            ["integrations", "◇", "Platform Integrations"],
+            ["monitoring", "◉", "Content Monitoring"],
+            ["analytics", "▥", "Analytics Overview"],
+            ["reports", "▧", "Reports"],
+            ["settings", "⚙", "System Settings"],
+            ["activity", "◷", "Activity Logs"]
+        ]
+    }
+};
+
+function esc(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+        '"': "&quot;", "'": "&#39;"
+    })[c]);
+}
+
+function normalizeRole(value) {
+    const role = String(value || "").trim().toLowerCase()
+        .replace(/[\s-]+/g, "_");
+
+    const aliases = {
+        creator: "creator",
+        agency: "agency",
+        admin: "admin",
+        administrator: "admin",
+        system_admin: "admin",
+        marketing: "marketing_team",
+        marketing_team: "marketing_team"
+    };
+    return aliases[role] || null;
+}
+
+function fmt(value) {
+    return Number(value || 0).toLocaleString("en-IN");
+}
+
+function money(value) {
+    return "₹" + Number(value || 0).toLocaleString("en-IN");
+}
+
+function pct(value) {
+    return `${Number(value || 0).toFixed(1)}%`;
+}
+
+async function apiGet(path) {
+    let response;
+
+    try {
+        response = await fetch(`${API_URL}${path}`, {
+            headers: {
+                "Accept": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
+    } catch {
+        throw new Error(`Cannot connect to ${API_URL}. Start FastAPI and try again.`);
+    }
+
+    const raw = await response.text();
+    let data = {};
+    try { data = raw ? JSON.parse(raw) : {}; }
+    catch { data = {detail: raw}; }
+
+    if (response.status === 401 || response.status === 403) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(USER_KEY);
+        window.location.replace("index.html");
+        throw new Error("Your login session has expired.");
+    }
+
+    if (!response.ok) {
+        throw new Error(data.detail || `API request failed: ${response.status}`);
+    }
+    return data;
+}
+
+function metric(title, value, icon, foot) {
+    return `<div class="metric">
+        <div class="metric-head">
+            <div class="metric-title">${esc(title)}</div>
+            <div class="metric-icon">${icon}</div>
+        </div>
+        <div class="metric-value">${esc(value)}</div>
+        <div class="metric-foot">${esc(foot)}</div>
+    </div>`;
+}
+
+function metrics(items, five = false) {
+    return `<section class="metrics ${five ? "five" : ""}">${items.join("")}</section>`;
+}
+
+function panel(title, body, subtitle = "", badge = "") {
+    return `<section class="panel">
+        <div class="panel-head">
+            <div>
+                <h3>${esc(title)}</h3>
+                ${subtitle ? `<div class="panel-sub">${esc(subtitle)}</div>` : ""}
+            </div>
+            ${badge ? `<span class="badge">${esc(badge)}</span>` : ""}
+        </div>
+        ${body}
+    </section>`;
+}
+
+function welcome(user, config) {
+    const name = user.name || user.full_name || user.email || "User";
+    return `<section class="welcome section-anchor" id="overview">
+        <div>
+            <h2>Welcome back, ${esc(name)} 👋</h2>
+            <p>${esc(config.greeting)} ${esc(config.subtitle)}</p>
+        </div>
+        <span class="pill">${esc(config.title)}</span>
+    </section>`;
+}
+
+function status(value) {
+    const key = String(value).toLowerCase();
+    const cls = ["inactive", "paused", "blocked"].includes(key)
+        ? "inactive"
+        : ["pending", "planning", "scheduled"].includes(key)
+            ? "pending" : "";
+    return `<span class="status ${cls}">${esc(value)}</span>`;
+}
+
+function person(name, sub) {
+    return `<div class="person">
+        <div class="person-avatar">${esc(String(name).charAt(0).toUpperCase())}</div>
+        <div><div class="person-name">${esc(name)}</div>
+        <div class="person-sub">${esc(sub)}</div></div>
+    </div>`;
+}
+
+function table(headers, rows) {
+    if (!rows.length) return `<div class="chart-empty">No records available yet.</div>`;
+    return `<div class="table-wrap"><table>
+        <thead><tr>${headers.map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead>
+        <tbody>${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table></div>`;
+}
+
+function activity(items) {
+    return `<div class="activity-list">${items.map((item, i) => `
+        <div class="activity">
+            <div class="activity-icon">${["↗", "◎", "▣", "✓", "♙"][i % 5]}</div>
+            <div class="activity-main">
+                <div class="activity-title">${esc(item.title)}</div>
+                <div class="activity-desc">${esc(item.description)}</div>
+                ${item.time ? `<div class="activity-time">${esc(item.time)}</div>` : ""}
+            </div>
+        </div>`).join("")}</div>`;
+}
+
+function bars(items) {
+    return `<div class="bars">${items.map(item => `
+        <div class="bar-item">
+            <div class="bar-top"><span>${esc(item.label)}</span><strong>${esc(item.value)}</strong></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0, Math.min(100, Number(item.percent) || 0))}%"></div></div>
+        </div>`).join("")}</div>`;
+}
+
+function donut(items, centerValue, centerLabel) {
+    const total = items.reduce((sum, item) => sum + Number(item.value || 0), 0);
+    let cumulative = 0;
+    const stops = items.map((item, i) => {
+        const start = cumulative;
+        cumulative += total ? Number(item.value || 0) / total * 100 : 0;
+        return `${COLORS[i % COLORS.length]} ${start}% ${cumulative}%`;
+    }).join(", ");
+
+    const legend = items.map((item, i) => `
+        <div class="legend-row">
+            <span class="legend-label">
+                <span class="legend-color" style="background:${COLORS[i % COLORS.length]}"></span>
+                ${esc(item.label)}
+            </span>
+            <strong>${total ? Math.round(Number(item.value || 0) / total * 100) : 0}%</strong>
+        </div>`).join("");
+
+    return `<div class="donut-wrap">
+        <div class="donut" style="background:conic-gradient(${stops || "#e9e3ff 0 100%"})">
+            <div class="donut-center">${esc(centerValue)}<small>${esc(centerLabel)}</small></div>
+        </div>
+        <div class="donut-legend">${legend}</div>
+    </div>`;
+}
+
+function lineChart(series, labels, options = {}) {
+    const all = series.flatMap(s => s.values.map(Number));
+    if (!all.length) return `<div class="chart-empty">No chart data available.</div>`;
+
+    const width = 620, height = 230;
+    const left = 49, right = 15, top = 15, bottom = 32;
+    const plotW = width - left - right, plotH = height - top - bottom;
+    const min = Math.min(0, ...all);
+    const max = Math.max(1, ...all);
+    const range = Math.max(max - min, 1);
+    let svg = `<svg class="chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(options.label || "Analytics chart")}">`;
+
+    for (let i = 0; i <= 4; i++) {
+        const y = top + plotH * i / 4;
+        const value = max - (max - min) * i / 4;
+        svg += `<line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" stroke="#eceaf6"/>
+        <text x="${left - 8}" y="${y + 4}" font-size="10" text-anchor="end" fill="#777b98">${fmt(value)}</text>`;
+    }
+
+    const x = i => left + (labels.length <= 1 ? plotW / 2 : plotW * i / (labels.length - 1));
+    const y = value => top + plotH * (1 - (Number(value) - min) / range);
+
+    series.forEach((s, si) => {
+        const color = COLORS[si % COLORS.length];
+        const points = s.values.map((value, i) => `${x(i)},${y(value)}`).join(" ");
+        if (si === 0 && series.length === 1) {
+            const firstX = x(0);
+            const lastX = x(s.values.length - 1);
+            svg += `<polygon points="${firstX},${top + plotH} ${points} ${lastX},${top + plotH}" fill="${color}" opacity=".09"/>`;
+        }
+        svg += `<polyline points="${points}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+        s.values.forEach((value, i) => {
+            svg += `<circle cx="${x(i)}" cy="${y(value)}" r="3" fill="${color}"><title>${esc(s.name)}: ${fmt(value)}</title></circle>`;
+        });
+    });
+
+    labels.forEach((label, i) => {
+        if (labels.length <= 7 || i % Math.ceil(labels.length / 7) === 0 || i === labels.length - 1) {
+            svg += `<text x="${x(i)}" y="${height - 9}" font-size="10" text-anchor="middle" fill="#777b98">${esc(label)}</text>`;
+        }
+    });
+    return svg + "</svg>";
+}
+
+function legendSeries(series) {
+    return `<div class="legend">${series.map((s, i) => `
+        <span class="legend-item"><span class="legend-dot" style="background:${COLORS[i % COLORS.length]}"></span>${esc(s.name)}</span>
+    `).join("")}</div>`;
+}
+
+function platformCards(platforms) {
+    const items = Object.keys(PLATFORM_NAMES);
+    return `<div class="platform-grid">${items.map((key, i) => {
+        const exists = Object.prototype.hasOwnProperty.call(platforms, key);
+        return `<div class="platform-card">
+            <div class="platform-name"><span class="platform-logo">${esc(PLATFORM_NAMES[key].charAt(0))}</span>${esc(PLATFORM_NAMES[key])}</div>
+            <div class="platform-count">${fmt(platforms[key] || 0)}</div>
+            <div class="platform-note">${exists ? "Latest saved followers" : "No data saved yet"}</div>
+        </div>`;
+    }).join("")}</div>`;
+}
+
+function Notice() {
+    return `<div class="notice">
+        Some campaign, revenue, views, engagement and account-wide figures on this page are illustrative  data.
+        Your follower totals and growth history are fetched from the existing API.  figures are not live database records.
+    </div>`;
+}
+
+/* CREATOR DASHBOARD */
+function creatorDashboard(user, analytics, growth, config) {
+    const p = analytics.platforms || {};
+    const total = Number(analytics.total_followers || 0);
+    const platformCount = Object.keys(p).length;
+    const dates = growth.slice(-7);
+    const labels = dates.map((r, i) => {
+        const d = String(r.date || "").slice(5, 10);
+        return d || `Day ${i + 1}`;
+    });
+
+
+
+    return `
+        ${welcome(user, config)}
+        ${metrics([
+            metric("Total Followers", fmt(total), "♙", "Latest saved platform totals"),
+            metric("Total Views", "1.8M", "◉", " data · connect views API"),
+            metric("Total Likes", "98,240", "♡", " data · connect engagement API"),
+            metric("Comments", "8,932", "▣", " data · connect comments API")
+        ])}
+
+        <div class="grid-main section-anchor" id="analytics">
+            ${panel("Follower Growth",
+                `<div class="panel-sub">Combined historical follower snapshots</div>
+                 ${growth.length ? lineChart([{name:"Followers", values:dates.map(r => Number(r.followers || 0))}], labels, {label:"Follower growth"}) :
+                 `<div class="chart-empty">No follower history recorded yet.<br>Save snapshots to build your growth chart.</div>`}`,
+                "Real data from your account", "Live API")}
+            ${panel("Followers by Platform",
+                donut(Object.keys(PLATFORM_NAMES).map(key => ({label:PLATFORM_NAMES[key], value:Number(p[key] || 0)})), fmt(total), "Followers"),
+                "Latest saved platform counts")}
+        </div>
+
+        <div class="grid-main section-anchor" id="social">
+            ${panel("Social Accounts", platformCards(p), "Supported social platforms", "Live API")}
+            ${panel("Creator Settings", activity([
+                {title:"Account profile",description:`Signed in as ${user.email || "your account"}.`},
+                {title:"Social connections",description:"Platform connection and publishing actions require additional integrations."},
+                {title:"Analytics settings",description:"Your follower totals and historical growth are loaded from the API."}
+            ]), "Account and integration settings")}
+        </div>
+        <div class="section-anchor" id="brands"></div>
+    `;
+}
+
+/* AGENCY DASHBOARD */
+function agencyDashboard(user, analytics, growth, config) {
+    const creators = [
+        ["Tech With Aryan","Technology","450K","5.2M","7.4%","₹85,000","Active"],
+        ["Foodie Diaries","Food & lifestyle","320K","3.1M","6.3%","₹62,000","Active"],
+        ["Travel With Anjali","Travel","280K","4.8M","5.8%","₹70,000","Active"],
+        ["Fitness Hub","Fitness","210K","2.4M","5.7%","₹45,000","Inactive"],
+        ["Study Capsule","Education","190K","2.1M","6.1%","₹38,000","Active"]
+    ];
+    const campaigns = [
+        ["Summer Sale","5 Creators",65,"Active"],
+        ["Back to College","4 Creators",40,"Active"],
+        ["New Product Launch","3 Creators",80,"Planning"],
+        ["Festive Offer","4 Creators",30,"Active"],
+        ["Brand Awareness","2 Creators",50,"Pending"]
+    ];
+
+    return `
+        ${welcome(user, config)}
+        ${Notice()}
+        ${metrics([
+            metric("Total Creators","12","♙"," managed roster"),
+            metric("Total Followers","2.4M","◉"," portfolio total"),
+            metric("Total Views","18.7M","▣"," campaign analytics"),
+            metric("Active Campaigns","5","▤"," campaign records"),
+            metric("Total Revenue",money(348600),"₹"," revenue")
+        ], true)}
+
+        <div class="grid-main section-anchor" id="analytics">
+            ${panel("Overall Performance",
+                `${legendSeries([{name:"Followers"},{name:"Views"},{name:"Engagement"}])}
+                ${lineChart([
+                    {name:"Followers",values:[1.1,1.6,2.1,2.7,3.1,3.9]},
+                    {name:"Views",values:[.4,.8,1.2,1.6,2,2.3]},
+                    {name:"Engagement",values:[1.6,2.1,2.8,3.4,4.1,4.8]}
+                ],["Aug 1","Aug 8","Aug 15","Aug 22","Aug 29","Sep 5"])}`,
+                "Illustrative portfolio trends"," data")}
+            ${panel("Platform Distribution",
+                donut([
+                    {label:"Instagram",value:42},
+                    {label:"YouTube",value:28},
+                    {label:"X (Twitter)",value:12},
+                    {label:"LinkedIn",value:10},
+                    {label:"Others",value:8}
+                ],"2.4M","Followers"),
+                "Example roster audience distribution"," data")}
+        </div>
+
+        <div class="grid-main section-anchor" id="creators">
+            ${panel("Top Creators",
+                table(["Creator","Followers","Views","Engagement","Revenue","Status"],
+                    creators.map(r => [
+                        person(r[0],r[1]),r[2],r[3],
+                        `<span class="status">${esc(r[4])}</span>`,r[5],status(r[6])
+                    ])),
+                "Illustrative managed roster"," data")}
+            ${panel("Active Campaigns",
+                `<div class="bars">${campaigns.map(c => `
+                    <div class="bar-item">
+                        <div class="bar-top"><span>${esc(c[0])}<br><span class="muted">${esc(c[1])}</span></span><strong>${c[2]}%</strong></div>
+                        <div class="bar-track"><div class="bar-fill" style="width:${c[2]}%"></div></div>
+                        <div class="metric-foot">${esc(c[3])}</div>
+                    </div>`).join("")}</div>`,
+                "Illustrative campaign completion"," data")}
+        </div>
+
+        <div class="section-anchor" id="reports"></div>
+        <div class="section-anchor" id="content"></div>
+        <div class="section-anchor" id="team"></div>
+        <div class="section-anchor" id="billing"></div>
+    `;
+}
+
+/* MARKETING TEAM DASHBOARD */
+function marketingDashboard(user, analytics, growth, config) {
+    const campaigns = [
+        ["Summer Sale 2026","Instagram","2.4M","186K",money(120000),"Active"],
+        ["Back to College","YouTube","1.8M","124K",money(90000),"Active"],
+        ["New Product Launch","X","1.2M","98K",money(80000),"Completed"],
+        ["Festive Offer","Instagram","860K","62K",money(80000),"Active"],
+        ["Brand Awareness","LinkedIn","620K","41K",money(40000),"Planning"]
+    ];
+
+    return `
+        ${welcome(user, config)}
+        ${Notice()}
+        ${metrics([
+            metric("Total Campaigns","8","▣"," campaign count"),
+            metric("Total Reach","12.4M","◉"," audience reach"),
+            metric("Total Engagement","986K","♙"," interactions"),
+            metric("Total Spend",money(420000),"₹"," marketing spend"),
+            metric("ROI","3.2x","↗"," return on investment")
+        ], true)}
+
+        <div class="grid-main section-anchor" id="analytics">
+            ${panel("Campaign Performance",
+                `${legendSeries([{name:"Reach"},{name:"Engagement"},{name:"Conversions"}])}
+                ${lineChart([
+                    {name:"Reach",values:[2.4,3.1,3.8,4.5,5.2,6]},
+                    {name:"Engagement",values:[1.2,1.7,2.3,2.7,3.2,4.4]},
+                    {name:"Conversions",values:[.5,.8,1.1,1.5,2.1,3]}
+                ],["Aug 1","Aug 8","Aug 15","Aug 22","Aug 29","Sep 5"])}`,
+                "Illustrative marketing trends"," data")}
+            ${panel("Top Performing Campaigns",
+                bars([
+                    {label:"Summer Sale",value:"4.2M",percent:100},
+                    {label:"Back to College",value:"2.4M",percent:72},
+                    {label:"New Product",value:"2.4M",percent:65},
+                    {label:"Festive Offer",value:"1.6M",percent:50},
+                    {label:"Brand Awareness",value:"1.1M",percent:35}
+                ]),
+                "Example campaign reach"," data")}
+        </div>
+
+        <div class="grid-main section-anchor" id="campaigns">
+            ${panel("Recent Campaigns",
+                table(["Campaign","Creators","Platform","Reach","Engagement","Spend","Status"],
+                    campaigns.map(c => [
+                        `<strong>${esc(c[0])}</strong>`,
+                        `<span class="tag">3 creators</span>`,
+                        `<span class="tag">${esc(c[1])}</span>`,
+                        c[2],c[3],c[4],status(c[5])
+                    ])),
+                "Illustrative campaign management"," data")}
+            ${panel("Content Distribution",
+                donut([
+                    {label:"Video",value:52},
+                    {label:"Image",value:28},
+                    {label:"Carousel",value:12},
+                    {label:"Text",value:6},
+                    {label:"Live",value:2}
+                ],"722","Total Content"),
+                "Example content format distribution"," data")}
+        </div>
+
+        <div class="section-anchor" id="reports"></div>
+        <div class="section-anchor" id="assets"></div>
+        <div class="section-anchor" id="tasks"></div>
+    `;
+}
+
+/* ADMIN DASHBOARD */
+function adminDashboard(user, analytics, growth, config) {
+
+
+    return `
+        ${welcome(user, config)}
+        ${Notice()}
+        ${metrics([
+            metric("Total Users","148","♙"," platform-wide total"),
+            metric("Creators","120","◎"," role count"),
+            metric("Agencies","18","♧"," role count"),
+            metric("Marketing Teams","7","▣"," role count"),
+            metric("Active Users","132","✓"," account status count")
+        ], true)}
+
+        <div class="grid-main section-anchor" id="analytics">
+            ${panel("User Growth",
+                `${legendSeries([{name:"Creators"},{name:"Agencies"},{name:"Marketing Teams"}])}
+                ${lineChart([
+                    {name:"Creators",values:[50,85,120,155,210,280]},
+                    {name:"Agencies",values:[20,25,32,42,51,65]},
+                    {name:"Marketing Teams",values:[15,24,39,54,67,85]}
+                ],["Aug 1","Aug 8","Aug 15","Aug 22","Aug 29","Sep 5"])}`,
+                "Illustrative platform-wide growth"," data")}
+            ${panel("Platform Usage",
+                bars([
+                    {label:"Instagram",value:"120K",percent:90},
+                    {label:"YouTube",value:"95K",percent:75},
+                    {label:"X (Twitter)",value:"68K",percent:55},
+                    {label:"LinkedIn",value:"42K",percent:35}
+                ]),
+                "Illustrative platform usage"," data")}
+        </div>
+
+        <div class="grid-half section-anchor" id="creators">
+            ${panel("Accounts by Role",
+                donut([
+                    {label:"Creators",value:120},
+                    {label:"Agencies",value:18},
+                    {label:"Marketing Teams",value:7},
+                    {label:"Admins",value:3}
+                ],"148","Users"),
+                "Illustrative role distribution"," data")}
+            ${panel("Platform Integrations",
+                activity([
+                    {title:"Instagram",description:"Connection status requires an integration endpoint."},
+                    {title:"YouTube",description:"Connection status requires an integration endpoint."},
+                    {title:"X",description:"Connection status requires an integration endpoint."},
+                    {title:"LinkedIn",description:"Connection status requires an integration endpoint."}
+                ]),
+                "Integration status not available from current API")}
+        </div>
+
+        <div class="section-anchor" id="agencies"></div>
+        <div class="section-anchor" id="marketing"></div>
+        <div class="section-anchor" id="integrations"></div>
+        <div class="section-anchor" id="monitoring"></div>
+        <div class="section-anchor" id="reports"></div>
+        <div class="section-anchor" id="settings"></div>
+        <div class="section-anchor" id="activity"></div>
+    `;
+}
+
+function setupNavigation(config) {
+    const nav = document.getElementById("navigation");
+    nav.innerHTML = config.nav.map((item, i) => `
+        <a href="#${item[0]}" data-target="${item[0]}" class="${i === 0 ? "active" : ""}">
+            <span class="nav-icon">${item[1]}</span><span>${esc(item[2])}</span>
+        </a>`).join("");
+
+    nav.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", event => {
+            event.preventDefault();
+            const target = document.getElementById(link.dataset.target);
+            if (!target) return;
+            nav.querySelectorAll("a").forEach(a => a.classList.remove("active"));
+            link.classList.add("active");
+            target.scrollIntoView({behavior:"smooth", block:"start"});
+        });
+    });
+}
+
+function showError(message) {
+    const box = document.getElementById("errorBox");
+    box.textContent = message;
+    box.style.display = "block";
+}
+
+async function loadDashboard() {
+    const btn = document.getElementById("refreshBtn");
+    btn.disabled = true;
+    btn.textContent = "Loading...";
+    document.getElementById("errorBox").style.display = "none";
+
+    if (!token) {
+        window.location.replace("index.html");
+        return;
+    }
+
+    try {
+        const profileResponse = await apiGet("/me");
+        const user = profileResponse.user || profileResponse;
+        const role = normalizeRole(user.role);
+
+        if (!role || !ROLE_CONFIG[role]) {
+            throw new Error("Your account role is missing or unsupported.");
+        }
+
+        const [analyticsResponse, growthResponse] = await Promise.all([
+            apiGet("/dashboard/analytics"),
+            apiGet("/dashboard/growth")
+        ]);
+
+        const analytics = {
+            total_followers: Number(analyticsResponse.total_followers || 0),
+            platforms: analyticsResponse.platforms || {}
+        };
+        const growth = Array.isArray(growthResponse.growth)
+            ? growthResponse.growth : [];
+
+        sessionStorage.setItem(USER_KEY, JSON.stringify({...user, role}));
+
+        const config = ROLE_CONFIG[role];
+        document.getElementById("pageTitle").textContent = config.title;
+        document.getElementById("eyebrow").textContent = config.eyebrow;
+        document.getElementById("pageSubtitle").textContent = config.subtitle;
+        document.getElementById("workspaceLabel").textContent = config.title;
+        document.getElementById("accountName").textContent =
+            user.name || user.full_name || user.email || "User";
+        document.getElementById("accountRole").textContent = role.replace(/_/g, " ");
+        document.getElementById("avatar").textContent =
+            String(user.name || user.email || "U").charAt(0).toUpperCase();
+
+        setupNavigation(config);
+
+        const renderers = {
+            creator: creatorDashboard,
+            agency: agencyDashboard,
+            marketing_team: marketingDashboard,
+            admin: adminDashboard
+        };
+
+        document.getElementById("dashboardContent").innerHTML =
+            renderers[role](user, analytics, growth, config);
+
+        const dbButton = document.getElementById("dbCheckBtn");
+        if (dbButton) {
+            dbButton.addEventListener("click", async () => {
+                const output = document.getElementById("dbResult");
+                output.textContent = "Checking...";
+                try {
+                    const result = await apiGet("/db-check");
+                    output.textContent = result.database === "connected"
+                        ? "Database connection successful."
+                        : "Database response received.";
+                } catch (error) {
+                    output.textContent = error.message;
+                }
+            });
+        }
+
+    } catch (error) {
+        showError(error.message);
+        document.getElementById("dashboardContent").innerHTML = `
+            <section class="panel">
+                <h3>Unable to load dashboard</h3>
+                <p class="panel-sub">Check that FastAPI is running on port 8000, the database is available, and your session is valid.</p>
+                <button class="btn btn-primary" id="retryBtn">Try again</button>
+            </section>`;
+        document.getElementById("retryBtn").addEventListener("click", loadDashboard);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Refresh data";
+    }
+}
+
+document.getElementById("refreshBtn").addEventListener("click", loadDashboard);
+document.getElementById("refreshIcon").addEventListener("click", loadDashboard);
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
+    window.location.replace("index.html");
+});
+
+document.getElementById("dateRange").addEventListener("change", () => {
+    const selected = document.getElementById("dateRange").value;
+    if (selected !== "30") {
+        showError("The date-range selector is visual only. Date-filtered analytics require backend support.");
+    } else {
+        document.getElementById("errorBox").style.display = "none";
+    }
+});
+
+loadDashboard();
+</script>
+</body>
+</html>

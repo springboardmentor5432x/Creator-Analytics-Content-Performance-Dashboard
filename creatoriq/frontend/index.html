@@ -1,0 +1,352 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CreatorIQ | Login and Signup</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;min-height:100vh;display:grid;place-items:center;
+    padding:20px;background:#f3f5fb;color:#19213a;
+    font-family:Arial,Helvetica,sans-serif
+}
+.card{
+    width:min(430px,100%);padding:30px;background:#fff;
+    border:1px solid #e7eaf2;border-radius:18px;
+    box-shadow:0 15px 50px #17203312
+}
+.logo{text-align:center;font-size:29px;font-weight:800;color:#625bff}
+.subtitle{text-align:center;color:#75809a;font-size:14px;margin:9px 0 25px}
+h2{font-size:21px;margin:0 0 7px}
+.description{color:#75809a;font-size:13px;margin:0 0 20px}
+label{display:block;margin:15px 0 7px;font-size:13px;font-weight:700}
+input,select{
+    width:100%;padding:12px 13px;border:1px solid #dce1ed;
+    border-radius:9px;font-size:14px;background:white;color:#19213a
+}
+input:focus,select:focus{outline:2px solid #c5c2ff;border-color:#625bff}
+button{
+    width:100%;padding:13px;margin-top:20px;border:0;border-radius:9px;
+    background:#625bff;color:white;font-weight:700;font-size:14px;cursor:pointer
+}
+button:hover{background:#5048e5}
+button:disabled{opacity:.6;cursor:wait}
+.switch{text-align:center;margin-top:21px;font-size:13px;color:#75809a}
+.switch a{color:#625bff;text-decoration:none;font-weight:700}
+#message{font-size:13px;line-height:1.6;margin-top:15px;overflow-wrap:anywhere}
+.success{color:#07875a}
+.error{color:#c52d43}
+.hidden{display:none!important}
+</style>
+</head>
+
+<body>
+<main class="card">
+    <div class="logo">CreatorIQ</div>
+    <p class="subtitle">Your creator journey starts here.</p>
+
+    <form id="signupForm">
+        <h2>Create your account</h2>
+        <p class="description">Register to access your personalized dashboard.</p>
+
+        <label for="signupName">Full name</label>
+        <input id="signupName" type="text" required maxlength="100"
+               autocomplete="name" placeholder="Enter your full name">
+
+        <label for="signupEmail">Email address</label>
+        <input id="signupEmail" type="email" required
+               autocomplete="email" placeholder="Enter your email">
+
+        <label for="signupRole">Role</label>
+        <select id="signupRole" required>
+            <option value="" disabled selected>Select your role</option>
+            <option value="creator">Creator</option>
+            <option value="admin">Admin</option>
+            <option value="agency">Agency</option>
+            <option value="marketing_team">Marketing Team</option>
+        </select>
+
+        <label for="signupPassword">Password</label>
+        <input id="signupPassword" type="password" required
+               minlength="8" maxlength="128" autocomplete="new-password"
+               placeholder="At least 8 characters">
+
+        <button id="signupButton" type="submit">Create account</button>
+
+        <div class="switch">
+            Already have an account? <a href="#" id="showLogin">Log in</a>
+        </div>
+    </form>
+
+    <form id="loginForm" class="hidden">
+        <h2>Welcome back</h2>
+        <p class="description">Log in to continue to your dashboard.</p>
+
+        <label for="loginEmail">Email address</label>
+        <input id="loginEmail" type="email" required
+               autocomplete="email" placeholder="Enter your registered email">
+
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" required maxlength="128"
+               autocomplete="current-password" placeholder="Enter your password">
+
+        <button id="loginButton" type="submit">Log in</button>
+
+        <div class="switch">
+            Don't have an account? <a href="#" id="showSignup">Sign up</a>
+        </div>
+    </form>
+
+    <div id="message" role="status" aria-live="polite"></div>
+</main>
+
+<script>
+"use strict";
+
+/* FastAPI runs on port 8000 with the command given below. */
+const API_URL = "http://127.0.0.1:8000";
+const TOKEN_KEY = "creatoriq_token";
+const USER_KEY = "creatoriq_user";
+
+const signupForm = document.getElementById("signupForm");
+const loginForm = document.getElementById("loginForm");
+const message = document.getElementById("message");
+
+function showMessage(text, type = "") {
+    message.textContent = text;
+    message.className = type;
+}
+
+function showSignup() {
+    signupForm.classList.remove("hidden");
+    loginForm.classList.add("hidden");
+    showMessage("");
+}
+
+function showLogin() {
+    loginForm.classList.remove("hidden");
+    signupForm.classList.add("hidden");
+    showMessage("");
+}
+
+document.getElementById("showLogin").addEventListener("click", event => {
+    event.preventDefault();
+    showLogin();
+});
+
+document.getElementById("showSignup").addEventListener("click", event => {
+    event.preventDefault();
+    showSignup();
+});
+
+async function apiRequest(path, method, body, token) {
+    const headers = {Accept: "application/json"};
+
+    if (body !== undefined) {
+        headers["Content-Type"] = "application/json";
+    }
+
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+
+    let response;
+
+    try {
+        response = await fetch(`${API_URL}${path}`, {
+            method,
+            headers,
+            body: body === undefined ? undefined : JSON.stringify(body)
+        });
+    } catch {
+        throw new Error(
+            `Cannot connect to ${API_URL}. Start the FastAPI backend and try again.`
+        );
+    }
+
+    const responseText = await response.text();
+    let data = {};
+
+    try {
+        data = responseText ? JSON.parse(responseText) : {};
+    } catch {
+        data = {detail: responseText};
+    }
+
+    if (!response.ok) {
+        const detail = data.detail || data.message || `HTTP ${response.status}`;
+        throw new Error(
+            typeof detail === "string" ? detail : JSON.stringify(detail)
+        );
+    }
+
+    return data;
+}
+
+function extractUser(payload) {
+    if (!payload || typeof payload !== "object") return null;
+
+    if (payload.user && typeof payload.user === "object") {
+        return payload.user;
+    }
+
+    if (payload.data && typeof payload.data === "object") {
+        return extractUser(payload.data);
+    }
+
+    return payload;
+}
+
+function normalizeRole(value) {
+    const role = String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[\s-]+/g, "_");
+
+    const aliases = {
+        creator: "creator",
+        admin: "admin",
+        administrator: "admin",
+        agency: "agency",
+        marketing: "marketing_team",
+        marketing_team: "marketing_team"
+    };
+
+    return aliases[role] || null;
+}
+
+async function getCurrentUser(token) {
+    const response = await apiRequest("/me", "GET", undefined, token);
+    return extractUser(response);
+}
+
+function redirectByRole(user) {
+    const role = normalizeRole(user && user.role);
+
+    if (!role) {
+        throw new Error("Your account does not have a recognized role.");
+    }
+
+    const normalizedUser = {...user, role};
+
+    sessionStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
+
+    /* Both the login page and dashboard are in the frontend folder. */
+    window.location.replace(
+        new URL("dashboard.html", window.location.href).href
+    );
+}
+
+/* SIGNUP */
+signupForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const button = document.getElementById("signupButton");
+    button.disabled = true;
+    showMessage("Creating your account...");
+
+    const name = document.getElementById("signupName").value.trim();
+    const email = document.getElementById("signupEmail").value.trim();
+    const password = document.getElementById("signupPassword").value;
+    const role = document.getElementById("signupRole").value;
+
+    try {
+        await apiRequest("/signup", "POST", {
+            name, email, password, role
+        });
+
+        signupForm.reset();
+        document.getElementById("loginEmail").value = email;
+        showLogin();
+        showMessage("Account created successfully. Please log in.", "success");
+
+    } catch (error) {
+        showMessage(`Signup failed: ${error.message}`, "error");
+
+    } finally {
+        button.disabled = false;
+    }
+});
+
+/* LOGIN */
+loginForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const button = document.getElementById("loginButton");
+    button.disabled = true;
+    showMessage("Logging in...");
+
+    try {
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+
+        const loginData = await apiRequest("/login", "POST", {
+            email, password
+        });
+
+        if (!loginData.access_token) {
+            throw new Error("The API did not return an access token.");
+        }
+
+        const token = loginData.access_token;
+        sessionStorage.setItem(TOKEN_KEY, token);
+
+        let user = extractUser(loginData);
+
+        if (!user || !normalizeRole(user.role)) {
+            user = await getCurrentUser(token);
+        }
+
+        if (!user || !normalizeRole(user.role)) {
+            throw new Error("The API did not return a valid account role.");
+        }
+
+        redirectByRole(user);
+
+    } catch (error) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(USER_KEY);
+        showMessage(`Login failed: ${error.message}`, "error");
+
+    } finally {
+        button.disabled = false;
+    }
+});
+
+/* CHECK AN EXISTING SESSION */
+async function checkExistingSession() {
+    const token = sessionStorage.getItem(TOKEN_KEY);
+
+    if (!token) {
+        showSignup();
+        return;
+    }
+
+    signupForm.classList.add("hidden");
+    loginForm.classList.add("hidden");
+    showMessage("Checking your session...");
+
+    try {
+        const user = await getCurrentUser(token);
+
+        if (!user || !normalizeRole(user.role)) {
+            throw new Error("The account role could not be identified.");
+        }
+
+        redirectByRole(user);
+
+    } catch (error) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(USER_KEY);
+        showLogin();
+        showMessage(`Please log in again. ${error.message}`, "error");
+    }
+}
+
+checkExistingSession();
+</script>
+</body>
+</html>
