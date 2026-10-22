@@ -1,0 +1,180 @@
+[
+  {
+    "id": "demo-user",
+    "name": "Sai Creator",
+    "email": "sample@example.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$sPXSNnUPS3nDgrr5EvN8G.62A9Dq3SvXsWOcD7nryMo0gGDVOJ4A6",
+    "createdAt": "2026-10-12T04:02:32.348Z",
+    "tokenVersion": 2
+  },
+  {
+    "id": "user-1791777921225-vsci2z",
+    "name": "sai",
+    "email": "saikatakam497@gmail.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$lPOVIA9UqteBSpRlrr/pH.eNBTGJbNAaomh5h66Hv3xHc8BnB3SwC",
+    "createdAt": "2026-10-12T04:05:21.225Z",
+    "tokenVersion": 7
+  },
+  {
+    "id": "user-1791810426558-p0y84f",
+    "name": "sai",
+    "email": "sai@gmail.com",
+    "role": "agency",
+    "passwordHash": "$2a$10$R6M778IGnOHoIE7q7vCkNurZ/l.u5.fB9Ds2vFuUV0oWnPOHnwtcm",
+    "createdAt": "2026-10-12T13:07:06.559Z"
+  },
+  {
+    "id": "user-1791812699387-iuyr8a",
+    "name": "sai",
+    "email": "sai1@gmail.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$YmSKagyYIMJrH86n0QE6l.7Aoifi6d1g4FymfngXhkxOyTstrJh66",
+    "createdAt": "2026-10-12T13:44:59.387Z"
+  },
+  {
+    "id": "user-1791860344176-om4q7a",
+    "name": "QA Browser User",
+    "email": "qa-ui-1791860341065@example.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$SvCdO5lKA9/FQHJFn1bghOAn2w5RJP.ytd8YaZug8JSiH1.7WUBUy",
+    "createdAt": "2026-10-13T02:59:04.176Z"
+  },
+  {
+    "id": "user-1791862654974-t3713g",
+    "name": "Sai Katakam",
+    "email": "saikatakam49@gmail.com",
+    "role": "agency",
+    "passwordHash": "$2a$10$MjQLYj0BXFJ9C87iArBwsO/M6xMQC96BZssIKARVBjH77cNQFnPo6",
+    "createdAt": "2026-10-13T03:37:34.974Z"
+  },
+  {
+    "id": "user-1791894212542-7feeby",
+    "name": "New Creator",
+    "email": "newcreator+localtest@example.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$DeF.Vd0bsKT/k/YfXfcha.tmbaqU0ByDg4UBT8BnxH3q5zkohpK6S",
+    "createdAt": "2026-10-13T12:23:32.543Z"
+  },
+  {
+    "id": "user-1791894312869-g9q8om",
+    "name": "sai",
+    "email": "sai111@gmail.com",
+    "role": "marketing",
+    "passwordHash": "$2a$10$yF2Fjv7lTYAcEfA7KE1tA.VhMSj4xEQ3/5aPr1sLp3pGeF.a5LHby",
+    "createdAt": "2026-10-13T12:25:12.871Z"
+  },
+  {
+    "id": "user-1791895188550-7uj9ih",
+    "name": "Katakam Naga Venkata Sai Charan",
+    "email": "23102a04084@mbu.asia",
+    "role": "marketing",
+    "passwordHash": "$2a$10$DjzA0Sw6dg14i02iMuEGIupdj8ZdLNgSSDbvLQnGxiyaTEt8H0K8a",
+    "createdAt": "2026-10-13T12:39:48.550Z",
+    "tokenVersion": 2
+  },
+  {
+    "id": "user-1791962294885-4yvq08",
+    "name": "QA User",
+    "email": "qa-1791962294649@example.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$EESj..I6A9e7BAAaTk1wsOWUGltxTeqHN7/Odr0T8cVO585sYKVCK",
+    "createdAt": "2026-10-14T07:18:14.885Z"
+  },
+  {
+    "id": "user-1791962295303-gijbfx",
+    "name": "Logout Test",
+    "email": "logout-1791962295201@example.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$Z0sdBh8/r1zQhI9ZwuD66OK1JATMYxXpX8YqFkE/Om7gWTW5Zy8DC",
+    "createdAt": "2026-10-14T07:18:15.303Z",
+    "tokenVersion": 1
+  },
+  {
+    "id": "user-1791962343427-r24uok",
+    "name": "QA User",
+    "email": "qa-1791962343266@example.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$sEv4vFNl7/DrcIhsN9EHI.DMsOmhPWmmDfon7GZqQr3bFZufKBzKi",
+    "createdAt": "2026-10-14T07:19:03.427Z"
+  },
+  {
+    "id": "user-1791962343819-wn25os",
+    "name": "Logout Test",
+    "email": "logout-1791962343702@example.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$lEFXQPN6Ptd8OVT/3tA.u.pslLdWfkoIgBBDJl1TeKrmIcxX9Vp3.",
+    "createdAt": "2026-10-14T07:19:03.819Z",
+    "tokenVersion": 1
+  },
+  {
+    "id": "user-1791981779750-5brk23",
+    "name": "QA User",
+    "email": "qa-1791981779521@example.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$2q2lp4oFziMkMHJKI3HeyeLHRMyLbSs4.JHWRpym4TbNzmM9QKSRe",
+    "createdAt": "2026-10-14T12:42:59.750Z"
+  },
+  {
+    "id": "user-1791981780330-cztloa",
+    "name": "Logout Test",
+    "email": "logout-1791981780209@example.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$g/fnZw/xJubeaMFTd3PMeOe1ayMw1CloHIk6SoHztcffbRXEv.BlC",
+    "createdAt": "2026-10-14T12:43:00.330Z",
+    "tokenVersion": 1
+  },
+  {
+    "id": "user-1791983742714-6hc1ie",
+    "name": "QA User",
+    "email": "qa-1791983742594@example.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$gT.icxguHN85yB8hpG0UPO/LGgczGi8T.AmO0kvp5zoIS7Uh3.0hq",
+    "createdAt": "2026-10-14T13:15:42.714Z"
+  },
+  {
+    "id": "user-1791983743172-umf6l8",
+    "name": "Logout Test",
+    "email": "logout-1791983743080@example.com",
+    "role": "creator",
+    "passwordHash": "$2a$10$VHQMz9BPViOBAdVyAWJPVeUb2PL.xkAKmGUovzqctZ2I.LTjmqufi",
+    "createdAt": "2026-10-14T13:15:43.172Z",
+    "tokenVersion": 1
+  },
+  {
+    "id": "user-1792410907413-m2g5cs",
+    "name": "Sai Katakam",
+    "email": "saikatakam4@gmail.com",
+    "role": "agency",
+    "passwordHash": "$2a$10$gDJf3K1APTfIZGUhrAHzdeP/6ke6DOn084KE.hW3Cg7gtL4vfP0ju",
+    "createdAt": "2026-10-19T11:55:07.413Z",
+    "tokenVersion": 4
+  },
+  {
+    "id": "user-1792412280328-b1clmj",
+    "name": "Katakam",
+    "email": "saikatakam@gmail.com",
+    "role": "marketing",
+    "passwordHash": "$2a$10$AisUiWjyyEY0QEtfMypwqeULoOqrVF/qmifHEeiIAmSMdxZgrLBNm",
+    "createdAt": "2026-10-19T12:18:00.328Z",
+    "tokenVersion": 4
+  },
+  {
+    "id": "user-1792554343317-z6fmk2",
+    "name": "CreatorIQ Administrator",
+    "email": "administrator@creatoriq.local",
+    "role": "administrator",
+    "passwordHash": "$2a$10$Pd8MKK7xGM1Xbf/ub2Pq7eEA/b5V98HvHTITRI7G2JMAiPtYHlqKq",
+    "createdAt": "2026-10-21T03:45:43.457Z",
+    "tokenVersion": 1
+  },
+  {
+    "id": "user-1792555127586-90d7o1",
+    "name": "sai",
+    "email": "saicharan0898@gmail.com",
+    "role": "administrator",
+    "passwordHash": "$2a$10$4x52HC4YBqVsUq9VHfypn.rcvJ2iAIwMa9iccFirUK5aqyisL7QiG",
+    "createdAt": "2026-10-21T03:58:47.701Z"
+  }
+]

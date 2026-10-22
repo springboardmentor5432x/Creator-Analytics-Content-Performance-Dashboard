@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create your CreatorIQ account.">
+    <title>Create Account | CreatorIQ</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/signup.js" defer></script>
+</head>
+
+<body>
+    <main class="page-shell">
+
+        <header class="site-header">
+            <a href="index.html" class="brand-logo"
+               aria-label="CreatorIQ home">
+                <span class="logo-mark" aria-hidden="true">C</span>
+                <span>Creator<span class="brand-accent">IQ</span></span>
+            </a>
+
+            <nav class="site-nav" aria-label="Main navigation">
+                <span class="helper-text">Already have an account?</span>
+                <a href="index.html" class="text-link">Sign in</a>
+            </nav>
+        </header>
+
+        <section class="page-card" aria-labelledby="signup-title">
+
+            <div class="form-heading">
+                <span class="eyebrow">JOIN CREATORIQ</span>
+                <h1 class="page-title" id="signup-title">
+                    Create your account
+                </h1>
+                <p class="page-description">
+                    Your content insights start here. Set up your
+                    workspace in a few simple steps.
+                </p>
+            </div>
+
+            <div class="prototype-notice" role="note">
+                <span aria-hidden="true">ⓘ</span>
+                <span>
+                    Account creation is connected to the local CreatorIQ API.
+                </span>
+            </div>
+
+            <form id="signup-form" novalidate>
+
+                <!-- Full name -->
+                <div class="form-group">
+                    <label for="full-name">Full name</label>
+                    <input
+                        type="text"
+                        id="full-name"
+                        name="fullName"
+                        placeholder="Enter your full name"
+                        autocomplete="name"
+                        maxlength="100"
+                        aria-describedby="name-error"
+                        required
+                    >
+                    <small class="field-error"
+                           id="name-error"
+                           aria-live="polite"></small>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="signup-email">Email address</label>
+                    <input
+                        type="email"
+                        id="signup-email"
+                        name="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        maxlength="254"
+                        aria-describedby="signup-email-error"
+                        required
+                    >
+                    <small class="field-error"
+                           id="signup-email-error"
+                           aria-live="polite"></small>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="signup-password"
+                            name="password"
+                            placeholder="Create a strong password"
+                            autocomplete="new-password"
+                            aria-describedby="password-rules password-strength-text password-error"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            data-toggle-password="signup-password"
+                            aria-label="Show password"
+                            aria-controls="signup-password"
+                            aria-pressed="false">
+                            Show
+                        </button>
+                    </div>
+
+                    <p class="helper-text" id="password-rules">
+                        Use at least 8 characters, including an
+                        uppercase letter, a lowercase letter,
+                        a number, and a special character.
+                    </p>
+
+                    <div class="password-strength"
+                         id="password-strength"
+                         aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                    <small class="helper-text"
+                           id="password-strength-text"
+                           aria-live="polite">
+                        Password strength: Not entered
+                    </small>
+
+                    <small class="field-error"
+                           id="password-error"
+                           aria-live="polite"></small>
+                </div>
+
+                <!-- Confirm password -->
+                <div class="form-group">
+                    <label for="confirm-password">
+                        Confirm password
+                    </label>
+
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="confirm-password"
+                            name="confirmPassword"
+                            placeholder="Re-enter your password"
+                            autocomplete="new-password"
+                            aria-describedby="confirm-password-error"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            data-toggle-password="confirm-password"
+                            aria-label="Show confirmation password"
+                            aria-controls="confirm-password"
+                            aria-pressed="false">
+                            Show
+                        </button>
+                    </div>
+
+                    <small class="field-error"
+                           id="confirm-password-error"
+                           aria-live="polite"></small>
+                </div>
+
+                <!-- Role selection -->
+                <fieldset class="form-group role-fieldset">
+                    <legend class="role-legend">
+                        Choose your workspace role
+                    </legend>
+
+                    <p class="helper-text">
+                        Select the role that best describes how
+                        you will use CreatorIQ.
+                    </p>
+
+                                    <div class="role-grid" id="role-grid">
+
+                        <button
+                            type="button"
+                            class="role-card"
+                            data-role="creator"
+                            aria-pressed="false">
+                            <span class="role-icon"
+                                  aria-hidden="true">✦</span>
+                            <strong>Creator</strong>
+                            <p>
+                                Manage your profile and access
+                                permitted personal analytics.
+                            </p>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="role-card"
+                            data-role="agency"
+                            aria-pressed="false">
+                            <span class="role-icon"
+                                  aria-hidden="true">◈</span>
+                            <strong>Agency</strong>
+                            <p>
+                                Manage authorized creator accounts
+                                and agency analytics.
+                            </p>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="role-card"
+                            data-role="marketing"
+                            aria-pressed="false">
+                            <span class="role-icon"
+                                  aria-hidden="true">◎</span>
+                            <strong>Marketing Team</strong>
+                            <p>
+                                Access authorized campaign and
+                                content performance information.
+                            </p>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="role-card role-card-restricted"
+                            disabled
+                            aria-describedby="administrator-role-note">
+                            <span class="role-icon" aria-hidden="true">◆</span>
+                            <strong>Administrator</strong>
+                            <p id="administrator-role-note">
+                                Provisioned by authorized platform staff;
+                                public registration is unavailable.
+                            </p>
+                        </button>
+
+                    </div>
+
+                    <small class="field-error"
+                           id="role-error"
+                           aria-live="polite"></small>
+
+                </fieldset>
+
+                <!-- Terms -->
+                <div class="terms-row">
+                    <label class="checkbox-label" for="accept-terms">
+                        <input
+                            type="checkbox"
+                            id="accept-terms"
+                            name="acceptTerms"
+                            aria-describedby="terms-error"
+                            required
+                        >
+                        <span>
+                            I agree to the
+                            <a href="#terms"
+                               class="text-link"
+                               id="terms-link">Terms of Service</a>
+                            and
+                            <a href="#privacy"
+                               class="text-link"
+                               id="privacy-link">Privacy Policy</a>.
+                        </span>
+                    </label>
+
+                    <small class="field-error"
+                           id="terms-error"
+                           aria-live="polite"></small>
+                </div>
+
+                <!-- Form status -->
+                <div id="signup-status"
+                     class="form-status"
+                     role="status"
+                     aria-live="polite"></div>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    id="signup-button">
+                    <span class="button-text">Create Account</span>
+                    <span aria-hidden="true">→</span>
+                </button>
+
+            </form>
+
+            <div class="separator">
+                <span></span>
+                <span>OR</span>
+                <span></span>
+            </div>
+
+            <button type="button"
+                    class="btn btn-google"
+                    id="signup-google">
+                <svg viewBox="0 0 48 48"
+                     width="20"
+                     height="20"
+                     aria-hidden="true">
+                    <path fill="#4285F4"
+                          d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.72 7.18l7.62 5.91c4.45-4.1 7.14-10.15 7.14-17.56z"/>
+                    <path fill="#34A853"
+                          d="M24 48c6.48 0 11.93-2.13 15.9-5.79l-7.62-5.91c-2.12 1.42-4.84 2.26-8.28 2.26-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    <path fill="#FBBC05"
+                          d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78z"/>
+                    <path fill="#EA4335"
+                          d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                </svg>
+                Continue with Google
+            </button>
+
+            <p class="signup-prompt">
+                Already have an account?
+                <a href="index.html" class="text-link">Sign in</a>
+            </p>
+
+        </section>
+
+        <footer class="brand-footer"
+                style="text-align:center; margin-top:24px">
+            CreatorIQ · Frontend prototype
+        </footer>
+
+    </main>
+</body>
+</html>
