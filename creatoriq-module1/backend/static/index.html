@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CreatorIQ | Sign in</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Montserrat", "Segoe UI", sans-serif; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+      background: linear-gradient(135deg, #0f1b3d 0%, #1d3a6e 55%, #2b6cb0 100%);
+      position: relative; overflow-x: hidden;
+    }
+    /* analytics-themed background art */
+    .bg-art { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+    .brand-top { position: fixed; top: 22px; left: 28px; z-index: 1; color: #fff; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.25rem; }
+    .brand-top small { display: block; font-weight: 400; font-size: .68rem; opacity: .7; letter-spacing: .4px; }
+
+    .card { position: relative; z-index: 2; width: 960px; max-width: 100%; height: 620px;
+      background: #fff; border-radius: 30px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+
+    .form-box { position: absolute; top: 0; width: 50%; height: 100%; display: flex; align-items: center; justify-content: center; transition: opacity .4s ease; }
+    .form-box form { width: 100%; max-width: 380px; padding: 0 20px; display: flex; flex-direction: column; gap: 13px; }
+    .form-box h1 { font-size: 2rem; text-align: center; color: #0f1b3d; }
+    .form-box .sub { text-align: center; font-size: .85rem; color: #5c6b85; margin-top: -6px; }
+    #signup-box { left: 50%; }
+    #login-box { left: 0; opacity: 0; pointer-events: none; }
+    .card.login-mode #signup-box { opacity: 0; pointer-events: none; }
+    .card.login-mode #login-box { opacity: 1; pointer-events: auto; }
+
+    input, select { width: 100%; padding: 13px 16px; border: 0; border-radius: 8px; background: #eef1f6; font: inherit; font-size: .95rem; }
+    input:focus, select:focus { outline: 2px solid #2da0a8; background: #fff; }
+    .btn { align-self: center; margin-top: 6px; padding: 12px 46px; border: 0; border-radius: 8px; background: #2da0a8; color: #fff; font: inherit; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; }
+    .btn:hover { background: #238a91; }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+    .msg { font-size: .88rem; padding: 10px 12px; border-radius: 8px; display: none; }
+    .msg.error { display: block; background: #fdecea; color: #b42318; }
+    .msg.success { display: block; background: #e6f6ec; color: #17673a; }
+    .switch-link { display: none; text-align: center; font-size: .9rem; }
+    .switch-link a { color: #2da0a8; font-weight: 600; cursor: pointer; }
+
+    .overlay { position: absolute; top: 0; left: 0; width: 50%; height: 100%; z-index: 5;
+      background: linear-gradient(160deg, #4a5bb8, #2f7fae); color: #fff; border-radius: 0 150px 100px 0;
+      overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center;
+      transition: transform .6s ease, border-radius .6s ease; }
+    .card.login-mode .overlay { transform: translateX(100%); border-radius: 150px 0 0 100px; }
+    .overlay .logo { position: absolute; top: 30px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; font-size: 1.2rem; }
+    .overlay .chart-art { position: absolute; bottom: 0; left: 0; width: 100%; opacity: .35; }
+    .overlay-text { position: absolute; width: 100%; padding: 0 40px; transition: opacity .4s ease; }
+    .overlay-text h1 { font-size: 2.1rem; margin-bottom: 12px; }
+    .overlay-text p { line-height: 1.5; margin-bottom: 24px; font-size: .95rem; }
+    .overlay-text .btn { background: transparent; border: 1px solid #fff; }
+    .overlay-text .btn:hover { background: rgba(255,255,255,.15); }
+    #text-signup { opacity: 1; }
+    #text-login { opacity: 0; pointer-events: none; }
+    .card.login-mode #text-signup { opacity: 0; pointer-events: none; }
+    .card.login-mode #text-login { opacity: 1; pointer-events: auto; }
+
+    @media (max-width: 760px) {
+      .brand-top { display: none; }
+      .card { height: auto; min-height: 560px; }
+      .overlay { display: none; }
+      .form-box { width: 100%; left: 0 !important; padding: 40px 0; }
+      #signup-box { position: relative; }
+      .card.login-mode #signup-box { display: none; }
+      #login-box { position: relative; display: none; }
+      .card.login-mode #login-box { display: flex; }
+      .switch-link { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background art: faint analytics chart lines + bars -->
+  <svg class="bg-art" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g fill="#ffffff" opacity=".06">
+      <rect x="40" y="520" width="40" height="280"/><rect x="100" y="440" width="40" height="360"/>
+      <rect x="160" y="480" width="40" height="320"/><rect x="220" y="360" width="40" height="440"/>
+      <rect x="280" y="400" width="40" height="400"/><rect x="340" y="300" width="40" height="500"/>
+      <rect x="860" y="600" width="40" height="200"/><rect x="920" y="540" width="40" height="260"/>
+      <rect x="980" y="480" width="40" height="320"/><rect x="1040" y="420" width="40" height="380"/>
+      <rect x="1100" y="340" width="40" height="460"/>
+    </g>
+    <polyline fill="none" stroke="#5eead4" stroke-width="3" opacity=".25"
+      points="0,640 120,600 240,620 360,520 480,540 600,430 720,460 840,340 960,370 1080,250 1200,200"/>
+    <polyline fill="none" stroke="#93c5fd" stroke-width="3" opacity=".2"
+      points="0,720 140,700 260,680 380,640 500,650 620,580 740,590 860,520 980,500 1100,430 1200,400"/>
+    <circle cx="1080" cy="250" r="7" fill="#5eead4" opacity=".5"/><circle cx="600" cy="430" r="7" fill="#5eead4" opacity=".5"/>
+    <circle cx="150" cy="120" r="90" fill="none" stroke="#fff" opacity=".06" stroke-width="14"/>
+    <circle cx="1060" cy="110" r="60" fill="none" stroke="#fff" opacity=".06" stroke-width="10"/>
+  </svg>
+
+  <div class="brand-top">
+    <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#2da0a8"/><rect x="9" y="22" width="5" height="10" rx="1.5" fill="#fff"/><rect x="18" y="15" width="5" height="17" rx="1.5" fill="#fff"/><rect x="27" y="8" width="5" height="24" rx="1.5" fill="#fff"/></svg>
+    <div>CreatorIQ<small>Creator Analytics &amp; Content Performance Dashboard</small></div>
+  </div>
+
+  <div class="card" id="card">
+    <!-- Sign up -->
+    <div class="form-box" id="signup-box">
+      <form id="signup-form" novalidate>
+        <h1>Create Account</h1>
+        <p class="sub">Track your growth, engagement and earnings</p>
+        <div class="msg" id="signup-msg" role="alert"></div>
+        <input type="text" id="su-name" placeholder="Full name" autocomplete="name">
+        <input type="email" id="su-email" placeholder="Email" autocomplete="email">
+        <input type="password" id="su-password" placeholder="Password (min 8 characters)" autocomplete="new-password">
+        <select id="su-role" aria-label="Account type">
+          <option value="creator">I am a Creator</option>
+          <option value="agency">I am an Agency</option>
+          <option value="marketing_team">I am in a Marketing Team</option>
+        </select>
+        <button class="btn" type="submit" id="su-btn">Sign up</button>
+        <p class="switch-link">Already registered? <a data-switch="login">Sign in</a></p>
+      </form>
+    </div>
+
+    <!-- Sign in -->
+    <div class="form-box" id="login-box">
+      <form id="login-form" novalidate>
+        <h1>Sign In</h1>
+        <p class="sub">Welcome back to your dashboard</p>
+        <div class="msg" id="login-msg" role="alert"></div>
+        <input type="email" id="li-email" placeholder="Email" autocomplete="email">
+        <input type="password" id="li-password" placeholder="Password" autocomplete="current-password">
+        <button class="btn" type="submit" id="li-btn">Sign in</button>
+        <p class="switch-link">New here? <a data-switch="signup">Create an account</a></p>
+      </form>
+    </div>
+
+    <!-- Sliding panel -->
+    <div class="overlay">
+      <div class="logo">
+        <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#fff" opacity=".2"/><rect x="9" y="22" width="5" height="10" rx="1.5" fill="#fff"/><rect x="18" y="15" width="5" height="17" rx="1.5" fill="#fff"/><rect x="27" y="8" width="5" height="24" rx="1.5" fill="#fff"/></svg>
+        CreatorIQ
+      </div>
+      <div class="overlay-text" id="text-signup">
+        <h1>Welcome Back!</h1>
+        <p>Sign in to see your views, audience growth and revenue in one place.</p>
+        <button class="btn" type="button" data-switch="login">Sign in</button>
+      </div>
+      <div class="overlay-text" id="text-login">
+        <h1>Hello, Creator!</h1>
+        <p>New to CreatorIQ? Create an account and start tracking your content performance.</p>
+        <button class="btn" type="button" data-switch="signup">Sign up</button>
+      </div>
+      <svg class="chart-art" viewBox="0 0 480 140" preserveAspectRatio="none" aria-hidden="true">
+        <g fill="#fff"><rect x="20" y="90" width="30" height="50"/><rect x="70" y="70" width="30" height="70"/><rect x="120" y="80" width="30" height="60"/><rect x="170" y="45" width="30" height="95"/><rect x="220" y="60" width="30" height="80"/><rect x="270" y="25" width="30" height="115"/><rect x="320" y="40" width="30" height="100"/><rect x="370" y="10" width="30" height="130"/><rect x="420" y="30" width="30" height="110"/></g>
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    // Same server (http://localhost:8000) -> relative URLs. Live Server etc. -> point to the backend.
+    const API_URL = location.port === "8000" ? "" : "http://localhost:8000";
+    const card = document.getElementById("card");
+
+    // already logged in? go straight to the dashboard (dashboard.html re-verifies the token)
+    if (localStorage.getItem("token")) location.replace("dashboard.html");
+
+    document.querySelectorAll("[data-switch]").forEach(el => {
+      el.addEventListener("click", () => {
+        card.classList.toggle("login-mode", el.dataset.switch === "login");
+        clearMsg("signup-msg"); clearMsg("login-msg");
+      });
+    });
+
+    function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = "msg " + type; }
+    function clearMsg(id) { const el = document.getElementById(id); el.textContent = ""; el.className = "msg"; }
+    function readError(data) {
+      if (data && typeof data.detail === "string") return data.detail;
+      if (data && Array.isArray(data.detail)) return data.detail.map(d => d.msg).join(", ");
+      return "Something went wrong. Try again.";
+    }
+
+    // ---------- SIGN UP -> POST /auth/register -> saved in database ----------
+    document.getElementById("signup-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearMsg("signup-msg");
+      const full_name = document.getElementById("su-name").value.trim();
+      const email = document.getElementById("su-email").value.trim();
+      const password = document.getElementById("su-password").value;
+      const role = document.getElementById("su-role").value;
+
+      if (full_name.length < 2) return showMsg("signup-msg", "Enter your full name.", "error");
+      if (!/^\S+@\S+\.\S+$/.test(email)) return showMsg("signup-msg", "Enter a valid email address.", "error");
+      if (password.length < 8) return showMsg("signup-msg", "Password must be at least 8 characters.", "error");
+
+      const btn = document.getElementById("su-btn");
+      btn.disabled = true; btn.textContent = "Please wait...";
+      try {
+        const res = await fetch(`${API_URL}/auth/register`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ full_name, email, password, role })
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) return showMsg("signup-msg", readError(data), "error");
+
+        document.getElementById("signup-form").reset();
+        card.classList.add("login-mode");
+        document.getElementById("li-email").value = email;
+        showMsg("login-msg", "Account created! Please sign in.", "success");
+      } catch (err) {
+        showMsg("signup-msg", "Cannot reach the server. Is the backend running?", "error");
+      } finally { btn.disabled = false; btn.textContent = "Sign up"; }
+    });
+
+    // ---------- SIGN IN -> POST /auth/login -> token -> dashboard ----------
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearMsg("login-msg");
+      const email = document.getElementById("li-email").value.trim();
+      const password = document.getElementById("li-password").value;
+      if (!email || !password) return showMsg("login-msg", "Enter your email and password.", "error");
+
+      const btn = document.getElementById("li-btn");
+      btn.disabled = true; btn.textContent = "Please wait...";
+      try {
+        const res = await fetch(`${API_URL}/auth/login`, {
+          method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ username: email, password })
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) return showMsg("login-msg", readError(data), "error");
+
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("full_name", data.full_name);
+        location.href = "dashboard.html";
+      } catch (err) {
+        showMsg("login-msg", "Cannot reach the server. Is the backend running?", "error");
+      } finally { btn.disabled = false; btn.textContent = "Sign in"; }
+    });
+  </script>
+</body>
+</html>

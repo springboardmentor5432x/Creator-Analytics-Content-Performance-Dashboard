@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CreatorIQ | Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy:#0f1b3d; --navy2:#1d3a6e; --teal:#2da0a8; --bg:#f3f6fb; --line:#dfe5ef; --muted:#5c6b85; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Montserrat","Segoe UI",sans-serif; background: var(--bg); color: var(--navy); display: none; min-height: 100vh; }
+    body.ready { display: flex; }
+
+    aside { width: 250px; background: linear-gradient(180deg, var(--navy), var(--navy2)); color: #fff; padding: 24px 16px; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.2rem; padding: 0 8px 24px; }
+    nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    nav a { color: #c9d3e6; text-decoration: none; padding: 11px 12px; border-radius: 8px; font-size: .92rem; font-weight: 500; }
+    nav a:hover { background: rgba(255,255,255,.08); color: #fff; }
+    nav a.active { background: var(--teal); color: #fff; }
+    .logout { background: transparent; border: 1px solid rgba(255,255,255,.4); color: #fff; padding: 10px; border-radius: 8px; font: inherit; cursor: pointer; }
+    .logout:hover { background: rgba(255,255,255,.12); }
+
+    main { flex: 1; padding: 28px 32px; min-width: 0; }
+    header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+    header h1 { font-size: 1.7rem; }
+    header p { color: var(--muted); font-size: .92rem; margin-top: 4px; }
+    .badge { background: #e0f3f4; color: #17767d; padding: 6px 14px; border-radius: 20px; font-size: .8rem; font-weight: 600; text-transform: capitalize; }
+
+    .notice { background: #fff8e1; border: 1px solid #ffe08a; color: #7a5b00; padding: 10px 14px; border-radius: 8px; font-size: .85rem; margin-bottom: 20px; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .panel { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+    .kpi .label { font-size: .8rem; color: var(--muted); font-weight: 600; }
+    .kpi .value { font-size: 1.7rem; font-weight: 700; margin: 6px 0 2px; }
+    .kpi .delta { font-size: .8rem; color: #17803d; font-weight: 600; }
+    .grid2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+    h2 { font-size: 1rem; margin-bottom: 12px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: .85rem; }
+    .bar-row span:first-child { width: 80px; color: var(--muted); }
+    .bar { flex: 1; background: #edf1f7; border-radius: 6px; height: 12px; overflow: hidden; }
+    .bar i { display: block; height: 100%; background: var(--teal); border-radius: 6px; }
+    dl { display: grid; grid-template-columns: 90px 1fr; gap: 8px 12px; font-size: .9rem; }
+    dt { color: var(--muted); } dd { word-break: break-all; }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; }
+    .hidden { display: none; }
+
+    @media (max-width: 860px) {
+      body.ready { flex-direction: column; }
+      aside { width: 100%; height: auto; position: static; padding: 14px; }
+      nav { flex-direction: row; flex-wrap: wrap; margin-bottom: 12px; }
+      .grid2 { grid-template-columns: 1fr; }
+      main { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="logo">
+      <svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#2da0a8"/><rect x="9" y="22" width="5" height="10" rx="1.5" fill="#fff"/><rect x="18" y="15" width="5" height="17" rx="1.5" fill="#fff"/><rect x="27" y="8" width="5" height="24" rx="1.5" fill="#fff"/></svg>
+      CreatorIQ
+    </div>
+    <nav id="nav"></nav>
+    <button class="logout" id="logout">Log out</button>
+  </aside>
+
+  <main>
+    <header>
+      <div>
+        <h1 id="welcome">Welcome</h1>
+        <p id="today"></p>
+      </div>
+      <span class="badge" id="role-badge"></span>
+    </header>
+
+    <div class="notice">The numbers and charts below are <strong>sample data</strong>. Real analytics are connected in the upcoming modules.</div>
+
+    <section class="kpis" id="kpis"></section>
+
+    <section class="grid2">
+      <div class="panel">
+        <h2>Views - last 7 days (sample)</h2>
+        <svg id="line-chart" viewBox="0 0 520 200" width="100%" role="img" aria-label="Sample weekly views line chart"></svg>
+      </div>
+      <div class="panel">
+        <h2>Audience by platform (sample)</h2>
+        <div class="bar-row"><span>YouTube</span><div class="bar"><i style="width:72%"></i></div><span>72%</span></div>
+        <div class="bar-row"><span>Instagram</span><div class="bar"><i style="width:54%"></i></div><span>54%</span></div>
+        <div class="bar-row"><span>TikTok</span><div class="bar"><i style="width:38%"></i></div><span>38%</span></div>
+        <div class="bar-row"><span>X</span><div class="bar"><i style="width:21%"></i></div><span>21%</span></div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-bottom:20px">
+      <h2>Your account (from the database)</h2>
+      <dl>
+        <dt>Name</dt><dd id="acc-name"></dd>
+        <dt>Email</dt><dd id="acc-email"></dd>
+        <dt>Role</dt><dd id="acc-role"></dd>
+        <dt>User ID</dt><dd id="acc-id"></dd>
+      </dl>
+    </section>
+
+    <section class="panel hidden" id="admin-panel">
+      <h2>All registered users (admin only)</h2>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody id="users-body"></tbody></table>
+      </div>
+    </section>
+  </main>
+  <script>
+    const API_URL = location.port === "8000" ? "" : "http://localhost:8000";
+    const token = localStorage.getItem("token");
+
+    function goLogin() { localStorage.clear(); location.replace("index.html"); }
+    if (!token) goLogin();
+
+    const NAV = {
+      creator:        ["Overview", "Content Analytics", "Audience", "Growth & Trends", "Revenue", "My Profile", "Account Settings"],
+      agency:         ["Overview", "Managed Creators", "Platform Comparison", "Revenue", "Agency Profile", "Account Settings"],
+      marketing_team: ["Overview", "Campaign Performance", "Creator Insights", "Reports", "Account Settings"],
+      admin:          ["Overview", "User Management", "Platform Reports", "Account Settings"],
+    };
+    const KPIS = [
+      ["Total views", "128.4K", "+12.5%"], ["Engagement rate", "6.8%", "+0.9%"],
+      ["New followers", "2,341", "+8.2%"], ["Est. revenue", "$1,845", "+15.1%"],
+    ];
+
+    function el(tag, text, attrs) { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; Object.assign(e, attrs || {}); return e; }
+
+    function drawLine() {
+      const pts = [30, 48, 41, 66, 58, 82, 95], W = 520, H = 200, pad = 24;
+      const x = i => pad + i * (W - 2 * pad) / (pts.length - 1);
+      const y = v => H - pad - v * (H - 2 * pad) / 100;
+      const NS = "http://www.w3.org/2000/svg", svg = document.getElementById("line-chart");
+      const add = (n, a) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); svg.appendChild(e); return e; };
+      [0, 50, 100].forEach(v => add("line", { x1: pad, x2: W - pad, y1: y(v), y2: y(v), stroke: "#e3e8f1" }));
+      add("polyline", { points: pts.map((v, i) => x(i) + "," + y(v)).join(" "), fill: "none", stroke: "#2da0a8", "stroke-width": 3, "stroke-linejoin": "round" });
+      pts.forEach((v, i) => add("circle", { cx: x(i), cy: y(v), r: 4, fill: "#2da0a8" }));
+      ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach((d, i) => { const t = add("text", { x: x(i), y: H - 6, "text-anchor": "middle", "font-size": 11, fill: "#5c6b85" }); t.textContent = d; });
+    }
+
+    // AUTHENTICATION check: ask the backend "who am I?" using the JWT token
+    async function init() {
+      let res;
+      try { res = await fetch(`${API_URL}/users/me`, { headers: { Authorization: "Bearer " + token } }); }
+      catch (e) { document.body.classList.add("ready"); document.body.textContent = "Cannot reach the server. Start the backend and refresh."; return; }
+      if (!res.ok) return goLogin();           // token missing/expired/invalid
+      const me = await res.json();
+      const roleLabel = me.role.replace("_", " ");
+
+      document.getElementById("welcome").textContent = "Welcome, " + me.full_name + "!";
+      document.getElementById("today").textContent = new Date().toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+      document.getElementById("role-badge").textContent = roleLabel;
+      document.getElementById("acc-name").textContent = me.full_name;
+      document.getElementById("acc-email").textContent = me.email;
+      document.getElementById("acc-role").textContent = roleLabel;
+      document.getElementById("acc-id").textContent = me.id;
+
+      // ROLE-BASED navigation
+      
+const nav = document.getElementById("nav");
+
+(NAV[me.role] || NAV.creator).forEach((name, i) => {
+  const a = el("a", name, { href: "#" });
+
+  if (i === 0) a.classList.add("active");
+
+  a.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    nav.querySelectorAll("a").forEach(link =>
+      link.classList.remove("active")
+    );
+    a.classList.add("active");
+
+    const isProfile = name === "My Profile";
+
+    document.getElementById("profile-panel")
+      .classList.toggle("hidden", !isProfile);
+      document.getElementById("other-placeholder")
+  .classList.toggle("hidden", isProfile);
+
+    document.querySelectorAll("main > header, main > .notice, main > .kpis, main > .grid2, main > section.panel:not(#profile-panel)")
+      .forEach(section => {
+        section.classList.toggle("hidden", isProfile);
+      });
+
+    if (isProfile) {
+      document.getElementById("profile-avatar").textContent =
+        me.full_name.trim().charAt(0).toUpperCase();
+
+      document.getElementById("profile-name").textContent = me.full_name;
+      document.getElementById("profile-fullname").textContent = me.full_name;
+      document.getElementById("profile-email").textContent = me.email;
+      document.getElementById("profile-role").textContent =
+        me.role.replace("_", " ");
+      document.getElementById("profile-id").textContent = me.id;
+    }
+  });
+
+  nav.appendChild(a);
+});
+
+      
+
+      KPIS.forEach(([label, value, delta]) => {
+        const d = el("div"); d.className = "panel kpi";
+        d.append(el("div", label, { className: "label" }), el("div", value, { className: "value" }), el("div", delta + " vs last week", { className: "delta" }));
+        document.getElementById("kpis").appendChild(d);
+      });
+      drawLine();
+
+      // AUTHORIZATION: only admins may call /admin/users (others would get 403)
+      if (me.role === "admin") {
+        const r = await fetch(`${API_URL}/admin/users`, { headers: { Authorization: "Bearer " + token } });
+        if (r.ok) {
+          (await r.json()).forEach(u => {
+            const tr = el("tr");
+            [u.id, u.full_name, u.email, u.role.replace("_", " ")].forEach(v => tr.appendChild(el("td", String(v))));
+            document.getElementById("users-body").appendChild(tr);
+          });
+          document.getElementById("admin-panel").classList.remove("hidden");
+        }
+      }
+      document.body.classList.add("ready");
+    }
+
+    document.getElementById("logout").addEventListener("click", goLogin);
+    init();
+  </script>
+</body>
+</html>
