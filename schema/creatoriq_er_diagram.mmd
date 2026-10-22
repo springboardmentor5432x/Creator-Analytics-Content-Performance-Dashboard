@@ -1,0 +1,110 @@
+erDiagram
+    USERS ||--o| CREATOR_PROFILES : owns
+    USERS ||--o| AGENCY_PROFILES : owns
+    USERS ||--o| MARKETING_TEAM_PROFILES : owns
+    CREATOR_PROFILES ||--o{ SOCIAL_ACCOUNTS : connects
+    SOCIAL_ACCOUNTS ||--o{ CONTENT_POSTS : publishes
+    CONTENT_POSTS ||--o{ CONTENT_METRICS : measures
+    SOCIAL_ACCOUNTS ||--o{ AUDIENCE_INSIGHTS : summarizes
+    CREATOR_PROFILES ||--o{ REVENUE_RECORDS : earns
+    CREATOR_PROFILES ||--o{ NOTIFICATIONS : receives
+    CREATOR_PROFILES ||--o{ REPORTS : generates
+
+    USERS {
+        int id PK
+        string email UK
+        string full_name
+        string hashed_password
+        string role
+        boolean is_active
+        datetime created_at
+    }
+    CREATOR_PROFILES {
+        int id PK
+        int user_id FK,UK
+        string display_name
+        string niche
+        string bio
+        datetime created_at
+    }
+    AGENCY_PROFILES {
+        int id PK
+        int user_id FK,UK
+        string agency_name
+        string service_focus
+        string bio
+        datetime created_at
+    }
+    MARKETING_TEAM_PROFILES {
+        int id PK
+        int user_id FK,UK
+        string team_name
+        string focus_area
+        string bio
+        datetime created_at
+    }
+    SOCIAL_ACCOUNTS {
+        int id PK
+        int creator_profile_id FK
+        string platform
+        string handle
+        int followers_count
+        boolean is_connected
+        datetime last_synced_at
+    }
+    CONTENT_POSTS {
+        int id PK
+        int social_account_id FK
+        string external_post_id UK
+        string title
+        string content_type
+        datetime published_at
+    }
+    CONTENT_METRICS {
+        int id PK
+        int content_post_id FK
+        date recorded_on
+        int views
+        int likes
+        int comments
+        int shares
+        int saves
+        int reach
+        int impressions
+        float engagement_rate
+    }
+    AUDIENCE_INSIGHTS {
+        int id PK
+        int social_account_id FK
+        date recorded_on
+        json age_distribution
+        json gender_distribution
+        json geographic_distribution
+        json device_distribution
+        json active_hours
+    }
+    REVENUE_RECORDS {
+        int id PK
+        int creator_profile_id FK
+        string source
+        decimal amount
+        string currency
+        date recorded_on
+    }
+    NOTIFICATIONS {
+        int id PK
+        int creator_profile_id FK
+        string title
+        string category
+        boolean is_read
+        datetime created_at
+    }
+    REPORTS {
+        int id PK
+        int creator_profile_id FK
+        string report_type
+        string title
+        string format
+        string status
+        datetime created_at
+    }

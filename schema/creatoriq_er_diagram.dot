@@ -1,0 +1,112 @@
+digraph CreatorIQER {
+  graph [rankdir=LR, bgcolor="white", pad="0.35", nodesep="0.48", ranksep="0.72", splines=ortho, fontname="Arial", labelloc=t, label="CreatorIQ — Entity Relationship Diagram\nMilestone 1 schema plus planned project modules", fontsize=22, fontcolor="#172033"];
+  node [shape=plain, fontname="Arial"];
+  edge [color="#818aa0", penwidth=1.25, arrowsize=0.7, fontname="Arial", fontsize=9, fontcolor="#6b7280"];
+  users [label=<
+  <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#D9DFF0">
+    <TR><TD BGCOLOR="#4338CA" COLSPAN="2"><FONT COLOR="white"><B>USERS</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#EEF2FF"><B>PK id</B></TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT">email (UQ)</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">full_name</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">hashed_password</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">role, is_active</TD><TD ALIGN="LEFT">varchar, bool</TD></TR>
+  </TABLE>>];
+  profiles [label=<
+  <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#D9DFF0">
+    <TR><TD BGCOLOR="#4338CA" COLSPAN="2"><FONT COLOR="white"><B>CREATOR_PROFILES</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#EEF2FF"><B>PK id</B></TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#EEF2FF"><B>FK user_id (UQ)</B></TD><TD ALIGN="LEFT">users.id</TD></TR>
+    <TR><TD ALIGN="LEFT">display_name</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">niche, bio</TD><TD ALIGN="LEFT">varchar, text</TD></TR>
+  </TABLE>>];
+  agency_profiles [label=<
+  <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#D9DFF0">
+    <TR><TD BGCOLOR="#7C3AED" COLSPAN="2"><FONT COLOR="white"><B>AGENCY_PROFILES</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#F3E8FF"><B>PK id</B></TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#F3E8FF"><B>FK user_id (UQ)</B></TD><TD ALIGN="LEFT">users.id</TD></TR>
+    <TR><TD ALIGN="LEFT">agency_name</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">service_focus</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">bio</TD><TD ALIGN="LEFT">text</TD></TR>
+  </TABLE>>];
+  marketing_profiles [label=<
+  <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#D9DFF0">
+    <TR><TD BGCOLOR="#7C3AED" COLSPAN="2"><FONT COLOR="white"><B>MARKETING_TEAM_PROFILES</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#F3E8FF"><B>PK id</B></TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#F3E8FF"><B>FK user_id (UQ)</B></TD><TD ALIGN="LEFT">users.id</TD></TR>
+    <TR><TD ALIGN="LEFT">team_name</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">focus_area</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">bio</TD><TD ALIGN="LEFT">text</TD></TR>
+  </TABLE>>];
+  social [label=<
+  <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#D9DFF0">
+    <TR><TD BGCOLOR="#0F766E" COLSPAN="2"><FONT COLOR="white"><B>SOCIAL_ACCOUNTS</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#CCFBF1"><B>PK id</B></TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#CCFBF1"><B>FK creator_profile_id</B></TD><TD ALIGN="LEFT">profiles.id</TD></TR>
+    <TR><TD ALIGN="LEFT">platform, handle</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">followers_count</TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT">is_connected</TD><TD ALIGN="LEFT">boolean</TD></TR>
+  </TABLE>>];
+  posts [label=<
+  <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#D9DFF0">
+    <TR><TD BGCOLOR="#0F766E" COLSPAN="2"><FONT COLOR="white"><B>CONTENT_POSTS</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#CCFBF1"><B>PK id</B></TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#CCFBF1"><B>FK social_account_id</B></TD><TD ALIGN="LEFT">social_accounts.id</TD></TR>
+    <TR><TD ALIGN="LEFT">title</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">content_type</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">published_at</TD><TD ALIGN="LEFT">datetime</TD></TR>
+  </TABLE>>];
+  metrics [label=<
+  <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#D9DFF0">
+    <TR><TD BGCOLOR="#0F766E" COLSPAN="2"><FONT COLOR="white"><B>CONTENT_METRICS</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#CCFBF1"><B>PK id</B></TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#CCFBF1"><B>FK content_post_id</B></TD><TD ALIGN="LEFT">posts.id</TD></TR>
+    <TR><TD ALIGN="LEFT">recorded_on</TD><TD ALIGN="LEFT">date</TD></TR>
+    <TR><TD ALIGN="LEFT">views, likes, comments</TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT">shares, saves, reach</TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT">engagement_rate</TD><TD ALIGN="LEFT">float</TD></TR>
+  </TABLE>>];
+  audience [label=<
+  <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#D9DFF0">
+    <TR><TD BGCOLOR="#0F766E" COLSPAN="2"><FONT COLOR="white"><B>AUDIENCE_INSIGHTS</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#CCFBF1"><B>PK id</B></TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#CCFBF1"><B>FK social_account_id</B></TD><TD ALIGN="LEFT">social_accounts.id</TD></TR>
+    <TR><TD ALIGN="LEFT">recorded_on</TD><TD ALIGN="LEFT">date</TD></TR>
+    <TR><TD ALIGN="LEFT">age / gender split</TD><TD ALIGN="LEFT">JSON</TD></TR>
+    <TR><TD ALIGN="LEFT">geo / device / active hours</TD><TD ALIGN="LEFT">JSON</TD></TR>
+  </TABLE>>];
+  revenue [label=<
+  <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#D9DFF0">
+    <TR><TD BGCOLOR="#B45309" COLSPAN="2"><FONT COLOR="white"><B>REVENUE_RECORDS</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#FEF3C7"><B>PK id</B></TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#FEF3C7"><B>FK creator_profile_id</B></TD><TD ALIGN="LEFT">profiles.id</TD></TR>
+    <TR><TD ALIGN="LEFT">source, amount</TD><TD ALIGN="LEFT">varchar, decimal</TD></TR>
+    <TR><TD ALIGN="LEFT">currency, recorded_on</TD><TD ALIGN="LEFT">varchar, date</TD></TR>
+  </TABLE>>];
+  notifications [label=<
+  <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#D9DFF0">
+    <TR><TD BGCOLOR="#64748B" COLSPAN="2"><FONT COLOR="white"><B>NOTIFICATIONS</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#F1F5F9"><B>PK id</B></TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#F1F5F9"><B>FK creator_profile_id</B></TD><TD ALIGN="LEFT">profiles.id</TD></TR>
+    <TR><TD ALIGN="LEFT">title, message</TD><TD ALIGN="LEFT">varchar, text</TD></TR>
+    <TR><TD ALIGN="LEFT">category, is_read</TD><TD ALIGN="LEFT">varchar, bool</TD></TR>
+  </TABLE>>];
+  reports [label=<
+  <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#D9DFF0">
+    <TR><TD BGCOLOR="#64748B" COLSPAN="2"><FONT COLOR="white"><B>REPORTS</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#F1F5F9"><B>PK id</B></TD><TD ALIGN="LEFT">integer</TD></TR>
+    <TR><TD ALIGN="LEFT" BGCOLOR="#F1F5F9"><B>FK creator_profile_id</B></TD><TD ALIGN="LEFT">profiles.id</TD></TR>
+    <TR><TD ALIGN="LEFT">report_type, title</TD><TD ALIGN="LEFT">varchar</TD></TR>
+    <TR><TD ALIGN="LEFT">format, status</TD><TD ALIGN="LEFT">varchar</TD></TR>
+  </TABLE>>];
+
+  users -> profiles [label="1 : 1"];
+  users -> agency_profiles [label="1 : 1"];
+  users -> marketing_profiles [label="1 : 1"];
+  profiles -> social [label="1 : many"];
+  social -> posts [label="1 : many"];
+  posts -> metrics [label="1 : many"];
+  social -> audience [label="1 : many"];
+  profiles -> revenue [label="1 : many"];
+  profiles -> notifications [label="1 : many"];
+  profiles -> reports [label="1 : many"];
+}

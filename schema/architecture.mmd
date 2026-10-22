@@ -1,0 +1,9 @@
+flowchart LR
+    Browser[Creator / Team Browser] -->|HTTPS + React UI| Frontend[React + Vite]
+    Frontend -->|JSON API + Bearer JWT| API[FastAPI REST API]
+    API --> Auth[Authentication & Role Guards]
+    API --> Services[Dashboard Analytics Queries]
+    Auth --> ORM[SQLAlchemy ORM]
+    Services --> ORM
+    ORM --> DB[(PostgreSQL primary\nSQLite local fallback)]
+    DB --> Seed[Clearly labelled seed/demo records]
