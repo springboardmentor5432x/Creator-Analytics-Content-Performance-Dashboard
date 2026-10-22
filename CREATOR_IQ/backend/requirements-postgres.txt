@@ -1,0 +1,2 @@
+# Only needed if you set DATABASE_URL to PostgreSQL
+psycopg[binary]>=3.2,<4.0
