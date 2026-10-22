@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix CreatorIQ – Creator Analytics \u0026 Content Performance Dashboard",
+  "description": "Professional creator analytics and content performance dashboard with role-based user management, JWT authentication, and creator profiles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

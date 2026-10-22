@@ -1,0 +1,125 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role and verification state",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "description": "User email address" },
+        "name": { "type": "string", "description": "Full name of the user" },
+        "role": { "type": "string", "description": "Assigned role", "enum": ["creator", "admin", "agency", "marketing"] },
+        "status": { "type": "string", "description": "Account status", "enum": ["active", "pending", "suspended"] },
+        "emailVerified": { "type": "boolean", "description": "Whether the email is verified via Firebase Auth" },
+        "createdAt": { "type": "string", "description": "Creation ISO timestamp" },
+        "updatedAt": { "type": "string", "description": "Last updated ISO timestamp" }
+      },
+      "required": ["uid", "email", "name", "role", "status"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Admin authorization entry",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "Admin email" },
+        "assignedBy": { "type": "string", "description": "UID who granted admin" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["email"]
+    },
+    "CreatorProfile": {
+      "title": "CreatorProfile",
+      "description": "Creator details, niche, and metrics",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the creator" },
+        "handle": { "type": "string", "description": "Social handle" },
+        "bio": { "type": "string", "description": "Creator biography" },
+        "niche": { "type": "string", "description": "Primary creator niche" },
+        "followersCount": { "type": "number", "description": "Follower count" },
+        "engagementRate": { "type": "string", "description": "Average engagement rate" },
+        "totalReach": { "type": "string", "description": "Estimated total monthly reach" },
+        "monthlyRevenue": { "type": "string", "description": "Monthly creator revenue" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" }
+      },
+      "required": ["userId"]
+    },
+    "Campaign": {
+      "title": "Campaign",
+      "description": "Influencer and marketing campaigns",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Campaign ID" },
+        "title": { "type": "string", "description": "Campaign title" },
+        "client": { "type": "string", "description": "Client or brand name" },
+        "budget": { "type": "number", "description": "Budget in USD or local currency" },
+        "status": { "type": "string", "description": "Campaign status", "enum": ["active", "planning", "completed", "paused"] },
+        "reach": { "type": "string", "description": "Target or actual reach" },
+        "impressions": { "type": "string", "description": "Impressions count" },
+        "engagementRate": { "type": "string", "description": "Average engagement rate" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Update timestamp" }
+      },
+      "required": ["title", "client", "budget", "status"]
+    },
+    "ContentItem": {
+      "title": "ContentItem",
+      "description": "Published or scheduled creator content",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Content ID" },
+        "creatorId": { "type": "string", "description": "UID of creator" },
+        "title": { "type": "string", "description": "Post title or headline" },
+        "platform": { "type": "string", "description": "Target platform", "enum": ["youtube", "instagram", "tiktok", "twitter", "linkedin"] },
+        "type": { "type": "string", "description": "Media type" },
+        "views": { "type": "string", "description": "Formatted view count" },
+        "likes": { "type": "string", "description": "Formatted like count" },
+        "comments": { "type": "string", "description": "Formatted comment count" },
+        "engagement": { "type": "string", "description": "Engagement percentage" },
+        "status": { "type": "string", "description": "Publish status", "enum": ["published", "scheduled"] },
+        "scheduledDate": { "type": "string", "description": "Scheduled publish date" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["creatorId", "title", "platform", "status"]
+    },
+    "SystemSettings": {
+      "title": "SystemSettings",
+      "description": "Platform settings",
+      "type": "object",
+      "properties": {
+        "platformName": { "type": "string", "description": "App branding name" },
+        "maintenanceMode": { "type": "boolean", "description": "Maintenance switch" },
+        "selfRegistration": { "type": "boolean", "description": "Allow public self registration" },
+        "emailVerificationRequired": { "type": "boolean", "description": "Require verified email before accessing dashboard" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" }
+      },
+      "required": ["platformName"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User accounts with roles and verification statuses"
+    },
+    "/admins/{adminUid}": {
+      "schema": "AdminRecord",
+      "description": "Admin authorization registry document mapping admin UIDs"
+    },
+    "/creatorProfiles/{profileId}": {
+      "schema": "CreatorProfile",
+      "description": "Creator profile details"
+    },
+    "/campaigns/{campaignId}": {
+      "schema": "Campaign",
+      "description": "Campaign tracker"
+    },
+    "/content/{contentId}": {
+      "schema": "ContentItem",
+      "description": "Creator posts and scheduled calendar items"
+    },
+    "/systemSettings/global": {
+      "schema": "SystemSettings",
+      "description": "Global application configuration"
+    }
+  }
+}
