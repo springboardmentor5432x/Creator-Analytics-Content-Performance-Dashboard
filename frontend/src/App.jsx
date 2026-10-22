@@ -12,6 +12,8 @@ import Dashboard from "./Dashboard";
 import CreatorDashboard from "./CreatorDashboard";
 import MarketingDashboard from "./MarketingDashboard";
 import AdminDashboard from "./AdminDashboard";
+import GPSNavigator from "./GPSNavigator";
+import DashboardHeader from "./DashboardHeader";
 
 export default function App() {
   return (
@@ -44,6 +46,11 @@ export default function App() {
         <Route
           path="/admin-dashboard"
           element={<AdminDashboard />}
+        />
+        {/* GPS Navigator */}
+        <Route
+          path="/gps-navigator"
+          element={<GPSNavigator />}
         />
 
         <Route

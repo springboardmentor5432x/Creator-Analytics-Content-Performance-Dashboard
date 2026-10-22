@@ -367,3 +367,125 @@
     font-size: 11px;
   }
 }
+
+
+
+.creator-chart-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.creator-platform-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+.creator-platform-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 7px 13px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.creator-platform-filter:hover {
+  border-color: #635bff;
+  color: #635bff;
+}
+
+.creator-platform-filter.active {
+  background: #635bff;
+  border-color: #635bff;
+  color: #ffffff;
+}
+
+.creator-platform-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .creator-platform-filters {
+    gap: 6px;
+  }
+
+  .creator-platform-filter {
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+}
+
+/* Creator dashboard: keep platform filters beside the Follower Growth heading. */
+.creator-chart-heading-with-filters {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+}
+
+.creator-chart-title {
+  flex: 1 1 42%;
+  min-width: 0;
+}
+
+.creator-platform-filters-inline {
+  flex: 0 1 56%;
+  width: 56%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  align-content: start;
+}
+
+.creator-platform-filters-inline .creator-platform-filter:first-child {
+  grid-column: 1 / -1;
+}
+
+.creator-platform-filters-inline .creator-platform-filter {
+  width: 100%;
+  min-width: 0;
+  min-height: 27px;
+  padding: 5px 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.creator-platform-filters-inline .creator-platform-filter:first-child {
+  min-height: 29px;
+}
+
+@media (max-width: 700px) {
+  .creator-chart-heading-with-filters {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .creator-platform-filters-inline {
+    width: 100%;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

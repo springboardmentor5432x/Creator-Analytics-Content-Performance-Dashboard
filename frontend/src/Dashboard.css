@@ -1,4 +1,4 @@
-
+﻿
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 
 :root {
@@ -1269,7 +1269,7 @@ select:focus-visible {
   }
 }
 
-/* ===== CreatorIQ Dashboard — Reference Style ===== */
+/* ===== CreatorIQ Dashboard â€” Reference Style ===== */
 
 :root {
   font-family: "DM Sans", "Segoe UI", Arial, sans-serif;
@@ -2866,3 +2866,369 @@ input:focus-visible {
 }
 
 
+
+.admin-date-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e2e6ef;
+  border-radius: 10px;
+  background: #fff;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.admin-date-select select {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  max-width: 150px;
+}
+
+.admin-date-select:focus-within {
+  border-color: #7c5cf0;
+  box-shadow: 0 0 0 3px rgba(124, 92, 240, 0.1);
+}
+
+/* Keep dashboard header items in one horizontal row */
+.ciq-topbar.creator-topbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Search and dashboard section */
+.admin-topbar-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+/* Date selector, search and profile on the right */
+.admin-topbar-right {
+  margin-left: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Date range dropdown */
+.admin-date-select {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Search box */
+.admin-search {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Profile / account */
+.admin-profile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Smaller screens */
+@media (max-width: 900px) {
+  .ciq-topbar.creator-topbar {
+    flex-wrap: wrap;
+  }
+
+  .admin-topbar-right {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
+
+
+.admin-page-heading {
+  margin: 24px 0 20px;
+}
+
+.admin-page-heading h1 {
+  margin: 0 0 6px;
+  color: #172033;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.admin-page-heading p {
+  margin: 0;
+  color: #697386;
+  font-size: 14px;
+}
+
+.creator-usage .ciq-info-note {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+
+
+.ciq-info-note {
+  display: block !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  min-width: 180px !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #697386;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+
+
+.role-dashboard-header {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 90px;
+  padding: 14px 20px;
+  text-align: center;
+  background: linear-gradient(100deg, #d9fbe8 0%, #c9f5df 100%);
+  border-radius: 0 0 10px 10px;
+  color: #20263b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-dashboard-header h1 {
+  margin: 0 0 6px;
+  color: #20263b;
+  font-size: 28px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.role-dashboard-header p {
+  margin: 0;
+  color: #63708d;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Reduce vertical gap between sidebar menu items */
+.ciq-layout.creator-layout > .ciq-sidebar .ciq-nav-item {
+  min-height: 30px;
+  padding: 5px 10px;
+  margin-bottom: 1px;
+  line-height: 1.2;
+  gap: 8px;
+}
+
+/* Reduce space above sidebar section headings */
+.ciq-layout.creator-layout > .ciq-sidebar .ciq-menu-label {
+  margin-top: 9px;
+  margin-bottom: 4px;
+}
+
+/* Reduce sidebar navigation spacing */
+.ciq-layout.creator-layout > .ciq-sidebar .ciq-nav {
+  gap: 2px;
+}
+.role-dashboard-header {
+  width: 100%;
+  min-height: 90px;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  background: linear-gradient(100deg, #d9fbe8, #c9f5df);
+  border-radius: 0 0 8px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.role-dashboard-header h1 {
+  margin: 0 0 6px;
+  color: #20263b;
+  font-size: 28px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.role-dashboard-header p {
+  margin: 0;
+  color: #63708d;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.ciq-creator-date-filter {
+  max-width: 155px;
+  padding: 9px 10px;
+  border: 1px solid #d9deea;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #27324a;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.ciq-creator-date-filter:focus {
+  border-color: #20b8a6;
+  box-shadow: 0 0 0 2px rgba(32, 184, 166, 0.12);
+}
+
+@media (max-width: 600px) {
+  .ciq-creator-date-filter {
+    max-width: 125px;
+    padding: 7px 6px;
+    font-size: 11px;
+  }
+}
+.ciq-topbar-user {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ciq-topbar-profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ciq-topbar-profile-info strong {
+  max-width: 150px;
+  overflow: hidden;
+  color: #252941;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ciq-topbar-profile-info span {
+  color: #8a91a5;
+  font-size: 10px;
+}
+
+.ciq-creator-date-filter {
+  max-width: 145px;
+  padding: 9px 10px;
+  border: 1px solid #e1e4ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #252941;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.ciq-topbar-profile-button {
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .ciq-topbar-user {
+    gap: 6px;
+  }
+
+  .ciq-creator-date-filter {
+    max-width: 112px;
+    padding: 7px 5px;
+    font-size: 10px;
+  }
+
+  .ciq-topbar-profile-info strong {
+    max-width: 85px;
+  }
+}
+
+/* Creator Analytics centered heading with light orange background */
+.ciq-creator-heading {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 20px;
+  text-align: center;
+  background: #ffecd9;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.ciq-creator-heading h1 {
+  margin: 0 0 6px;
+  color: #273047;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.ciq-creator-heading p {
+  margin: 0;
+  color: #69748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+/* Creator Analytics banner */
+.ciq-creator-heading {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 20px;
+  margin: 0;
+  text-align: center;
+  background: #ffecd9;
+  border-radius: 4px;
+}
+
+.ciq-creator-heading h1 {
+  margin: 0 0 6px;
+  color: #273047;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.ciq-creator-heading p {
+  margin: 0;
+  color: #69748b;
+  font-size: 13px;
+  line-height: 1.5;
+}

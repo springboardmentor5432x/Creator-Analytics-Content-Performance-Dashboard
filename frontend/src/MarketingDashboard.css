@@ -439,3 +439,394 @@
 .ma-logout-button:active {
   transform: scale(0.99);
 }
+
+/* Marketing dashboard: bottom profile and logout alignment */
+.ma-sidebar-bottom {
+  margin-top: auto;
+  padding-top: 10px;
+  flex-shrink: 0;
+}
+
+.ma-sidebar-profile-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 3px;
+  margin-top: 0;
+  border-radius: 9px;
+  text-align: left;
+}
+
+.ma-sidebar-profile-button .ma-profile-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ma-sidebar-profile-button .ma-profile-text strong {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ma-sidebar-profile-button .ma-profile-text span {
+  display: block;
+  color: #9296aa;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.ma-logout-button {
+  width: 100%;
+  margin-top: 5px;
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+/* Keep search on the left and date, notifications and account on the right */
+.ma-header {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ma-header-actions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.ma-search {
+  margin-right: auto;
+  flex: 0 1 360px;
+  min-width: 150px;
+}
+
+.ma-date-select,
+.ma-notification,
+.ma-popover-wrap {
+  flex-shrink: 0;
+}
+
+/* Keep the profile name and team readable */
+.ma-header-profile {
+  flex-shrink: 0;
+}
+
+/* Keep profile and logout at the bottom of the sidebar */
+.ma-sidebar {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ma-sidebar-bottom {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+
+/* Keep search on the left and date, notifications and account on the right */
+.ma-header {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ma-header-actions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.ma-search {
+  margin-right: auto;
+  flex: 0 1 360px;
+  min-width: 150px;
+}
+
+.ma-date-select,
+.ma-notification,
+.ma-popover-wrap {
+  flex-shrink: 0;
+}
+
+/* Keep the profile name and team readable */
+.ma-header-profile {
+  flex-shrink: 0;
+}
+
+/* Keep profile and logout at the bottom of the sidebar */
+.ma-sidebar {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ma-sidebar-bottom {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+
+/* Fix Top Performing Campaigns chart spacing */
+.ma-chart-grid {
+  align-items: stretch;
+  gap: 14px;
+}
+
+.ma-chart-grid > .ma-panel {
+  min-width: 0;
+  min-height: 0;
+}
+
+.ma-chart-grid > .ma-panel:last-child {
+  align-self: start;
+  height: fit-content;
+  min-height: 0;
+  padding-bottom: 20px;
+}
+
+/* Make the campaign bars and labels easier to see */
+.ma-chart-grid > .ma-panel:last-child svg {
+  max-height: 280px;
+  width: 100%;
+}
+
+/* Avoid oversized empty chart areas */
+.ma-chart-grid > .ma-panel:last-child .recharts-wrapper {
+  max-height: 280px;
+}
+
+
+/* Make Campaign Performance and Top Performing Campaigns equal size */
+.ma-chart-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.65fr);
+  align-items: stretch !important;
+  gap: 14px !important;
+}
+
+.ma-chart-grid > .ma-panel {
+  width: 100%;
+  height: 430px !important;
+  min-height: 430px !important;
+  max-height: none !important;
+  box-sizing: border-box;
+  align-self: stretch !important;
+}
+
+/* Let each chart use its card width */
+.ma-chart-grid > .ma-panel svg,
+.ma-chart-grid > .ma-panel .recharts-wrapper {
+  max-width: 100%;
+}
+
+/* Responsive layout */
+@media (max-width: 800px) {
+  .ma-chart-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ma-chart-grid > .ma-panel {
+    height: 360px !important;
+    min-height: 360px !important;
+  }
+}
+
+
+/* Spread Top Performing Campaigns across the available chart height */
+.ma-chart-grid > .ma-panel:last-child .recharts-wrapper {
+  width: 100% !important;
+  max-width: 100%;
+  max-height: none !important;
+}
+
+.ma-chart-grid > .ma-panel:last-child svg {
+  width: 100% !important;
+  max-height: none !important;
+}
+
+/* Increase campaign labels and spacing */
+.ma-chart-grid > .ma-panel:last-child .recharts-cartesian-axis-tick text {
+  font-size: 12px !important;
+}
+
+/* Make the bars thicker */
+.ma-chart-grid > .ma-panel:last-child .recharts-bar-rectangle {
+  stroke-width: 0;
+}
+
+/* Increase chart area and distribute rows vertically */
+.ma-chart-grid > .ma-panel:last-child .recharts-surface {
+  overflow: visible;
+}
+
+
+/* Fix clipped X-axis labels in Campaign Performance */
+.ma-chart-grid > .ma-panel:first-child {
+  overflow: visible !important;
+  padding-bottom: 22px;
+}
+
+.ma-chart-grid > .ma-panel:first-child svg {
+  overflow: visible !important;
+}
+
+.ma-chart-grid > .ma-panel:first-child .recharts-wrapper,
+.ma-chart-grid > .ma-panel:first-child .recharts-surface {
+  overflow: visible !important;
+}
+
+.ma-chart-grid > .ma-panel:first-child .recharts-cartesian-axis-x {
+  overflow: visible !important;
+}
+
+.ma-chart-grid > .ma-panel:first-child .recharts-cartesian-axis-tick text {
+  dominant-baseline: auto;
+}
+
+
+/* FIX: Make Campaign Performance X-axis labels visible */
+.ma-performance-panel {
+  min-width: 0;
+  overflow: visible !important;
+  padding-bottom: 24px;
+}
+
+.ma-performance-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 250px;
+  overflow: visible !important;
+}
+
+/* TOP PERFORMING CAMPAIGNS */
+
+.ma-top-campaigns {
+  display: flex;
+  flex-direction: column;
+  min-height: 380px;
+  box-sizing: border-box;
+}
+
+.ma-top-campaigns > .ma-panel-heading {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+.ma-top-campaigns .top-performing-chart {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 280px;
+  padding-top: 8px;
+  box-sizing: border-box;
+}
+
+.ma-top-campaigns .top-performing-rows {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 6px;
+}
+
+.ma-top-campaigns .campaign-bar-row {
+  display: grid;
+  grid-template-columns: minmax(95px, 118px) minmax(0, 1fr) 38px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+}
+
+.ma-top-campaigns .campaign-bar-label {
+  overflow: hidden;
+  color: #343750;
+  font-size: 11px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ma-top-campaigns .campaign-bar-track {
+  display: block;
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #eeeaff;
+}
+
+.ma-top-campaigns .campaign-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: #7958f5;
+  transition: width 250ms ease;
+}
+
+.ma-top-campaigns .campaign-bar-value {
+  color: #555b7b;
+  font-size: 11px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ma-top-campaigns .campaign-axis {
+  display: flex;
+  justify-content: space-between;
+  margin: 12px 38px 0 128px;
+  padding-top: 8px;
+  border-top: 1px solid #edf0f7;
+  color: #858ba1;
+  font-size: 10px;
+}
+
+@media (min-width: 1400px) {
+  .ma-top-campaigns .top-performing-chart {
+    min-height: 300px;
+  }
+
+  .ma-top-campaigns .campaign-bar-row {
+    min-height: 38px;
+  }
+}
+
+@media (max-width: 700px) {
+  .ma-top-campaigns {
+    min-height: 340px;
+  }
+
+  .ma-top-campaigns .campaign-bar-row {
+    grid-template-columns: 88px minmax(0, 1fr) 34px;
+    gap: 7px;
+  }
+
+  .ma-top-campaigns .campaign-axis {
+    margin-left: 95px;
+    margin-right: 34px;
+  }
+}
+
+.ma-performance-svg {
+  display: block;
+  width: 100%;
+  height: 280px !important;
+  min-width: 0;
+  overflow: visible;
+  flex-shrink: 0;
+}

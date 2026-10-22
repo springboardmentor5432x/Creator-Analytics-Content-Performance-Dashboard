@@ -1,6 +1,8 @@
 
 import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./AgencyDashboard.css";
+import DashboardHeader from "./DashboardHeader";
 
 const initialCreators = [
   { name: "Tech With Riya", initials: "TR", platform: "YouTube", followers: "450K", views: "5.2M", engagement: "7.8%", revenue: "₹85,000", status: "Active" },
@@ -24,6 +26,7 @@ const navigation = [
   { label: "Content Library", icon: "▤" },
   { label: "Reports", icon: "▧" },
   { label: "Team Members", icon: "♧" },
+  { label: "GPS Navigation",icon: "📍" },
   { label: "Settings", icon: "⚙" },
 ];
 
@@ -309,6 +312,7 @@ function PlatformChart() {
 
 export default function AgencyDashboard({ profile }) {
   const [activePage, setActivePage] = useState("Dashboard");
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState("Last 30 Days");
   const [creators, setCreators] = useState(initialCreators);
@@ -366,10 +370,17 @@ export default function AgencyDashboard({ profile }) {
   }, [campaigns, search]);
 
   function openPage(page) {
-    setActivePage(page);
-    setSearch("");
-    setNotice("");
+  if (page === "GPS Navigation") {
+    setShowNotifications(false);
+    navigate("/gps-navigator");
+    return;
   }
+
+  setActivePage(page);
+  setSearch("");
+  setNotice("");
+  setShowNotifications(false);
+}
 
   function handleLogout() {
     const confirmed = window.confirm("Are you sure you want to log out?");

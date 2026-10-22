@@ -1458,3 +1458,74 @@ button:disabled {
     padding: 11px 9px;
   }
 }
+/* Admin dashboard header alignment */
+.creator-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+}
+
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-left: auto;
+  min-width: 0;
+}
+
+.admin-date-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e2e6ef;
+  border-radius: 10px;
+  background: #fff;
+  color: #64748b;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-date-select select {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  max-width: 150px;
+}
+
+.admin-date-select:focus-within {
+  border-color: #7c5cf0;
+  box-shadow: 0 0 0 3px rgba(124, 92, 240, 0.1);
+}
+
+@media (max-width: 900px) {
+  .creator-topbar {
+    flex-wrap: wrap;
+  }
+
+  .admin-topbar-right {
+    width: 100%;
+    flex-wrap: wrap;
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-topbar-right {
+    justify-content: flex-start;
+  }
+
+  .admin-topbar-right .ciq-search-bar {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+}
+
