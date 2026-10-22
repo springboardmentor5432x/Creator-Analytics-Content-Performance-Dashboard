@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="CreatorIQ dashboard overview for content performance and creator analytics."
+    />
+    <title>Dashboard | CreatorIQ</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/dashboard.js" defer></script>
+  </head>
+  <body class="dashboard-body">
+    <div class="dashboard-shell">
+      <aside class="dashboard-sidebar" aria-label="Sidebar navigation">
+        <div class="sidebar-brand">
+          <a href="home.html" class="brand-logo" aria-label="CreatorIQ home">
+            <span class="logo-mark" aria-hidden="true">C</span>
+            <span>Creator<span class="brand-accent">IQ</span></span>
+          </a>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Dashboard navigation">
+          <a href="dashboard.html" class="nav-item active">Overview</a>
+          <a href="analyzer.html" class="nav-item">Analyzer</a>
+          <a href="profile.html" class="nav-item">Profile</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="sidebar-label">This week</span>
+          <strong>92.4%</strong>
+          <small>Content efficiency</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="dashboard-topbar">
+          <div>
+            <p class="eyebrow"><span class="status-dot"></span> CREATOR INSIGHTS</p>
+            <h1>Good morning, <span id="dashboard-user-name">Creator</span></h1>
+          </div>
+          <div class="dashboard-actions">
+            <button type="button" class="btn btn-secondary compact">Export report</button>
+            <a href="profile.html" class="btn btn-primary compact">Account</a>
+          </div>
+        </header>
+
+        <section class="stats-grid" aria-label="Key performance metrics">
+          <article class="stat-card accent">
+            <span>Total reach</span>
+            <strong>128.4K</strong>
+            <small>+18.2% vs last week</small>
+          </article>
+
+          <article class="stat-card">
+            <span>Engagement</span>
+            <strong>8.62%</strong>
+            <small>+1.4 pts from trend</small>
+          </article>
+
+          <article class="stat-card">
+            <span>Subscribers</span>
+            <strong>24.1K</strong>
+            <small>+1,280 this month</small>
+          </article>
+
+          <article class="stat-card">
+            <span>Conversion</span>
+            <strong>4.9%</strong>
+            <small>Above benchmark</small>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel chart-panel">
+            <div class="panel-header">
+              <div>
+                <p class="panel-kicker">Performance</p>
+                <h2>Audience growth</h2>
+              </div>
+              <span class="chip positive">+24.6%</span>
+            </div>
+
+            <svg viewBox="0 0 520 210" class="dashboard-chart" role="img" aria-label="Audience growth chart">
+              <defs>
+                <linearGradient id="growthFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.48" />
+                  <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <g stroke="rgba(255,255,255,0.08)" stroke-width="1">
+                <line x1="20" y1="40" x2="500" y2="40" />
+                <line x1="20" y1="90" x2="500" y2="90" />
+                <line x1="20" y1="140" x2="500" y2="140" />
+                <line x1="20" y1="190" x2="500" y2="190" />
+              </g>
+              <path d="M20 164 C100 168, 120 142, 170 126 S260 110, 290 80 S360 50, 400 64 S460 38, 500 24 L500 210 L20 210 Z" fill="url(#growthFill)" />
+              <path d="M20 164 C100 168, 120 142, 170 126 S260 110, 290 80 S360 50, 400 64 S460 38, 500 24" stroke="#c4b5fd" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </svg>
+          </article>
+
+          <article class="panel list-panel">
+            <div class="panel-header">
+              <div>
+                <p class="panel-kicker">Top posts</p>
+                <h2>Best performers</h2>
+              </div>
+            </div>
+
+            <ul class="content-list">
+              <li>
+                <div>
+                  <strong>Short-form tutorial</strong>
+                  <small>Reel · 61.2K reach</small>
+                </div>
+                <span class="positive">+32%</span>
+              </li>
+              <li>
+                <div>
+                  <strong>Behind-the-scenes edit</strong>
+                  <small>Story · 44.8K reach</small>
+                </div>
+                <span class="positive">+18%</span>
+              </li>
+              <li>
+                <div>
+                  <strong>Launch teaser</strong>
+                  <small>Feed post · 39.7K reach</small>
+                </div>
+                <span class="positive">+11%</span>
+              </li>
+            </ul>
+          </article>
+        </section>
+
+        <section class="bottom-grid">
+          <article class="panel">
+            <div class="panel-header compact-header">
+              <div>
+                <p class="panel-kicker">Content mix</p>
+                <h2>Channel performance</h2>
+              </div>
+            </div>
+
+            <div class="channel-bars" aria-label="Channel performance bars">
+              <div><span>Instagram</span><div class="bar"><i style="width: 82%"></i></div></div>
+              <div><span>YouTube</span><div class="bar"><i style="width: 74%"></i></div></div>
+              <div><span>TikTok</span><div class="bar"><i style="width: 91%"></i></div></div>
+              <div><span>LinkedIn</span><div class="bar"><i style="width: 58%"></i></div></div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header compact-header">
+              <div>
+                <p class="panel-kicker">Campaign pulse</p>
+                <h2>Priority actions</h2>
+              </div>
+            </div>
+
+            <ul class="task-list">
+              <li><span class="dot success"></span> Repurpose Reel 3 into story highlights</li>
+              <li><span class="dot warning"></span> Refresh CTA on product landing post</li>
+              <li><span class="dot info"></span> Schedule a creator collab for Friday</li>
+            </ul>
+          </article>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

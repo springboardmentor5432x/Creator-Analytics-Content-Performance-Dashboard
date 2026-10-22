@@ -1,0 +1,2105 @@
+.liq-page {
+  --bg: #f3f7f6;
+  --bg-soft: #eef3f2;
+  --surface: rgba(255, 255, 255, 0.42);
+  --surface-hover: rgba(255, 255, 255, 0.72);
+  --border: rgba(255, 255, 255, 0.88);
+  --text: #203038;
+  --muted: #77858b;
+  --purple: #8976ae;
+  --purple-light: #74649a;
+  --danger: #c75f53;
+  --success: #28776b;
+  --liq-ink: #203038;
+  --liq-muted: #77858b;
+  --liq-line: #e1e8e7;
+  --liq-paper: rgba(255, 255, 255, 0.42);
+  --liq-border: rgba(255, 255, 255, 0.88);
+  --liq-shadow:
+    0 8px 30px rgba(70, 88, 103, 0.075),
+    0 2px 8px rgba(70, 88, 103, 0.035),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --liq-green: #28776b;
+  --liq-green-soft: #e6f1ee;
+  --liq-coral: #d66b57;
+  --liq-blue: #5b8bb3;
+  --liq-pink: #c47eaa;
+  --liq-purple: #8976ae;
+  --liq-orange: #cb9650;
+  min-height: 100vh;
+  color: var(--liq-ink);
+  background-color: #f3f7f6;
+  background-image:
+    linear-gradient(125deg, rgba(211, 204, 255, 0.36), transparent 38%),
+    linear-gradient(235deg, rgba(196, 226, 255, 0.36), transparent 34%),
+    linear-gradient(330deg, rgba(251, 217, 240, 0.28), transparent 38%),
+    linear-gradient(rgba(53, 89, 80, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(53, 89, 80, 0.035) 1px, transparent 1px),
+    linear-gradient(145deg, #f5f8f7 0%, #eef3f4 54%, #f7f4f0 100%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 34px 34px, 34px 34px, cover;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+.liq-page *,
+.liq-page *::before,
+.liq-page *::after {
+  box-sizing: border-box;
+}
+
+.liq-page [hidden] {
+  display: none !important;
+}
+
+.liq-page button,
+.liq-page input,
+.liq-page select {
+  color: inherit;
+  font: inherit;
+}
+
+.liq-page button {
+  cursor: pointer;
+}
+
+.liq-page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.liq-page button:focus-visible,
+.liq-page a:focus-visible,
+.liq-page input:focus-visible,
+.liq-page select:focus-visible {
+  outline: 3px solid rgba(40, 119, 107, 0.38);
+  outline-offset: 2px;
+}
+
+.liq-sidebar {
+  position: fixed;
+  z-index: 30;
+  inset: 0 auto 0 0;
+  display: flex;
+  width: 250px;
+  flex-direction: column;
+  padding: 22px 16px 15px;
+  border: 1px solid var(--liq-border);
+  border-left: 0;
+  border-radius: 0 16px 16px 0;
+  background: rgba(255, 255, 255, 0.48);
+  box-shadow: 8px 0 30px rgba(70, 88, 103, 0.075), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(22px) saturate(155%);
+  backdrop-filter: blur(22px) saturate(155%);
+}
+
+.liq-brand {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 10px;
+  color: var(--liq-ink);
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.liq-brand-icon {
+  display: grid;
+  width: 35px;
+  height: 35px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--liq-green);
+  color: white;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.liq-brand-accent {
+  color: var(--liq-green);
+}
+
+.liq-section-label,
+.liq-platform-label {
+  color: #91a09e;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.liq-section-label {
+  margin: 34px 0 11px 9px;
+}
+
+.liq-navigation {
+  display: grid;
+  gap: 3px;
+}
+
+.liq-navigation > [data-role-navigation] {
+  display: grid;
+  gap: 3px;
+}
+
+.liq-navigation > [data-role-navigation][hidden] {
+  display: none;
+}
+
+.liq-nav-link {
+  display: flex;
+  min-height: 39px;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #69797d;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.liq-nav-link:hover,
+.liq-nav-link.liq-active {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(115deg, rgba(218, 211, 255, 0.56), rgba(230, 241, 255, 0.58));
+  color: var(--liq-green);
+  box-shadow: 0 5px 15px rgba(89, 88, 143, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.liq-nav-icon {
+  display: inline-grid;
+  width: 19px;
+  flex: 0 0 19px;
+  place-items: center;
+  font-size: 16px;
+}
+
+.liq-notification-dot {
+  width: 6px;
+  height: 6px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--liq-coral);
+}
+
+.liq-sidebar-bottom {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.liq-upgrade-card {
+  padding: 13px;
+  border: 1px solid #dbe9e5;
+  border-radius: 8px;
+  background: #edf5f2;
+}
+
+.liq-upgrade-symbol {
+  color: var(--liq-coral);
+  font-size: 16px;
+}
+
+.liq-upgrade-card h2 {
+  margin-top: 5px;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 13px;
+}
+
+.liq-upgrade-card p {
+  margin: 4px 0 10px;
+  color: var(--liq-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.liq-button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.liq-button:hover {
+  transform: translateY(-1px);
+}
+
+.liq-button-secondary {
+  width: 100%;
+  border-color: #c8dcd6;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--liq-green);
+}
+
+.liq-button-primary {
+  background: var(--liq-green);
+  color: white !important;
+}
+
+.liq-button-primary:hover {
+  background: #1e6258;
+}
+
+.liq-signout {
+  width: 100%;
+}
+
+.liq-user-card {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 7px 3px;
+  border-top: 1px solid var(--liq-line);
+}
+
+.liq-avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border: 1px solid #f0d9cf;
+  border-radius: 50%;
+  background: #f7e8e0;
+  color: #9b5748;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.liq-user-details,
+.liq-account-text {
+  display: grid;
+  min-width: 0;
+}
+
+.liq-user-details strong,
+.liq-account-text strong {
+  overflow: hidden;
+  color: var(--liq-ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.liq-user-details small,
+.liq-account-text small {
+  color: var(--liq-muted);
+  font-size: 9px;
+}
+
+.liq-user-status {
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: #48a786;
+}
+
+.liq-main {
+  min-width: 0;
+  margin-left: 250px;
+}
+
+.liq-topbar {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: flex;
+  min-height: 66px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 10px clamp(20px, 3vw, 42px);
+  border-bottom: 1px solid rgba(213, 224, 222, 0.8);
+  background: rgba(247, 250, 249, 0.84);
+  backdrop-filter: blur(16px);
+}
+
+.liq-search {
+  display: flex;
+  width: min(500px, 52%);
+  height: 36px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 10px;
+  border: 1px solid var(--liq-line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 5px 16px rgba(76, 80, 128, 0.045);
+  -webkit-backdrop-filter: blur(18px) saturate(155%);
+  backdrop-filter: blur(18px) saturate(155%);
+  color: #91a09e;
+}
+
+.liq-search > span {
+  font-size: 18px;
+}
+
+.liq-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--liq-ink);
+  font-size: 11px;
+}
+
+.liq-search input::placeholder {
+  color: #9aa6a6;
+}
+
+.liq-search kbd {
+  flex: 0 0 auto;
+  padding: 2px 5px;
+  border: 1px solid var(--liq-line);
+  border-radius: 4px;
+  background: #f8faf9;
+  color: #8b999a;
+  font-family: inherit;
+  font-size: 9px;
+}
+
+.liq-topbar-right,
+.liq-account {
+  display: flex;
+  align-items: center;
+}
+
+.liq-topbar-right {
+  gap: 17px;
+}
+
+.liq-icon-button {
+  display: grid;
+  width: 35px;
+  height: 35px;
+  place-items: center;
+  border: 1px solid var(--liq-line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #607174;
+  font-size: 16px;
+}
+
+.liq-avatar-small {
+  width: 30px;
+  height: 30px;
+  flex-basis: 30px;
+}
+
+.liq-account {
+  gap: 8px;
+}
+
+.liq-chevron {
+  color: #8a9998;
+}
+
+.liq-menu-toggle {
+  display: none;
+}
+
+.liq-content {
+  width: min(100%, 1580px);
+  margin: 0 auto;
+  padding: 27px clamp(20px, 3vw, 42px) 22px;
+}
+
+.liq-welcome,
+.liq-heading-actions {
+  display: flex;
+  align-items: center;
+}
+
+.liq-welcome {
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.liq-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--liq-green);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.liq-eyebrow > span,
+.liq-demo-status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #49a487;
+}
+
+.liq-welcome h1 {
+  margin-top: 6px;
+  color: #203038;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.liq-wave {
+  color: var(--liq-coral);
+  font-size: 19px;
+}
+
+.liq-welcome p,
+.liq-panel-heading p {
+  margin-top: 3px;
+  color: var(--liq-muted);
+  font-size: 11px;
+}
+
+.liq-heading-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.liq-demo-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 4px;
+  color: #72817f;
+  font-size: 10px;
+}
+
+.liq-demo-status i {
+  width: 6px;
+  height: 6px;
+}
+
+.liq-glass-control {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--liq-line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.48);
+  box-shadow: 0 4px 13px rgba(70, 88, 103, 0.05), inset 0 1px 0 #fff;
+  -webkit-backdrop-filter: blur(18px) saturate(155%);
+  backdrop-filter: blur(18px) saturate(155%);
+  font-size: 10px;
+}
+
+.liq-platform-row {
+  display: flex;
+  min-height: 55px;
+  align-items: center;
+  gap: 7px;
+  margin: 18px 0 14px;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(213, 224, 222, 0.8);
+  scrollbar-width: thin;
+}
+
+.liq-platform-label {
+  flex: 0 0 auto;
+  margin-right: 5px;
+}
+
+.liq-platform-button {
+  display: inline-flex;
+  min-height: 30px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #708083;
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.liq-platform-button:hover,
+.liq-platform-button.liq-platform-active {
+  border-color: #d2e5df;
+  background: #e8f2ef;
+  color: var(--liq-green);
+}
+
+.liq-platform-youtube { color: #d45e56; }
+.liq-platform-instagram { color: #bd6e95; }
+.liq-platform-tiktok { color: #344852; }
+.liq-platform-linkedin { color: #4779a4; font-size: 9px; font-weight: 800; }
+
+.liq-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.liq-role-view {
+  display: grid;
+  gap: 13px;
+  margin-top: 18px;
+}
+
+.liq-role-view[hidden] {
+  display: none;
+}
+
+.liq-role-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.liq-role-metrics .liq-kpi-card {
+  min-height: 112px;
+  padding-bottom: 18px;
+}
+
+.liq-role-metrics .liq-kpi-footer {
+  flex-wrap: wrap;
+}
+
+.liq-role-chart-grid,
+.liq-marketing-lower-grid,
+.liq-admin-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr);
+  gap: 12px;
+}
+
+.liq-marketing-chart-grid {
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.85fr);
+}
+
+.liq-admin-grid {
+  grid-template-columns: minmax(0, 1.4fr) minmax(250px, 0.8fr);
+}
+
+.liq-role-line-chart {
+  position: relative;
+  height: 220px;
+  margin: 14px 0 0 34px;
+}
+
+.liq-role-line-chart svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.liq-role-y-labels {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #95a09f;
+  font-size: 9px;
+}
+
+.liq-grid-path {
+  fill: none;
+  stroke: #e5eae8;
+  stroke-width: 1;
+}
+
+.liq-line-red,
+.liq-line-purple,
+.liq-line-blue,
+.liq-line-green,
+.liq-line-pink {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.liq-line-red { stroke: #ef5d59; }
+.liq-line-purple { stroke: #8a63df; }
+.liq-line-blue { stroke: #4d9de0; }
+.liq-line-green { stroke: #44ad89; }
+.liq-line-pink { stroke: #df65a8; }
+
+.liq-role-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 9px 0 0 34px;
+  color: var(--liq-muted);
+  font-size: 9px;
+}
+
+.liq-role-chart-legend span::before {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #ef5d59;
+  content: "";
+}
+
+.liq-role-chart-legend span:nth-child(2)::before { background: #8a63df; }
+.liq-role-chart-legend span:nth-child(3)::before { background: #4d9de0; }
+
+.liq-role-donut-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 12px;
+  min-height: 210px;
+}
+
+.liq-role-donut {
+  position: relative;
+  display: grid;
+  width: 150px;
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  align-content: center;
+  justify-items: center;
+  border-radius: 50%;
+  background: conic-gradient(#8b68ee 0 42%, #f34e51 42% 70%, #357ee8 70% 88%, #50bd8c 88% 96%, #aab7c8 96% 100%);
+  color: #273840;
+  text-align: center;
+  isolation: isolate;
+}
+
+.liq-role-donut::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: 106px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff;
+  content: "";
+  transform: translate(-50%, -50%);
+}
+
+.liq-role-donut strong {
+  font-size: 18px;
+}
+
+.liq-role-donut span {
+  color: var(--liq-muted);
+  font-size: 9px;
+}
+
+.liq-content-donut {
+  background: conic-gradient(#8b68ee 0 52%, #4d9de0 52% 80%, #ef5d59 80% 95%, #aab7c8 95% 100%);
+}
+
+.liq-role-legend {
+  display: grid;
+  min-width: 116px;
+  gap: 11px;
+  color: var(--liq-muted);
+  font-size: 9px;
+}
+
+.liq-role-legend > div {
+  display: grid;
+  grid-template-columns: 8px 1fr auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.liq-role-legend b {
+  color: var(--liq-ink);
+}
+
+.liq-role-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.liq-swatch-purple { background: #8b68ee; }
+.liq-swatch-red { background: #f34e51; }
+.liq-swatch-blue { background: #357ee8; }
+.liq-swatch-green { background: #50bd8c; }
+.liq-swatch-gray { background: #aab7c8; }
+
+.liq-role-table-panel {
+  min-width: 0;
+}
+
+.liq-role-table-panel .liq-table {
+  min-width: 760px;
+}
+
+.liq-status-pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #e4f5ed;
+  color: #208761;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.liq-status-inactive {
+  background: #fde9e8;
+  color: #d35a54;
+}
+
+.liq-status-complete {
+  background: #e9effc;
+  color: #5075c7;
+}
+
+.liq-status-planning {
+  background: #fff3db;
+  color: #a77721;
+}
+
+.liq-campaign-bars,
+.liq-location-bars,
+.liq-usage-bars {
+  display: grid;
+  gap: 13px;
+  margin-top: 22px;
+}
+
+.liq-campaign-bars > div,
+.liq-location-bars > div,
+.liq-usage-bars > div {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) minmax(50px, 2fr) auto;
+  align-items: center;
+  gap: 8px;
+  color: var(--liq-muted);
+  font-size: 9px;
+}
+
+.liq-campaign-bars i,
+.liq-location-bars i,
+.liq-usage-bars i {
+  display: block;
+  width: var(--bar-width);
+  height: 13px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #8b68ee, #b39bf4);
+}
+
+.liq-location-bars i { background: linear-gradient(90deg, #4d9de0, #94c6ef); }
+.liq-usage-bars i { background: linear-gradient(90deg, #357ee8, #83b3f5); }
+
+.liq-campaign-bars b,
+.liq-location-bars b,
+.liq-usage-bars b {
+  color: var(--liq-ink);
+  font-size: 9px;
+}
+
+.liq-activity-list {
+  display: grid;
+  gap: 15px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.liq-activity-list li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.liq-activity-list li > i {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 6px;
+  background: #e7f4ee;
+  color: #348e6d;
+  font-size: 12px;
+  font-style: normal;
+}
+
+.liq-activity-list li:nth-child(even) > i {
+  background: #edf1fc;
+  color: #6681cb;
+}
+
+.liq-activity-list span,
+.liq-activity-list small {
+  display: block;
+}
+
+.liq-activity-list strong {
+  color: #3d4d50;
+  font-size: 10px;
+}
+
+.liq-activity-list small {
+  margin-top: 3px;
+  color: #98a3a2;
+  font-size: 9px;
+}
+
+.liq-kpi-card,
+.liq-panel {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--liq-border);
+  border-radius: 8px;
+  background: var(--liq-paper);
+  box-shadow: var(--liq-shadow);
+  -webkit-backdrop-filter: blur(22px) saturate(155%);
+  backdrop-filter: blur(22px) saturate(155%);
+}
+
+.liq-kpi-card::before,
+.liq-panel::before {
+  position: absolute;
+  top: 0;
+  left: 9%;
+  width: 82%;
+  height: 1px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.98);
+  content: "";
+  pointer-events: none;
+}
+
+.liq-kpi-card {
+  position: relative;
+  min-height: 132px;
+  overflow: hidden;
+  padding: 13px 14px 34px;
+}
+
+.liq-kpi-heading,
+.liq-kpi-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.liq-kpi-heading {
+  color: #788588;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.liq-kpi-icon {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.liq-purple { background: #efebf5; color: #80709d; }
+.liq-blue { background: #e8f0f5; color: #5b8bb3; }
+.liq-pink { background: #f7eaf0; color: #bd739a; }
+.liq-orange { background: #f6efe3; color: #ba8848; }
+.liq-green { background: #e5f2ec; color: #38866b; }
+
+.liq-kpi-value {
+  display: block;
+  margin-top: 8px;
+  color: #24363b;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.liq-percent {
+  margin-left: 1px;
+  font-size: 14px;
+}
+
+.liq-kpi-footer {
+  justify-content: flex-start;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.liq-kpi-footer span {
+  color: var(--liq-green);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.liq-kpi-footer small {
+  color: #9aa5a5;
+  font-size: 9px;
+}
+
+.liq-mini-chart {
+  position: absolute;
+  right: 12px;
+  bottom: 0;
+  display: flex;
+  width: 70px;
+  height: 31px;
+  align-items: flex-end;
+  gap: 4px;
+  opacity: 0.78;
+}
+
+.liq-mini-chart i {
+  width: 6px;
+  border-radius: 3px 3px 0 0;
+  background: #65988c;
+}
+
+.liq-mini-blue i { background: #75a1bf; }
+.liq-mini-pink i { background: #d49ab7; }
+.liq-mini-orange i { background: #cba266; }
+.liq-mini-green i { background: #64a582; }
+
+.liq-chart-grid,
+.liq-lower-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 13px;
+}
+
+.liq-chart-grid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
+}
+
+.liq-lower-grid {
+  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.9fr);
+}
+
+.liq-panel {
+  padding: 15px;
+}
+
+.liq-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.liq-panel-heading h2 {
+  color: #2a3a3f;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.liq-panel-heading p {
+  font-size: 10px;
+}
+
+.liq-panel-menu {
+  color: #9ba8a6;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.liq-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 13px 0 5px;
+}
+
+.liq-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #788588;
+  font-size: 9px;
+}
+
+.liq-legend i,
+.liq-demographic-legend i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+}
+
+.liq-legend-purple { background: var(--liq-purple); }
+.liq-legend-red { background: var(--liq-coral); }
+.liq-legend-pink { background: var(--liq-pink); }
+.liq-legend-blue { background: var(--liq-blue); }
+
+.liq-line-chart {
+  display: flex;
+  height: 180px;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.liq-y-labels {
+  display: flex;
+  flex: 0 0 30px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1px 0 0;
+  color: #94a1a2;
+  font-size: 8px;
+  text-align: right;
+}
+
+.liq-line-chart svg {
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+}
+
+.liq-grid-lines path {
+  fill: none;
+  stroke: #e8eeec;
+  stroke-width: 1;
+}
+
+#liqGrowthLine {
+  fill: none;
+  stroke: var(--liq-coral);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+  transition: d 250ms ease;
+}
+
+.liq-chart-series {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 2.2;
+}
+
+.liq-series-purple { stroke: var(--liq-purple); }
+.liq-series-pink { stroke: var(--liq-pink); }
+.liq-series-blue { stroke: var(--liq-blue); }
+
+.liq-x-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  margin: 4px 0 0 38px;
+  color: #94a1a2;
+  font-size: 8px;
+}
+
+.liq-chart-tabs,
+.liq-demographic-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 13px;
+  padding: 3px;
+  border-radius: 7px;
+  background: #f0f4f2;
+}
+
+.liq-tab,
+.liq-demo-tab {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 6px 5px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #798688;
+  font-size: 9px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.liq-tab-active {
+  background: white;
+  color: var(--liq-green);
+  box-shadow: 0 1px 4px rgba(35, 59, 54, 0.09);
+}
+
+.liq-bar-chart {
+  display: flex;
+  height: 166px;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 10px;
+  padding: 17px 6px 0;
+  border-bottom: 1px solid var(--liq-line);
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 34px, #edf1ef 35px, transparent 36px);
+}
+
+.liq-bar-column {
+  display: flex;
+  min-width: 12px;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.liq-bar-column i {
+  display: block;
+  width: min(25px, 70%);
+  min-height: 4px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, #438f7c, #8bb8a9);
+  transition: height 220ms ease;
+}
+
+.liq-bar-column:nth-child(3n + 2) i {
+  background: linear-gradient(180deg, #d77862, #e8ad93);
+}
+
+.liq-bar-column span {
+  color: #8d999b;
+  font-size: 8px;
+}
+
+.liq-posts-panel {
+  overflow: hidden;
+}
+
+.liq-text-link {
+  flex: 0 0 auto;
+  color: var(--liq-green);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.liq-table-scroll {
+  margin: 13px -2px -3px;
+  overflow-x: auto;
+}
+
+.liq-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.liq-table th {
+  padding: 9px 7px;
+  border-bottom: 1px solid var(--liq-line);
+  color: #8d999b;
+  font-size: 8px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.liq-table td {
+  padding: 10px 7px;
+  border-bottom: 1px solid #edf1ef;
+  color: #637276;
+}
+
+.liq-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.liq-table td:first-child {
+  max-width: 230px;
+  overflow: hidden;
+  color: #334348;
+  font-weight: 650;
+  text-overflow: ellipsis;
+}
+
+.liq-post-thumb {
+  display: inline-grid;
+  width: 25px;
+  height: 25px;
+  margin-right: 7px;
+  place-items: center;
+  border-radius: 5px;
+  vertical-align: middle;
+}
+
+.liq-thumb-purple { background: #eeeaf4; color: #83719e; }
+.liq-thumb-blue { background: #e9f0f4; color: #5a87aa; }
+.liq-thumb-pink { background: #f6eaf0; color: #b97496; }
+.liq-thumb-green { background: #e8f1e9; color: #638769; }
+
+.liq-rate {
+  color: var(--liq-green);
+  font-weight: 750;
+}
+
+.liq-empty-state {
+  padding: 22px !important;
+  color: var(--liq-muted) !important;
+  text-align: center;
+}
+
+.liq-demographic-tabs {
+  margin-top: 13px;
+}
+
+.liq-demographic-tabs .liq-demo-tab {
+  padding-inline: 3px;
+  font-size: 8px;
+}
+
+.liq-audience-content {
+  display: flex;
+  min-height: 160px;
+  align-items: center;
+  justify-content: space-around;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.liq-donut {
+  display: grid;
+  width: 116px;
+  height: 116px;
+  flex: 0 0 116px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--liq-donut, conic-gradient(#d66b57 0 42%, #547d78 42% 74%, #6c94b7 74% 89%, #cf9d57 89% 100%));
+  position: relative;
+}
+
+.liq-donut::before {
+  position: absolute;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: #fff;
+  content: "";
+}
+
+.liq-donut > div {
+  z-index: 1;
+  display: grid;
+  text-align: center;
+}
+
+.liq-donut strong {
+  color: #314348;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 14px;
+}
+
+.liq-donut span {
+  color: #899697;
+  font-size: 8px;
+}
+
+.liq-demographic-legend {
+  display: grid;
+  width: min(150px, 100%);
+  gap: 9px;
+}
+
+.liq-demographic-legend > div {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  color: #798689;
+  font-size: 9px;
+}
+
+.liq-demographic-legend b {
+  color: #45565a;
+  font-size: 9px;
+}
+
+.liq-revenue-panel {
+  grid-column: 1 / -1;
+}
+
+.liq-admin-panel {
+  margin-top: 13px;
+}
+
+.liq-admin-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px 0;
+  color: var(--liq-muted);
+  font-size: 11px;
+}
+
+.liq-admin-total strong {
+  color: var(--liq-green);
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 20px;
+}
+
+.liq-admin-role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.liq-admin-role-grid > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.35);
+  color: var(--liq-muted);
+  font-size: 10px;
+}
+
+.liq-admin-role-grid strong {
+  color: var(--liq-ink);
+}
+
+.liq-admin-create-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--liq-line);
+}
+
+.liq-admin-create-form h3,
+.liq-admin-create-form #liqAdminCreateStatus {
+  grid-column: 1 / -1;
+}
+
+.liq-admin-create-form h3 {
+  color: var(--liq-ink);
+  font-size: 12px;
+}
+
+.liq-admin-create-form label {
+  display: grid;
+  gap: 5px;
+  color: var(--liq-muted);
+  font-size: 10px;
+}
+
+.liq-admin-create-form input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 9px;
+  border: 1px solid var(--liq-line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--liq-ink);
+}
+
+.liq-admin-create-form #liqAdminCreateStatus {
+  min-height: 14px;
+  color: var(--liq-green);
+  font-size: 10px;
+}
+
+.liq-revenue-total {
+  margin-top: 12px;
+  color: #2c3e43;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.liq-revenue-total span {
+  margin-left: 5px;
+  color: var(--liq-green);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.liq-revenue-caption {
+  color: var(--liq-muted);
+  font-size: 10px;
+}
+
+.liq-revenue-bars {
+  display: flex;
+  height: 58px;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+  border-bottom: 1px solid var(--liq-line);
+}
+
+.liq-revenue-bars i {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, #d98269, #e9b39b);
+}
+
+.liq-demo-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8e2;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(17px) saturate(150%);
+  backdrop-filter: blur(17px) saturate(150%);
+  color: #788582;
+  font-size: 9px;
+}
+
+.liq-demo-notice > span {
+  color: var(--liq-green);
+}
+
+.liq-demo-notice strong {
+  color: #52635e;
+}
+
+.liq-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 17px 2px 0;
+  color: #91a09e;
+  font-size: 9px;
+}
+
+.liq-toast {
+  position: fixed;
+  z-index: 60;
+  right: 20px;
+  bottom: 20px;
+  max-width: min(360px, calc(100vw - 40px));
+  padding: 11px 14px;
+  border: 1px solid #cdded9;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(31, 55, 49, 0.13);
+  color: #34564e;
+  font-size: 11px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.liq-toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.liq-overlay {
+  position: fixed;
+  z-index: 25;
+  inset: 0;
+  background: rgba(25, 43, 41, 0.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+@media (max-width: 1180px) {
+  .liq-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .liq-chart-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(290px, 1fr);
+  }
+
+  .liq-search {
+    width: min(430px, 48%);
+  }
+}
+
+@media (max-width: 960px) {
+  .liq-chart-grid,
+  .liq-lower-grid,
+  .liq-role-chart-grid,
+  .liq-marketing-lower-grid,
+  .liq-admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .liq-role-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .liq-revenue-panel {
+    grid-column: auto;
+  }
+
+  .liq-welcome {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .liq-heading-actions {
+    justify-content: flex-start;
+  }
+
+  .liq-admin-create-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .liq-sidebar {
+    width: min(280px, calc(100vw - 48px));
+    transform: translateX(-105%);
+    transition: transform 220ms ease;
+  }
+
+  .liq-page.liq-menu-open .liq-sidebar {
+    transform: translateX(0);
+  }
+
+  .liq-page.liq-menu-open .liq-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .liq-main {
+    margin-left: 0;
+  }
+
+  .liq-menu-toggle {
+    display: grid;
+    flex: 0 0 35px;
+  }
+
+  .liq-topbar {
+    gap: 12px;
+    padding-inline: 16px;
+  }
+
+  .liq-search {
+    width: 100%;
+  }
+
+  .liq-content {
+    padding: 22px 16px 18px;
+  }
+
+  .liq-platform-row {
+    min-height: auto;
+    flex-wrap: wrap;
+    overflow: visible;
+    border-bottom: 0;
+  }
+
+  .liq-platform-label {
+    flex: 0 0 100%;
+    margin: 0 0 2px;
+  }
+}
+
+@media (max-width: 520px) {
+  .liq-topbar-right {
+    gap: 8px;
+  }
+
+  .liq-account-text,
+  .liq-chevron,
+  .liq-search kbd {
+    display: none;
+  }
+
+  .liq-search {
+    height: 34px;
+    gap: 5px;
+    padding-inline: 8px;
+  }
+
+  .liq-search input {
+    font-size: 10px;
+  }
+
+  .liq-welcome h1 {
+    font-size: 21px;
+  }
+
+  .liq-heading-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .liq-demo-status {
+    grid-column: 1 / -1;
+  }
+
+  .liq-heading-actions .liq-button {
+    width: 100%;
+  }
+
+  .liq-platform-row {
+    margin-top: 14px;
+    flex-wrap: wrap;
+    overflow: visible;
+    border-bottom: 0;
+  }
+
+  .liq-platform-label {
+    display: none;
+  }
+
+  .liq-kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .liq-role-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .liq-role-metrics .liq-kpi-card {
+    min-height: 105px;
+    padding-inline: 10px;
+  }
+
+  .liq-role-donut-layout {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .liq-campaign-bars > div,
+  .liq-location-bars > div,
+  .liq-usage-bars > div {
+    grid-template-columns: minmax(82px, 1fr) minmax(44px, 1.5fr) auto;
+  }
+
+  .liq-kpi-card {
+    min-height: 122px;
+    padding: 11px 10px 32px;
+  }
+
+  .liq-kpi-heading {
+    font-size: 9px;
+  }
+
+  .liq-kpi-value {
+    font-size: 19px;
+  }
+
+  .liq-kpi-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .liq-mini-chart {
+    right: 9px;
+    width: 58px;
+    gap: 3px;
+  }
+
+  .liq-panel {
+    padding: 12px;
+  }
+
+  .liq-line-chart {
+    height: 155px;
+  }
+
+  .liq-legend {
+    gap: 8px;
+  }
+
+  .liq-legend span {
+    font-size: 8px;
+  }
+
+  .liq-chart-tabs {
+    gap: 2px;
+  }
+
+  .liq-tab {
+    padding-inline: 3px;
+    font-size: 8px;
+  }
+
+  .liq-audience-content {
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  .liq-donut {
+    width: 102px;
+    height: 102px;
+    flex-basis: 102px;
+  }
+
+  .liq-donut::before {
+    width: 68px;
+    height: 68px;
+  }
+
+  .liq-demographic-tabs .liq-demo-tab {
+    font-size: 7px;
+  }
+
+  .liq-footer {
+    font-size: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liq-page *,
+  .liq-page *::before,
+  .liq-page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.liq-profile-page .page-shell {
+  width: min(100% - 36px, 1120px);
+  padding-top: 22px;
+}
+
+.liq-profile-page .site-header {
+  margin-bottom: 30px;
+}
+
+.liq-profile-page .page-card {
+  width: min(100%, 820px);
+}
+
+.liq-profile-page .liq-profile-card {
+  padding: clamp(22px, 4vw, 38px);
+}
+
+.liq-profile-page .page-title,
+.liq-profile-page .password-form-title {
+  color: var(--liq-ink);
+  font-family: Manrope, "Segoe UI", sans-serif;
+}
+
+.liq-profile-page .text-link {
+  color: var(--liq-green);
+}
+
+.liq-profile-page .text-link:hover {
+  color: #1e6258;
+}
+
+.liq-profile-page .profile-header {
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.86);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.liq-profile-page .avatar {
+  border-color: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(135deg, #e5f0eb, #e7edf4);
+  color: var(--liq-green);
+}
+
+.liq-profile-page .profile-item {
+  border-color: rgba(255, 255, 255, 0.9);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.liq-profile-page .profile-item input:not(:disabled) {
+  border-color: rgba(40, 119, 107, 0.32);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--liq-ink);
+}
+
+.liq-profile-page .profile-actions .btn {
+  width: auto;
+  min-height: 38px;
+  flex: 1 1 160px;
+  border-radius: 7px;
+  font-size: 11px;
+}
+
+.liq-profile-page .btn-primary {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: var(--liq-green);
+  box-shadow: 0 5px 14px rgba(40, 119, 107, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+
+.liq-profile-page .btn-primary:hover:not(:disabled) {
+  background: #1e6258;
+}
+
+.liq-profile-page .btn-secondary,
+.liq-profile-page .btn-danger {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.48);
+  color: #53676a;
+}
+
+.liq-profile-page .btn-secondary:hover,
+.liq-profile-page .btn-danger:hover {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.liq-profile-page .password-form {
+  border-color: rgba(210, 222, 218, 0.8);
+}
+
+.liq-profile-page .form-group input {
+  border-color: rgba(206, 220, 216, 0.9);
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--liq-ink);
+}
+
+.liq-analyzer-page .dashboard-shell {
+  width: min(100% - 32px, 1440px);
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 18px;
+}
+
+.liq-analyzer-page .dashboard-sidebar {
+  border-color: var(--liq-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: var(--liq-shadow);
+  -webkit-backdrop-filter: blur(22px) saturate(155%);
+  backdrop-filter: blur(22px) saturate(155%);
+}
+
+.liq-analyzer-page .sidebar-brand {
+  border-color: rgba(210, 222, 218, 0.8);
+}
+
+.liq-analyzer-page .sidebar-nav {
+  gap: 4px;
+}
+
+.liq-analyzer-page .nav-item {
+  border-radius: 7px;
+  color: #69797d;
+  font-size: 12px;
+}
+
+.liq-analyzer-page .nav-item:hover,
+.liq-analyzer-page .nav-item.active {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(115deg, rgba(218, 211, 255, 0.56), rgba(230, 241, 255, 0.58));
+  color: var(--liq-green);
+}
+
+.liq-analyzer-page .sidebar-card,
+.liq-analyzer-page .summary-box,
+.liq-analyzer-page .panel {
+  border-color: var(--liq-border);
+  border-radius: 8px;
+  background: var(--liq-paper);
+  box-shadow: var(--liq-shadow);
+  -webkit-backdrop-filter: blur(22px) saturate(155%);
+  backdrop-filter: blur(22px) saturate(155%);
+}
+
+.liq-analyzer-page .sidebar-card {
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.liq-analyzer-page .dashboard-topbar {
+  padding: 6px 4px;
+}
+
+.liq-analyzer-page .dashboard-actions {
+  flex-wrap: wrap;
+}
+
+.liq-analyzer-page .analyzer-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.42);
+  color: var(--liq-muted);
+  font-size: 11px;
+  box-shadow: var(--liq-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+}
+
+.liq-analyzer-page .analyzer-filter-row[hidden] {
+  display: none;
+}
+
+.liq-analyzer-page .dashboard-topbar h1,
+.liq-analyzer-page .panel h2 {
+  color: var(--liq-ink);
+  font-family: Manrope, "Segoe UI", sans-serif;
+}
+
+.liq-analyzer-page .eyebrow,
+.liq-analyzer-page .panel-kicker,
+.liq-analyzer-page .summary-box span,
+.liq-analyzer-page .analysis-table th {
+  color: var(--liq-muted);
+}
+
+.liq-analyzer-page .status-dot {
+  background: #49a487;
+  box-shadow: 0 0 0 4px rgba(73, 164, 135, 0.12);
+}
+
+.liq-analyzer-page .summary-box {
+  padding: 16px 18px;
+}
+
+.liq-analyzer-page .summary-box strong {
+  color: var(--liq-ink);
+  font-family: Manrope, "Segoe UI", sans-serif;
+}
+
+.liq-analyzer-page .analysis-table th,
+.liq-analyzer-page .analysis-table td {
+  border-bottom-color: rgba(205, 219, 215, 0.75);
+}
+
+.liq-analyzer-page .analysis-table td {
+  color: #53676a;
+}
+
+.liq-analyzer-page .segmented-control {
+  border-color: rgba(255, 255, 255, 0.88);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.liq-analyzer-page .segment {
+  border-radius: 5px;
+  color: #6e7d80;
+}
+
+.liq-analyzer-page .segment.active {
+  background: var(--liq-green);
+  color: #fff;
+}
+
+@media (max-width: 960px) {
+  .liq-analyzer-page .dashboard-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .liq-analyzer-page .dashboard-sidebar {
+    min-width: 0;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .liq-analyzer-page .dashboard-main,
+  .liq-analyzer-page .analyzer-panel {
+    min-width: 0;
+  }
+
+  .liq-analyzer-page .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .liq-analyzer-page .nav-item {
+    flex: 1 1 120px;
+  }
+}
+
+@media (max-width: 620px) {
+  .liq-profile-page .page-shell {
+    width: min(100% - 24px, 600px);
+  }
+
+  .liq-profile-page .site-header {
+    margin-bottom: 22px;
+  }
+
+  .liq-analyzer-page .dashboard-shell {
+    width: min(100% - 20px, 600px);
+    padding-top: 14px;
+  }
+
+  .liq-analyzer-page .analysis-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .liq-analyzer-page .dashboard-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .liq-analyzer-page .dashboard-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .liq-analyzer-page .dashboard-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .liq-analyzer-page .dashboard-actions .liq-button {
+    width: auto;
+    flex: 1 1 125px;
+  }
+
+  .liq-analyzer-page .analysis-table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+.liq-profile-page .profile-item select {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 30px 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background-color: transparent;
+  color: var(--liq-ink);
+  font-size: 13px;
+}
+
+.liq-profile-page .profile-item select:not(:disabled) {
+  border-color: rgba(40, 119, 107, 0.32);
+  background-color: rgba(255, 255, 255, 0.68);
+  cursor: pointer;
+}
+
+.liq-profile-page .profile-item select:disabled {
+  appearance: none;
+  opacity: 1;
+  cursor: default;
+}
+
+.liq-profile-page #profile-role-note {
+  display: block;
+  margin-top: 6px;
+}
+
+.liq-profile-page #profile-role-note[hidden] {
+  display: none;
+}

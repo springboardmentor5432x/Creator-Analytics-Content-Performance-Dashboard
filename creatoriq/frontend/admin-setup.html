@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Provision the first CreatorIQ administrator." />
+    <title>Administrator Setup | CreatorIQ</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/admin-setup.js" defer></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="site-header">
+        <a href="index.html" class="brand-logo" aria-label="CreatorIQ sign in">
+          <span class="logo-mark" aria-hidden="true">C</span>
+          <span>Creator<span class="brand-accent">IQ</span></span>
+        </a>
+        <nav class="site-nav" aria-label="Main navigation">
+          <a href="index.html" class="text-link">Sign in</a>
+        </nav>
+      </header>
+
+      <section class="page-card narrow" aria-labelledby="setup-title">
+        <div class="form-heading">
+          <span class="eyebrow">AUTHORIZED SETUP</span>
+          <h1 class="page-title" id="setup-title">Create the first administrator</h1>
+          <p class="page-description">This one-time setup requires the key configured on the CreatorIQ server.</p>
+        </div>
+
+        <form id="admin-setup-form">
+          <div class="form-group">
+            <label for="setup-key">Setup key</label>
+            <input id="setup-key" name="setupKey" type="password" autocomplete="off" required />
+          </div>
+          <div class="form-group">
+            <label for="setup-name">Full name</label>
+            <input id="setup-name" name="name" autocomplete="name" minlength="2" required />
+          </div>
+          <div class="form-group">
+            <label for="setup-email">Email address</label>
+            <input id="setup-email" name="email" type="email" autocomplete="email" required />
+          </div>
+          <div class="form-group">
+            <label for="setup-password">Password</label>
+            <input id="setup-password" name="password" type="password" autocomplete="new-password" minlength="8" required />
+            <small class="helper-text">Use at least 8 characters with uppercase, lowercase, a number, and a special character.</small>
+          </div>
+          <div id="setup-status" class="form-status" role="status" aria-live="polite"></div>
+          <button class="btn btn-primary" type="submit" id="setup-submit">
+            <span class="button-text">Create administrator</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

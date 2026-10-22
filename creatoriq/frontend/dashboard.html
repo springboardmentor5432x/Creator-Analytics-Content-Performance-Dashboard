@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f7fa" />
+    <meta
+      name="description"
+      content="CreatorIQ creator dashboard for content performance and audience insights."
+    />
+    <title>Creator Dashboard | CreatorIQ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <script src="js/dashboard.js" defer></script>
+  </head>
+  <body class="liq-page">
+    <div class="liq-overlay" id="liqOverlay" aria-hidden="true"></div>
+
+    <aside class="liq-sidebar" id="liqSidebar" aria-label="Creator navigation">
+      <a href="home.html" class="liq-brand" aria-label="CreatorIQ home">
+        <span class="liq-brand-icon" aria-hidden="true">C</span>
+        <span>Creator<span class="liq-brand-accent">IQ</span></span>
+      </a>
+
+      <p class="liq-section-label" id="liqWorkspaceLabel">CREATOR WORKSPACE</p>
+      <nav class="liq-navigation" aria-label="Creator workspace">
+        <div data-role-navigation="creator">
+          <a class="liq-nav-link liq-active" href="dashboard.html"><span class="liq-nav-icon" aria-hidden="true">▦</span>Dashboard</a>
+          <a class="liq-nav-link" href="profile.html"><span class="liq-nav-icon" aria-hidden="true">♙</span>My Profile</a>
+          <a class="liq-nav-link" href="#social-accounts"><span class="liq-nav-icon" aria-hidden="true">◎</span>Social Accounts</a>
+          <a class="liq-nav-link" href="analyzer.html"><span class="liq-nav-icon" aria-hidden="true">▤</span>Content</a>
+          <a class="liq-nav-link" href="#analytics"><span class="liq-nav-icon" aria-hidden="true">⌁</span>Analytics</a>
+          <a class="liq-nav-link" href="#audience"><span class="liq-nav-icon" aria-hidden="true">♧</span>Audience</a>
+          <a class="liq-nav-link" href="#revenue"><span class="liq-nav-icon" aria-hidden="true">◉</span>Revenue</a>
+          <button type="button" class="liq-nav-link" data-liq-export><span class="liq-nav-icon" aria-hidden="true">▧</span>Reports</button>
+          <a class="liq-nav-link" href="profile.html"><span class="liq-nav-icon" aria-hidden="true">⚙</span>Settings</a>
+        </div>
+        <div data-role-navigation="agency" hidden>
+          <a class="liq-nav-link liq-active" href="dashboard.html"><span class="liq-nav-icon" aria-hidden="true">▦</span>Dashboard</a>
+          <a class="liq-nav-link" href="#agencyCreators"><span class="liq-nav-icon" aria-hidden="true">♙</span>Creators</a>
+          <a class="liq-nav-link" href="#agencyCreators"><span class="liq-nav-icon" aria-hidden="true">◈</span>Campaigns</a>
+          <a class="liq-nav-link" href="#agencyPerformance"><span class="liq-nav-icon" aria-hidden="true">⌁</span>Analytics</a>
+          <a class="liq-nav-link" href="#agencyCreators"><span class="liq-nav-icon" aria-hidden="true">▤</span>Content Library</a>
+          <button type="button" class="liq-nav-link" data-liq-export><span class="liq-nav-icon" aria-hidden="true">▧</span>Reports</button>
+          <button type="button" class="liq-nav-link" data-liq-feature="Team members"><span class="liq-nav-icon" aria-hidden="true">♧</span>Team Members</button>
+          <a class="liq-nav-link" href="profile.html"><span class="liq-nav-icon" aria-hidden="true">⚙</span>Settings</a>
+        </div>
+        <div data-role-navigation="marketing" hidden>
+          <a class="liq-nav-link liq-active" href="dashboard.html"><span class="liq-nav-icon" aria-hidden="true">▦</span>Dashboard</a>
+          <a class="liq-nav-link" href="#campaigns"><span class="liq-nav-icon" aria-hidden="true">◈</span>Campaigns</a>
+          <a class="liq-nav-link" href="#campaigns"><span class="liq-nav-icon" aria-hidden="true">♙</span>Influencers</a>
+          <a class="liq-nav-link" href="#campaigns"><span class="liq-nav-icon" aria-hidden="true">▤</span>Content</a>
+          <a class="liq-nav-link" href="#marketingPerformance"><span class="liq-nav-icon" aria-hidden="true">⌁</span>Analytics</a>
+          <button type="button" class="liq-nav-link" data-liq-export><span class="liq-nav-icon" aria-hidden="true">▧</span>Reports</button>
+          <button type="button" class="liq-nav-link" data-liq-feature="Brand deals"><span class="liq-nav-icon" aria-hidden="true">◇</span>Brand Deals</button>
+          <a class="liq-nav-link" href="profile.html"><span class="liq-nav-icon" aria-hidden="true">⚙</span>Settings</a>
+        </div>
+        <div data-role-navigation="administrator" hidden>
+          <a class="liq-nav-link liq-active" href="dashboard.html"><span class="liq-nav-icon" aria-hidden="true">▦</span>Dashboard</a>
+          <a class="liq-nav-link" href="#adminUsers"><span class="liq-nav-icon" aria-hidden="true">♙</span>User Management</a>
+          <a class="liq-nav-link" href="#adminActivity"><span class="liq-nav-icon" aria-hidden="true">◉</span>Content Monitoring</a>
+          <a class="liq-nav-link" href="#adminOverview"><span class="liq-nav-icon" aria-hidden="true">⌘</span>Platform Integrations</a>
+          <a class="liq-nav-link" href="#adminGrowth"><span class="liq-nav-icon" aria-hidden="true">⌁</span>Analytics Overview</a>
+          <button type="button" class="liq-nav-link" data-liq-export><span class="liq-nav-icon" aria-hidden="true">▧</span>Reports</button>
+          <a class="liq-nav-link" href="profile.html"><span class="liq-nav-icon" aria-hidden="true">⚙</span>System Settings</a>
+          <a class="liq-nav-link" href="#adminActivity"><span class="liq-nav-icon" aria-hidden="true">◷</span>Activity Logs</a>
+        </div>
+        <button type="button" class="liq-nav-link" data-liq-notifications><span class="liq-nav-icon" aria-hidden="true">♢</span>Notifications<span class="liq-notification-dot" aria-hidden="true"></span></button>
+      </nav>
+
+      <div class="liq-sidebar-bottom">
+        <div class="liq-upgrade-card">
+          <span class="liq-upgrade-symbol" aria-hidden="true">✦</span>
+          <h2>Creator Studio</h2>
+          <p>Understand your audience and make your next post count.</p>
+          <button type="button" class="liq-button liq-button-secondary" data-liq-feature="Creator Studio">Explore features <span aria-hidden="true">↗</span></button>
+        </div>
+        <button type="button" class="liq-nav-link liq-signout" id="liqSignOut"><span class="liq-nav-icon" aria-hidden="true">↪</span>Sign out</button>
+        <a href="profile.html" class="liq-user-card">
+          <span class="liq-avatar" id="liqAvatar" aria-hidden="true">C</span>
+          <span class="liq-user-details"><strong id="liqUserName">Creator</strong><small id="liqUserRole">Creator account</small></span>
+          <span class="liq-user-status" aria-hidden="true"></span>
+        </a>
+      </div>
+    </aside>
+
+    <main class="liq-main">
+      <header class="liq-topbar">
+        <button type="button" class="liq-icon-button liq-menu-toggle" id="liqMenuToggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+        <label class="liq-search"><span aria-hidden="true">⌕</span><input type="search" id="liqSearch" placeholder="Search content, analytics, reports..." aria-label="Search dashboard"><kbd>Enter</kbd></label>
+        <div class="liq-topbar-right">
+          <button type="button" class="liq-icon-button" data-liq-notifications aria-label="Notifications">♧</button>
+          <a href="profile.html" class="liq-account"><span class="liq-avatar liq-avatar-small" id="liqTopAvatar" aria-hidden="true">C</span><span class="liq-account-text"><strong id="liqTopName">Creator</strong><small id="liqTopRole">Creator</small></span><span class="liq-chevron" aria-hidden="true">⌄</span></a>
+        </div>
+      </header>
+
+      <section class="liq-content">
+        <div class="liq-welcome">
+          <div>
+            <div class="liq-eyebrow"><span></span><span id="liqOverviewLabel">CREATOR OVERVIEW</span></div>
+            <h1><span id="liqGreeting">Good morning</span>, <span id="liqFirstName">Creator</span> <span class="liq-wave" aria-hidden="true">✦</span></h1>
+            <p id="liqOverviewDescription">Here’s what’s happening with your content and audience.</p>
+          </div>
+          <div class="liq-heading-actions">
+            <span class="liq-demo-status"><i aria-hidden="true"></i>Sample insights</span>
+            <select id="liqDateRange" class="liq-glass-control" aria-label="Analytics date range">
+              <option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option>
+            </select>
+            <button type="button" class="liq-button liq-button-primary" id="liqExport"><span aria-hidden="true">↓</span>Export report</button>
+          </div>
+        </div>
+
+        <div class="liq-role-view" data-role-dashboard="creator">
+        <div class="liq-platform-row" id="social-accounts" aria-label="Filter by platform">
+          <span class="liq-platform-label">PLATFORMS</span>
+          <button type="button" class="liq-platform-button liq-platform-active" data-liq-platform="All" aria-pressed="true">All Platforms</button>
+          <button type="button" class="liq-platform-button" data-liq-platform="YouTube" aria-pressed="false"><span class="liq-platform-youtube" aria-hidden="true">▶</span>YouTube</button>
+          <button type="button" class="liq-platform-button" data-liq-platform="Instagram" aria-pressed="false"><span class="liq-platform-instagram" aria-hidden="true">◎</span>Instagram</button>
+          <button type="button" class="liq-platform-button" data-liq-platform="TikTok" aria-pressed="false"><span class="liq-platform-tiktok" aria-hidden="true">♪</span>TikTok</button>
+          <button type="button" class="liq-platform-button" data-liq-platform="LinkedIn" aria-pressed="false"><span class="liq-platform-linkedin" aria-hidden="true">in</span>LinkedIn</button>
+          <button type="button" class="liq-platform-button" data-liq-feature="Connect a social platform"><span aria-hidden="true">＋</span>Add Platform</button>
+        </div>
+
+        <section class="liq-kpi-grid" aria-label="Creator metrics">
+          <article class="liq-kpi-card"><div class="liq-kpi-heading"><span data-liq-kpi-label="0">Total Followers</span><span class="liq-kpi-icon liq-purple" aria-hidden="true">♙</span></div><strong class="liq-kpi-value" id="liqFollowers">24,816</strong><div class="liq-kpi-footer"><span>↗ 12.4%</span><small>vs. last month</small></div><div class="liq-mini-chart" aria-hidden="true"><i style="height:35%"></i><i style="height:48%"></i><i style="height:42%"></i><i style="height:66%"></i><i style="height:55%"></i><i style="height:78%"></i><i style="height:100%"></i></div></article>
+          <article class="liq-kpi-card"><div class="liq-kpi-heading"><span data-liq-kpi-label="1">Total Views</span><span class="liq-kpi-icon liq-blue" aria-hidden="true">▷</span></div><strong class="liq-kpi-value" id="liqViews">1.8M</strong><div class="liq-kpi-footer"><span>↗ 18.3%</span><small>vs. last month</small></div><div class="liq-mini-chart liq-mini-blue" aria-hidden="true"><i style="height:30%"></i><i style="height:40%"></i><i style="height:35%"></i><i style="height:62%"></i><i style="height:52%"></i><i style="height:78%"></i><i style="height:100%"></i></div></article>
+          <article class="liq-kpi-card"><div class="liq-kpi-heading"><span data-liq-kpi-label="2">Total Likes</span><span class="liq-kpi-icon liq-pink" aria-hidden="true">♡</span></div><strong class="liq-kpi-value" id="liqLikes">98,240</strong><div class="liq-kpi-footer"><span>↗ 15.1%</span><small>vs. last month</small></div><div class="liq-mini-chart liq-mini-pink" aria-hidden="true"><i style="height:25%"></i><i style="height:44%"></i><i style="height:40%"></i><i style="height:62%"></i><i style="height:57%"></i><i style="height:76%"></i><i style="height:100%"></i></div></article>
+          <article class="liq-kpi-card"><div class="liq-kpi-heading"><span data-liq-kpi-label="3">Comments</span><span class="liq-kpi-icon liq-orange" aria-hidden="true">☷</span></div><strong class="liq-kpi-value" id="liqComments">8,932</strong><div class="liq-kpi-footer"><span>↗ 9.8%</span><small>vs. last month</small></div><div class="liq-mini-chart liq-mini-orange" aria-hidden="true"><i style="height:36%"></i><i style="height:45%"></i><i style="height:40%"></i><i style="height:68%"></i><i style="height:55%"></i><i style="height:75%"></i><i style="height:100%"></i></div></article>
+          <article class="liq-kpi-card"><div class="liq-kpi-heading"><span data-liq-kpi-label="4">Shares</span><span class="liq-kpi-icon liq-purple" aria-hidden="true">↗</span></div><strong class="liq-kpi-value" id="liqShares">6,120</strong><div class="liq-kpi-footer"><span>↗ 6.5%</span><small>vs. last month</small></div><div class="liq-mini-chart" aria-hidden="true"><i style="height:30%"></i><i style="height:40%"></i><i style="height:35%"></i><i style="height:55%"></i><i style="height:50%"></i><i style="height:70%"></i><i style="height:100%"></i></div></article>
+          <article class="liq-kpi-card"><div class="liq-kpi-heading"><span data-liq-kpi-label="5">Engagement Rate</span><span class="liq-kpi-icon liq-green" aria-hidden="true">✳</span></div><strong class="liq-kpi-value" id="liqEngagement">6.8%</strong><div class="liq-kpi-footer"><span>↗ 0.9%</span><small>vs. last month</small></div><div class="liq-mini-chart liq-mini-green" aria-hidden="true"><i style="height:30%"></i><i style="height:48%"></i><i style="height:42%"></i><i style="height:65%"></i><i style="height:54%"></i><i style="height:80%"></i><i style="height:100%"></i></div></article>
+        </section>
+
+        <div class="liq-chart-grid" id="analytics">
+          <section class="liq-panel">
+            <div class="liq-panel-heading"><div><h2 id="liqGrowthTitle">Follower Growth</h2><p id="liqGrowthDescription">Growth across your social channels</p></div><span class="liq-panel-menu" aria-hidden="true">•••</span></div>
+            <div class="liq-legend"><span><i class="liq-legend-purple"></i>Instagram</span><span><i class="liq-legend-red"></i>YouTube</span><span><i class="liq-legend-pink"></i>TikTok</span><span><i class="liq-legend-blue"></i>LinkedIn</span></div>
+            <div class="liq-line-chart"><div class="liq-y-labels" aria-hidden="true"><span>150K</span><span>100K</span><span>50K</span><span>0</span></div>
+              <svg id="liqGrowthChart" viewBox="0 0 640 220" preserveAspectRatio="none" role="img" aria-label="Illustrative follower growth graph">
+                <defs><linearGradient id="liqChartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e56c5b" stop-opacity=".22"/><stop offset="100%" stop-color="#e56c5b" stop-opacity="0"/></linearGradient></defs>
+                <g class="liq-grid-lines"><path d="M0 12H640 M0 75H640 M0 138H640 M0 201H640"/></g>
+                <path id="liqGrowthArea" data-liq-growth-area="YouTube" d="M0 185 L64 173 L128 158 L192 143 L256 126 L320 108 L384 88 L448 73 L512 51 L576 34 L640 16 L640 201 L0 201Z" fill="url(#liqChartFill)"/>
+                <path id="liqGrowthLine" data-liq-growth="YouTube" d="M0 185 L64 173 L128 158 L192 143 L256 126 L320 108 L384 88 L448 73 L512 51 L576 34 L640 16"/>
+                <path d="M0 192 L64 183 L128 176 L192 164 L256 153 L320 143 L384 132 L448 124 L512 113 L576 104 L640 96" class="liq-chart-series liq-series-purple" data-liq-growth="Instagram"/>
+                <path d="M0 198 L64 194 L128 189 L192 184 L256 179 L320 174 L384 169 L448 165 L512 160 L576 156 L640 151" class="liq-chart-series liq-series-pink" data-liq-growth="TikTok"/>
+                <path d="M0 201 L64 199 L128 197 L192 195 L256 193 L320 191 L384 189 L448 187 L512 185 L576 183 L640 181" class="liq-chart-series liq-series-blue" data-liq-growth="LinkedIn"/>
+              </svg>
+            </div>
+            <div class="liq-x-labels" id="liqChartLabels"><span>Sep 14</span><span>Sep 19</span><span>Sep 24</span><span>Sep 29</span><span>Oct 4</span><span>Oct 9</span><span>Oct 13</span></div>
+          </section>
+
+          <section class="liq-panel">
+            <div class="liq-panel-heading"><div><h2 id="liqPerformanceTitle">Content Performance</h2><p id="liqPerformanceDescription">Compare engagement by metric</p></div><span class="liq-panel-menu" aria-hidden="true">•••</span></div>
+            <div class="liq-chart-tabs" role="group" aria-label="Performance metric">
+              <button type="button" class="liq-tab liq-tab-active" data-liq-metric="Views" aria-pressed="true">Views</button><button type="button" class="liq-tab" data-liq-metric="Likes" aria-pressed="false">Likes</button><button type="button" class="liq-tab" data-liq-metric="Comments" aria-pressed="false">Comments</button><button type="button" class="liq-tab" data-liq-metric="Shares" aria-pressed="false">Shares</button>
+            </div>
+            <div class="liq-bar-chart" id="liqBarChart" role="img" aria-label="Sample content performance for Views">
+              <div class="liq-bar-column"><i style="height:32%"></i><span>Mon</span></div><div class="liq-bar-column"><i style="height:49%"></i><span>Tue</span></div><div class="liq-bar-column"><i style="height:38%"></i><span>Wed</span></div><div class="liq-bar-column"><i style="height:72%"></i><span>Thu</span></div><div class="liq-bar-column"><i style="height:91%"></i><span>Fri</span></div><div class="liq-bar-column"><i style="height:63%"></i><span>Sat</span></div><div class="liq-bar-column"><i style="height:42%"></i><span>Sun</span></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="liq-lower-grid">
+          <section class="liq-panel liq-posts-panel">
+            <div class="liq-panel-heading"><div><h2 id="liqContentTitle">Top Performing Posts</h2><p id="liqContentDescription">Your best recent content</p></div><a href="analyzer.html" class="liq-text-link">View all <span aria-hidden="true">→</span></a></div>
+            <div class="liq-table-scroll"><table class="liq-table"><thead><tr><th scope="col">Content</th><th scope="col">Platform</th><th scope="col">Views</th><th scope="col">Likes</th><th scope="col">Comments</th><th scope="col">Engagement</th></tr></thead>
+              <tbody id="liqPostsBody">
+                <tr data-platform="YouTube"><td><span class="liq-post-thumb liq-thumb-purple" aria-hidden="true">✦</span>5 AI tools every student should know</td><td>YouTube</td><td>129K</td><td>8.4K</td><td>620</td><td><span class="liq-rate">7.9%</span></td></tr>
+                <tr data-platform="Instagram"><td><span class="liq-post-thumb liq-thumb-blue" aria-hidden="true">▧</span>A day in my life as a creator</td><td>Instagram</td><td>98K</td><td>6.1K</td><td>530</td><td><span class="liq-rate">8.4%</span></td></tr>
+                <tr data-platform="TikTok"><td><span class="liq-post-thumb liq-thumb-pink" aria-hidden="true">♡</span>Helpful productivity tips</td><td>TikTok</td><td>56K</td><td>3.5K</td><td>290</td><td><span class="liq-rate">6.7%</span></td></tr>
+                <tr data-platform="Instagram"><td><span class="liq-post-thumb liq-thumb-green" aria-hidden="true">✧</span>My study setup in 2026</td><td>Instagram</td><td>42K</td><td>2.4K</td><td>180</td><td><span class="liq-rate">6.1%</span></td></tr>
+              </tbody></table></div>
+          </section>
+
+          <section class="liq-panel" id="audience">
+            <div class="liq-panel-heading"><div><h2 id="liqAudienceTitle">Audience Demographics</h2><p id="liqAudienceDescription">Understand your audience</p></div></div>
+            <div class="liq-demographic-tabs" role="group" aria-label="Audience demographic">
+              <button type="button" class="liq-demo-tab liq-tab-active" data-liq-demo="Age" aria-pressed="true">Age</button><button type="button" class="liq-demo-tab" data-liq-demo="Gender" aria-pressed="false">Gender</button><button type="button" class="liq-demo-tab" data-liq-demo="Location" aria-pressed="false">Location</button><button type="button" class="liq-demo-tab" data-liq-demo="Device" aria-pressed="false">Device</button>
+            </div>
+            <div class="liq-audience-content"><div class="liq-donut" id="liqDonut"><div><strong>125.4K</strong><span>Followers</span></div></div><div class="liq-demographic-legend" id="liqDemographicLegend" aria-live="polite"></div></div>
+          </section>
+
+          <section class="liq-panel liq-revenue-panel" id="revenue">
+            <div class="liq-panel-heading"><div><h2 id="liqRevenueTitle">Revenue Overview</h2><p id="liqRevenueDescription">Illustrative creator earnings</p></div></div>
+            <div class="liq-revenue-total">₹48,250 <span>↗ 20.5%</span></div><p class="liq-revenue-caption">+₹8,240 from last month</p>
+            <div class="liq-revenue-bars" aria-label="Monthly revenue trend"><i style="height:34%"></i><i style="height:48%"></i><i style="height:42%"></i><i style="height:64%"></i><i style="height:58%"></i><i style="height:82%"></i><i style="height:70%"></i><i style="height:100%"></i></div>
+          </section>
+        </div>
+
+        <div class="liq-demo-notice"><span aria-hidden="true">ⓘ</span><p><strong>Sample data:</strong> Creator metrics are illustrative until connected to social-platform APIs.</p></div>
+        </div>
+
+        <div class="liq-role-view" data-role-dashboard="agency" hidden>
+          <section class="liq-role-metrics" aria-label="Agency portfolio metrics">
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Total Creators</div><strong class="liq-kpi-value">18</strong><div class="liq-kpi-footer"><span>↗ 3</span><small>this month</small></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Total Followers</div><strong class="liq-kpi-value">2.4M</strong><div class="liq-kpi-footer"><span>↗ 18.5%</span><small>vs. last month</small></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Total Views</div><strong class="liq-kpi-value">18.7M</strong><div class="liq-kpi-footer"><span>↗ 22.1%</span><small>vs. last month</small></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Active Campaigns</div><strong class="liq-kpi-value">5</strong><div class="liq-kpi-footer"><span>2 due soon</span></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Total Revenue</div><strong class="liq-kpi-value">₹3,48,600</strong><div class="liq-kpi-footer"><span>↗ 27.3%</span><small>vs. last month</small></div></article>
+          </section>
+
+          <div class="liq-role-chart-grid">
+            <section class="liq-panel">
+              <div class="liq-panel-heading"><div><h2>Overall Performance</h2><p>Portfolio reach, views, and engagement</p></div><select class="liq-glass-control" data-role-range="agency" aria-label="Agency performance range"><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></div>
+              <div class="liq-role-line-chart" role="img" aria-label="Agency portfolio performance trend"><div class="liq-role-y-labels"><span>6M</span><span>4M</span><span>2M</span><span>0</span></div><svg data-role-chart="agency" viewBox="0 0 640 220" preserveAspectRatio="none"><path class="liq-grid-path" d="M0 20H640 M0 80H640 M0 140H640 M0 200H640"/><path data-role-series="0" class="liq-line-red" d="M0 182 L80 160 L160 126 L240 106 L320 91 L400 56 L480 41 L560 25 L640 14"/><path data-role-series="1" class="liq-line-purple" d="M0 194 L80 184 L160 161 L240 144 L320 127 L400 102 L480 84 L560 68 L640 53"/><path data-role-series="2" class="liq-line-blue" d="M0 202 L80 197 L160 185 L240 171 L320 160 L400 145 L480 135 L560 120 L640 106"/></svg></div>
+              <div class="liq-role-chart-legend"><span>Followers</span><span>Views</span><span>Engagement</span></div>
+            </section>
+            <section class="liq-panel">
+              <div class="liq-panel-heading"><div><h2>Platform Distribution</h2><p>Followers across connected platforms</p></div></div>
+              <div class="liq-role-donut-layout"><div class="liq-role-donut liq-platform-donut"><strong>2.4M</strong><span>Total followers</span></div><div class="liq-role-legend"><div><i class="liq-swatch-purple"></i>Instagram <b>42%</b></div><div><i class="liq-swatch-red"></i>YouTube <b>28%</b></div><div><i class="liq-swatch-blue"></i>TikTok <b>18%</b></div><div><i class="liq-swatch-green"></i>LinkedIn <b>8%</b></div><div><i class="liq-swatch-gray"></i>Others <b>4%</b></div></div></div>
+            </section>
+          </div>
+
+          <section class="liq-panel liq-role-table-panel">
+            <div class="liq-panel-heading"><div><h2>Creators Overview</h2><p>Portfolio health and campaign delivery</p></div><select class="liq-glass-control" id="agencyPlatformFilter" aria-label="Filter creators by platform"><option value="All">All platforms</option><option>Instagram</option><option>YouTube</option><option>TikTok</option></select></div>
+            <div class="liq-table-scroll"><table class="liq-table"><thead><tr><th>Creator</th><th>Platforms</th><th>Followers</th><th>Views</th><th>Engagement</th><th>Revenue</th><th>Status</th></tr></thead><tbody id="agencyCreatorsBody">
+              <tr data-platform="Instagram"><td>Asha Creates</td><td>Instagram, YouTube</td><td>450K</td><td>5.2M</td><td>7.8%</td><td>₹85,000</td><td><span class="liq-status-pill">Active</span></td></tr>
+              <tr data-platform="TikTok"><td>Foodie Diaries</td><td>Instagram, TikTok</td><td>320K</td><td>3.1M</td><td>6.4%</td><td>₹62,000</td><td><span class="liq-status-pill">Active</span></td></tr>
+              <tr data-platform="YouTube"><td>Travel With Arjun</td><td>YouTube</td><td>280K</td><td>4.8M</td><td>8.1%</td><td>₹70,000</td><td><span class="liq-status-pill">Active</span></td></tr>
+              <tr data-platform="Instagram"><td>Fitness Hub</td><td>Instagram, YouTube</td><td>210K</td><td>2.4M</td><td>5.9%</td><td>₹45,000</td><td><span class="liq-status-pill liq-status-inactive">Inactive</span></td></tr>
+              <tr data-platform="YouTube"><td>Study Capsule</td><td>YouTube, TikTok</td><td>190K</td><td>2.1M</td><td>6.7%</td><td>₹38,000</td><td><span class="liq-status-pill">Active</span></td></tr>
+            </tbody></table></div>
+          </section>
+          <div class="liq-demo-notice"><span aria-hidden="true">ⓘ</span><p><strong>Sample data:</strong> Creator portfolio metrics are illustrative.</p></div>
+        </div>
+
+        <div class="liq-role-view" data-role-dashboard="marketing" hidden>
+          <section class="liq-role-metrics" aria-label="Marketing campaign metrics">
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Total Campaigns</div><strong class="liq-kpi-value">8</strong><div class="liq-kpi-footer"><span>2 active</span></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Total Reach</div><strong class="liq-kpi-value">12.4M</strong><div class="liq-kpi-footer"><span>↗ 25.3%</span><small>vs. last month</small></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Total Engagement</div><strong class="liq-kpi-value">986K</strong><div class="liq-kpi-footer"><span>↗ 18.7%</span><small>vs. last month</small></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Total Spend</div><strong class="liq-kpi-value">₹4,20,000</strong><div class="liq-kpi-footer"><span>Across active campaigns</span></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Return on Investment</div><strong class="liq-kpi-value">3.2x</strong><div class="liq-kpi-footer"><span>↗ 12.5%</span><small>vs. last month</small></div></article>
+          </section>
+
+          <div class="liq-role-chart-grid liq-marketing-chart-grid">
+            <section class="liq-panel">
+              <div class="liq-panel-heading"><div><h2>Campaign Performance</h2><p>Reach, engagement, and conversion trends</p></div><select class="liq-glass-control" data-role-range="marketing" aria-label="Campaign performance range"><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></div>
+              <div class="liq-role-line-chart" role="img" aria-label="Marketing campaign performance trend"><div class="liq-role-y-labels"><span>8M</span><span>6M</span><span>4M</span><span>0</span></div><svg data-role-chart="marketing" viewBox="0 0 640 220" preserveAspectRatio="none"><path class="liq-grid-path" d="M0 20H640 M0 80H640 M0 140H640 M0 200H640"/><path data-role-series="0" class="liq-line-purple" d="M0 166 L80 151 L160 137 L240 124 L320 108 L400 93 L480 79 L560 61 L640 43"/><path data-role-series="1" class="liq-line-green" d="M0 190 L80 181 L160 169 L240 157 L320 147 L400 134 L480 119 L560 109 L640 94"/><path data-role-series="2" class="liq-line-blue" d="M0 202 L80 197 L160 188 L240 180 L320 169 L400 161 L480 150 L560 138 L640 128"/></svg></div>
+              <div class="liq-role-chart-legend"><span>Reach</span><span>Engagement</span><span>Conversions</span></div>
+            </section>
+            <section class="liq-panel">
+              <div class="liq-panel-heading"><div><h2>Top Performing Campaigns</h2><p>Ranked by engagement</p></div></div>
+              <div class="liq-campaign-bars"><div><span>Summer Sale</span><i style="--bar-width:92%"></i><b>8.4%</b></div><div><span>Back to College</span><i style="--bar-width:78%"></i><b>7.1%</b></div><div><span>New Product Launch</span><i style="--bar-width:65%"></i><b>6.3%</b></div><div><span>Festive Offer</span><i style="--bar-width:52%"></i><b>5.6%</b></div><div><span>Brand Awareness</span><i style="--bar-width:38%"></i><b>4.8%</b></div></div>
+            </section>
+          </div>
+
+          <section class="liq-panel liq-role-table-panel">
+            <div class="liq-panel-heading"><div><h2>Recent Campaigns</h2><p>Delivery and performance at a glance</p></div><select id="campaignStatusFilter" class="liq-glass-control" aria-label="Filter campaigns by status"><option value="All">All statuses</option><option>Active</option><option>Completed</option><option>Planning</option></select></div>
+            <div class="liq-table-scroll"><table class="liq-table"><thead><tr><th>Campaign</th><th>Creators</th><th>Platform</th><th>Reach</th><th>Engagement</th><th>Spend</th><th>Status</th></tr></thead><tbody id="campaignsBody">
+              <tr data-status="Active"><td>Summer Sale 2026</td><td>3</td><td>Instagram</td><td>4.2M</td><td>320K</td><td>₹1,20,000</td><td><span class="liq-status-pill">Active</span></td></tr>
+              <tr data-status="Active"><td>Back to College</td><td>4</td><td>YouTube</td><td>3.1M</td><td>240K</td><td>₹90,000</td><td><span class="liq-status-pill">Active</span></td></tr>
+              <tr data-status="Completed"><td>New Product Launch</td><td>2</td><td>Instagram</td><td>2.8M</td><td>180K</td><td>₹75,000</td><td><span class="liq-status-pill liq-status-complete">Completed</span></td></tr>
+              <tr data-status="Completed"><td>Festive Offer</td><td>3</td><td>TikTok</td><td>1.9M</td><td>120K</td><td>₹65,000</td><td><span class="liq-status-pill liq-status-complete">Completed</span></td></tr>
+              <tr data-status="Planning"><td>Brand Awareness</td><td>5</td><td>Multi-platform</td><td>1.5M</td><td>90K</td><td>₹70,000</td><td><span class="liq-status-pill liq-status-planning">Planning</span></td></tr>
+            </tbody></table></div>
+          </section>
+
+          <div class="liq-marketing-lower-grid">
+            <section class="liq-panel"><div class="liq-panel-heading"><div><h2>Content Distribution</h2><p>Published assets by format</p></div></div><div class="liq-role-donut-layout"><div class="liq-role-donut liq-content-donut"><strong>278</strong><span>Assets</span></div><div class="liq-role-legend"><div><i class="liq-swatch-purple"></i>Video <b>52%</b></div><div><i class="liq-swatch-blue"></i>Image <b>28%</b></div><div><i class="liq-swatch-red"></i>Reel / Short <b>15%</b></div><div><i class="liq-swatch-gray"></i>Carousel <b>5%</b></div></div></div></section>
+            <section class="liq-panel"><div class="liq-panel-heading"><div><h2>Audience by Location</h2><p>Campaign audience reach</p></div></div><div class="liq-location-bars"><div><span>India</span><i style="--bar-width:88%"></i><b>48%</b></div><div><span>United States</span><i style="--bar-width:62%"></i><b>26%</b></div><div><span>United Kingdom</span><i style="--bar-width:38%"></i><b>15%</b></div><div><span>Canada</span><i style="--bar-width:21%"></i><b>8%</b></div><div><span>Other</span><i style="--bar-width:10%"></i><b>3%</b></div></div></section>
+          </div>
+          <div class="liq-demo-notice"><span aria-hidden="true">ⓘ</span><p><strong>Sample data:</strong> Campaign analytics are illustrative.</p></div>
+        </div>
+
+        <div class="liq-role-view" data-role-dashboard="administrator" hidden>
+          <section class="liq-role-metrics" aria-label="Platform account metrics">
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Total Users</div><strong class="liq-kpi-value" id="adminTotalUsers">—</strong><div class="liq-kpi-footer"><span>All registered accounts</span></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Creators</div><strong class="liq-kpi-value" id="adminCreatorCount">—</strong><div class="liq-kpi-footer"><span>Creator workspaces</span></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Agencies</div><strong class="liq-kpi-value" id="adminAgencyCount">—</strong><div class="liq-kpi-footer"><span>Agency workspaces</span></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Marketing Teams</div><strong class="liq-kpi-value" id="adminMarketingCount">—</strong><div class="liq-kpi-footer"><span>Marketing workspaces</span></div></article>
+            <article class="liq-kpi-card"><div class="liq-kpi-heading">Active Users</div><strong class="liq-kpi-value" id="adminActiveCount">—</strong><div class="liq-kpi-footer"><span>Accounts in good standing</span></div></article>
+          </section>
+
+          <div class="liq-role-chart-grid">
+            <section class="liq-panel" id="adminGrowth"><div class="liq-panel-heading"><div><h2>User Growth</h2><p>Registered accounts by role</p></div></div><div class="liq-role-line-chart" role="img" aria-label="User growth by role"><div class="liq-role-y-labels"><span>200</span><span>150</span><span>100</span><span>0</span></div><svg data-role-chart="administrator" viewBox="0 0 640 220" preserveAspectRatio="none"><path class="liq-grid-path" d="M0 20H640 M0 80H640 M0 140H640 M0 200H640"/><path data-role-series="0" class="liq-line-red" d="M0 188 L80 176 L160 162 L240 145 L320 126 L400 107 L480 87 L560 69 L640 51"/><path data-role-series="1" class="liq-line-purple" d="M0 197 L80 191 L160 183 L240 175 L320 162 L400 151 L480 141 L560 128 L640 116"/><path data-role-series="2" class="liq-line-pink" d="M0 202 L80 199 L160 195 L240 189 L320 183 L400 177 L480 169 L560 160 L640 151"/></svg></div><div class="liq-role-chart-legend"><span>Creators</span><span>Agencies</span><span>Marketing Teams</span></div></section>
+            <section class="liq-panel"><div class="liq-panel-heading"><div><h2>Platform Usage</h2><p>Connected social channels</p></div></div><div class="liq-usage-bars"><div><span>YouTube</span><i style="--bar-width:96%"></i><b>148K</b></div><div><span>Instagram</span><i style="--bar-width:78%"></i><b>120K</b></div><div><span>TikTok</span><i style="--bar-width:61%"></i><b>94K</b></div><div><span>LinkedIn</span><i style="--bar-width:45%"></i><b>69K</b></div><div><span>Others</span><i style="--bar-width:30%"></i><b>45K</b></div></div></section>
+          </div>
+
+          <div class="liq-admin-grid">
+            <section class="liq-panel liq-role-table-panel" id="adminUsers"><div class="liq-panel-heading"><div><h2>Recent Users</h2><p>Account access and registration details</p></div><select id="adminRoleFilter" class="liq-glass-control" aria-label="Filter users by role"><option value="All">All roles</option><option value="creator">Creator</option><option value="agency">Agency</option><option value="marketing">Marketing</option><option value="administrator">Administrator</option></select></div><div class="liq-table-scroll"><table class="liq-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div></section>
+            <section class="liq-panel" id="adminActivity"><div class="liq-panel-heading"><div><h2>System Activity</h2><p>Latest workspace events</p></div></div><ul class="liq-activity-list"><li><i>✓</i><span><strong>New creator registered</strong><small>10 minutes ago</small></span></li><li><i>↗</i><span><strong>Campaign created</strong><small>35 minutes ago</small></span></li><li><i>⚙</i><span><strong>User role updated</strong><small>1 hour ago</small></span></li><li><i>⌘</i><span><strong>Platform integration added</strong><small>2 hours ago</small></span></li><li><i>▤</i><span><strong>Report generated</strong><small>3 hours ago</small></span></li></ul></section>
+          </div>
+
+          <section class="liq-panel liq-admin-panel" id="adminOverview" aria-labelledby="liqAdminTitle">
+            <div class="liq-panel-heading"><div><h2 id="liqAdminTitle">User Management</h2><p>Provision access for authorized administrators</p></div></div>
+            <p class="liq-admin-total">Registered accounts <strong id="liqAdminAccountCount">—</strong></p>
+            <div class="liq-admin-role-grid" id="liqAdminRoleCounts" aria-live="polite"></div>
+            <form class="liq-admin-create-form" id="liqAdminCreateForm">
+              <h3>Create administrator account</h3>
+              <label>Full name<input name="name" autocomplete="name" minlength="2" required></label>
+              <label>Email<input name="email" type="email" autocomplete="email" required></label>
+              <label>Temporary password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+              <button type="submit" class="liq-button liq-button-primary">Create administrator</button>
+              <p id="liqAdminCreateStatus" role="status" aria-live="polite"></p>
+            </form>
+          </section>
+          <div class="liq-demo-notice"><span aria-hidden="true">ⓘ</span><p><strong>Sample data:</strong> System activity and platform usage are illustrative; account counts and recent users are live.</p></div>
+        </div>
+
+        <footer class="liq-footer"><span>© 2026 CreatorIQ</span><span>Made for creators <span aria-hidden="true">✦</span></span></footer>
+      </section>
+    </main>
+
+    <div class="liq-toast" id="liqToast" role="status" aria-live="polite"></div>
+  </body>
+</html>
