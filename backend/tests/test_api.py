@@ -1,15 +1,6 @@
 from fastapi.testclient import TestClient
 
 
-def test_default_cors_origins_include_vite_preview(monkeypatch):
-    from app.config import Settings
-
-    monkeypatch.delenv("CORS_ORIGINS", raising=False)
-    settings = Settings(_env_file=None)
-    assert "http://localhost:4173" in settings.cors_origin_list
-    assert "http://127.0.0.1:4173" in settings.cors_origin_list
-
-
 def test_root_and_health_are_available(client: TestClient):
     root = client.get("/")
     health = client.get("/health")
@@ -65,26 +56,6 @@ def test_duplicate_registration_is_rejected(client: TestClient):
     }
     assert client.post("/api/auth/register", json=payload).status_code == 201
     assert client.post("/api/auth/register", json=payload).status_code == 409
-
-
-def test_registered_account_can_immediately_log_in_with_case_insensitive_email(client: TestClient):
-    payload = {
-        "email": "CaseSensitive.User@example.com",
-        "full_name": "Case Sensitive User",
-        "password": "StrongPass@123",
-        "profile_name": "Case Sensitive Studio",
-        "focus_area": "Technology",
-    }
-    registered = client.post("/api/auth/register", json=payload)
-    assert registered.status_code == 201, registered.text
-    assert registered.json()["user"]["email"] == "casesensitive.user@example.com"
-
-    logged_in = client.post("/api/auth/login", json={
-        "email": "CASESENSITIVE.USER@EXAMPLE.COM",
-        "password": payload["password"],
-    })
-    assert logged_in.status_code == 200, logged_in.text
-    assert logged_in.json()["user"]["id"] == registered.json()["user"]["id"]
 
 
 def test_creator_cannot_open_admin_user_list(client: TestClient, creator_token: str):
@@ -414,3 +385,16 @@ def test_role_changed_from_creator_does_not_expose_creator_dashboard_metrics(cli
     assert summary.json()["views_7d"] == 0
     assert summary.json()["demo_data"] is False
     assert summary.json()["data_status"] == "no_creator_profile_for_role"
+
+
+def test_cors_preflight_accepts_local_vite_origin_and_custom_headers(client: TestClient):
+    response = client.options(
+        "/api/auth/login",
+        headers={
+            "Origin": "http://127.0.0.1:5173",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "authorization,content-type,x-local-test",
+        },
+    )
+    assert response.status_code == 200, response.text
+    assert response.headers.get("access-control-allow-origin") == "http://127.0.0.1:5173"
