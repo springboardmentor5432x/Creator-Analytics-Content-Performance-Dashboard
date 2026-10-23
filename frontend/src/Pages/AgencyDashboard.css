@@ -11,8 +11,8 @@
   --agency-card: #fffdf7;
   --agency-lime: #c3ff35;
   --agency-lime-dark: #91b928;
-  --agency-muted: #858579;
-  --agency-border: #e2dfd4;
+  --agency-muted: #66675e;
+  --agency-border: #d8d5c9;
   --agency-green: #4f8665;
   --agency-orange: #c9824b;
 
@@ -1616,4 +1616,83 @@
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
+/* ========================================
+   AGENCY DASHBOARD — READABILITY FIX
+======================================== */
+
+/* Sidebar section labels */
+.agency-nav-label,
+.agency-section-kicker {
+  color: #b4b5a7;
+}
+
+/* Sidebar navigation */
+.agency-nav-item {
+  color: #c5c6ba;
+}
+
+/* Workspace and profile descriptions */
+.agency-workspace-copy span,
+.agency-profile-copy span {
+  color: #c0c1b5;
+}
+
+/* Agency plan card */
+.agency-plan-card p {
+  color: #d0d1c5;
+}
+
+.agency-plan-card small {
+  color: #c0c1b5;
+}
+
+/* Statistics card labels */
+.agency-stat-top {
+  color: #66675e;
+}
+
+/* Statistics supporting text */
+.agency-stat-foot {
+  color: #66675e;
+}
+
+/* Keep text readable on the featured dark card */
+.agency-stat-featured .agency-stat-top {
+  color: #dedfd4;
+}
+
+.agency-stat-featured .agency-stat-foot {
+  color: #dedfd4;
+}
+
+/* Campaign information */
+.agency-client-name,
+.agency-campaign-meta,
+.agency-progress-heading,
+.agency-budget-row {
+  color: #66675e;
+}
+
+/* Creator details */
+.agency-creator-info > span,
+.agency-creator-stats > span {
+  color: #66675e;
+}
+
+/* Recent activity */
+.agency-activity-copy > span,
+.agency-activity-copy small {
+  color: #66675e;
+}
+
+/* Empty states and footer */
+.agency-empty-state,
+.agency-footer {
+  color: #66675e;
+}
+
+/* Improve contrast in the campaign modal */
+.agency-campaign-modal p {
+  color: #55564d;
 }

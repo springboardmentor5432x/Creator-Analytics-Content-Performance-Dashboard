@@ -585,3 +585,78 @@ html {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ========================================
+   CREATORIQ — TEXT CONTRAST FIX
+======================================== */
+
+/* Login heading */
+.login-heading h2 {
+  color: #252620;
+}
+
+/* Role names: Creator, Agency, Marketing Team, Administrator */
+.role-copy strong {
+  color: #252620;
+}
+
+/* Role descriptions */
+.role-copy small {
+  color: #55564d;
+}
+
+/* Role icons */
+.role-icon {
+  color: #252620;
+}
+
+.role-option.selected .role-icon {
+  color: #252620;
+}
+
+/* Main form labels */
+.login-form label {
+  color: #252620;
+}
+
+/* Input text */
+.login-form input {
+  color: #252620;
+}
+
+.login-form input::placeholder {
+  color: #66675e;
+  opacity: 1;
+}
+
+/* Supporting text */
+.login-heading p {
+  color: #55564d;
+}
+
+.login-note {
+  color: #55564d;
+}
+
+/* Login button */
+.login-button {
+  color: #f3f0e7;
+  background-color: #252620;
+}
+
+/* Footer text on the dark branding panel */
+.brand-footer {
+  color: #c0c0b7;
+}
+/* Keep email and password inputs consistent with the design */
+.login-form input,
+.login-form input:-webkit-autofill,
+.login-form input:-webkit-autofill:hover,
+.login-form input:-webkit-autofill:focus,
+.login-form input:-webkit-autofill:active {
+  -webkit-text-fill-color: #252620 !important;
+  caret-color: #252620;
+  -webkit-box-shadow: 0 0 0 1000px #fffdf8 inset !important;
+  box-shadow: 0 0 0 1000px #fffdf8 inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+}

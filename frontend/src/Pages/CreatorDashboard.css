@@ -1170,3 +1170,49 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ========================================
+   CREATOR DASHBOARD — TEXT CONTRAST FIX
+======================================== */
+
+/* Main dashboard heading */
+.dashboard-main h1,
+.dashboard-content h1,
+.welcome-heading {
+  color: #252620;
+}
+
+/* Section headings */
+.dashboard-main h2,
+.dashboard-content h2,
+.dashboard-card h2,
+.chart-card h2,
+.panel-title {
+  color: #252620;
+}
+
+/* Supporting descriptions */
+.dashboard-main p,
+.dashboard-content p {
+  color: #66675E;
+}
+
+/* Keep sidebar text readable on dark background */
+.sidebar,
+.sidebar a,
+.sidebar button {
+  color: #C0C0B7;
+}
+
+/* Active sidebar item */
+.sidebar .active,
+.sidebar a.active {
+  color: #252620;
+}
+
+/* Statistics */
+.stat-value,
+.stat-number,
+.metric-value {
+  color: #252620;
+}

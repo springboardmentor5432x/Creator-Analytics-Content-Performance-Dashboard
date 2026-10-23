@@ -1812,3 +1812,53 @@
     padding: 23px 18px;
   }
 }
+/* ========================================
+   MARKETING DASHBOARD — CONTRAST FIX
+======================================== */
+
+/* Main heading */
+.marketing-dashboard .marketing-welcome h1 {
+  color: #25271f;
+}
+
+/* Keep the highlighted heading text in green */
+.marketing-dashboard .marketing-welcome h1 span {
+  color: #6f8e20;
+}
+
+/* Metric numbers: reach, engagement, impressions, spend */
+.marketing-dashboard .marketing-stat-card > h2 {
+  color: #25271f;
+}
+
+/* Chart and platform summary numbers */
+.marketing-dashboard .marketing-chart-summary > strong,
+.marketing-dashboard .marketing-platform-total h2 {
+  color: #25271f;
+}
+
+/* Section headings */
+.marketing-dashboard .marketing-panel-header h3 {
+  color: #25271f;
+}
+
+/* Supporting text */
+.marketing-dashboard .marketing-stat-bottom,
+.marketing-dashboard .marketing-stat-caption,
+.marketing-dashboard .marketing-panel-header p {
+  color: #66675e;
+}
+
+/* Chart labels */
+.marketing-dashboard .marketing-chart-y-axis,
+.marketing-dashboard .marketing-chart-x-axis,
+.marketing-dashboard .marketing-chart-footer {
+  color: #66675e;
+}
+
+/* Platform descriptions */
+.marketing-dashboard .marketing-platform-total > div > span,
+.marketing-dashboard .marketing-platform-name div > span,
+.marketing-dashboard .marketing-platform-value span {
+  color: #66675e;
+}
