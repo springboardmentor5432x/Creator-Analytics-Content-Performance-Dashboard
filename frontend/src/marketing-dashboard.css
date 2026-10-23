@@ -1,0 +1,529 @@
+
+* {
+  box-sizing: border-box;
+}
+
+.marketing-dashboard {
+  min-height: 100vh;
+  display: flex;
+  background: #f5f6fb;
+  color: #20243a;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.marketing-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  padding: 27px 17px;
+  background: #17172e;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.marketing-brand,
+.marketing-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.marketing-brand {
+  padding: 0 8px 30px;
+}
+
+.marketing-logo {
+  width: 43px;
+  height: 43px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #8677ff, #5a49dd);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.marketing-brand h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.marketing-brand span,
+.marketing-user span {
+  display: block;
+  margin-top: 4px;
+  color: #a7a7c5;
+  font-size: 11px;
+}
+
+.marketing-user {
+  padding: 16px 10px;
+  background: #232340;
+  border-radius: 13px;
+  margin-bottom: 30px;
+  min-width: 0;
+}
+
+.marketing-user strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.marketing-avatar {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #dcd7ff;
+  color: #5141ca;
+  font-weight: 800;
+}
+
+.marketing-avatar.small {
+  width: 38px;
+  height: 38px;
+}
+
+.marketing-menu-label {
+  padding-left: 12px;
+  color: #777895;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.marketing-nav {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 13px 14px;
+  margin: 3px 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #b9b9d2;
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.marketing-nav span {
+  width: 20px;
+  font-size: 19px;
+  text-align: center;
+}
+
+.marketing-nav:hover,
+.marketing-nav.active {
+  color: white;
+  background: #6253df;
+}
+
+.marketing-sidebar-bottom {
+  margin-top: auto;
+  padding: 18px 12px;
+  border: 1px solid #353552;
+  border-radius: 12px;
+}
+
+.marketing-sidebar-bottom span {
+  color: #a69cff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.marketing-sidebar-bottom p {
+  margin-bottom: 0;
+  color: #b6b6d0;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.marketing-main {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 32px;
+}
+
+.marketing-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+.marketing-topbar p {
+  margin: 0 0 7px;
+  color: #9296aa;
+  font-size: 12px;
+}
+
+.marketing-topbar h1 {
+  margin: 0;
+  font-size: 27px;
+}
+
+.marketing-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.marketing-status {
+  color: #159b7c;
+  font-size: 12px;
+}
+
+.marketing-welcome {
+  min-height: 170px;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  color: white;
+  border-radius: 18px;
+  background: linear-gradient(115deg, #5143c6, #8c72f1);
+  box-shadow: 0 12px 30px #6253df20;
+}
+
+.marketing-eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: #d9d4ff;
+}
+
+.marketing-welcome h2 {
+  margin: 12px 0 8px;
+  font-size: clamp(22px, 3vw, 31px);
+}
+
+.marketing-welcome p {
+  margin: 0;
+  color: #e4e0ff;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.marketing-welcome-icon {
+  width: 75px;
+  height: 75px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid #ffffff55;
+  border-radius: 22px;
+  background: #ffffff20;
+  font-size: 42px;
+}
+
+.marketing-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 17px;
+  margin: 24px 0;
+}
+
+.marketing-stat,
+.marketing-card {
+  padding: 22px;
+  background: white;
+  border: 1px solid #eceef5;
+  border-radius: 15px;
+  box-shadow: 0 5px 18px #1c245008;
+}
+
+.marketing-stat > span {
+  color: #777d92;
+  font-size: 12px;
+}
+
+.marketing-stat h2 {
+  margin: 14px 0 8px;
+  font-size: 28px;
+  overflow-wrap: anywhere;
+}
+
+.marketing-stat p {
+  margin: 0;
+  color: #777d92;
+  font-size: 11px;
+}
+
+.marketing-stat .positive {
+  color: #119b79;
+  font-weight: 700;
+}
+
+.marketing-stat .positive span {
+  color: #85899a;
+  font-weight: 400;
+}
+
+.marketing-chart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.marketing-wide {
+  grid-column: span 1;
+}
+
+.marketing-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.marketing-card-heading h3,
+.marketing-report h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.marketing-card-heading p {
+  margin: 7px 0 0;
+  color: #9296aa;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.marketing-chip {
+  padding: 7px 10px;
+  background: #f1efff;
+  color: #6253df;
+  border-radius: 7px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.marketing-table-card {
+  margin-top: 20px;
+}
+
+.marketing-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.marketing-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.marketing-table th {
+  padding: 13px 12px;
+  background: #f7f7fc;
+  color: #85899d;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.marketing-table td {
+  padding: 17px 12px;
+  border-bottom: 1px solid #eff0f6;
+  color: #60667b;
+  font-size: 12px;
+}
+
+.marketing-table td strong {
+  color: #272b40;
+}
+
+.marketing-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.marketing-badge.active {
+  background: #e5f8f1;
+  color: #138566;
+}
+
+.marketing-badge.completed {
+  background: #eeeeff;
+  color: #6253df;
+}
+
+.marketing-creator-heading {
+  flex-wrap: wrap;
+}
+
+.marketing-search {
+  width: min(250px, 100%);
+  padding: 11px 13px;
+  border: 1px solid #e1e4ee;
+  border-radius: 9px;
+  outline: none;
+  font-size: 12px;
+}
+
+.marketing-search:focus {
+  border-color: #7162e8;
+  box-shadow: 0 0 0 3px #7162e81a;
+}
+
+.marketing-engagement {
+  padding: 6px 9px;
+  background: #e5f8f1;
+  color: #138566;
+  border-radius: 7px;
+  font-weight: 700;
+}
+
+.marketing-report {
+  max-width: 620px;
+  margin: 25px auto;
+  padding: 40px;
+  text-align: center;
+}
+
+.marketing-report-icon {
+  width: 65px;
+  height: 65px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: #efedff;
+  color: #6253df;
+  font-size: 32px;
+}
+
+.marketing-report p {
+  color: #85899d;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.marketing-primary-button {
+  margin-top: 15px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 9px;
+  background: #6253df;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.marketing-primary-button:hover {
+  background: #4e40c4;
+}
+
+@media (max-width: 1100px) {
+  .marketing-main {
+    padding: 24px 20px;
+  }
+
+  .marketing-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .marketing-chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .marketing-dashboard {
+    display: block;
+  }
+
+  .marketing-sidebar {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .marketing-brand {
+    padding-bottom: 15px;
+  }
+
+  .marketing-user {
+    margin-bottom: 12px;
+  }
+
+  .marketing-menu-label,
+  .marketing-sidebar-bottom {
+    display: none;
+  }
+
+  .marketing-sidebar {
+    display: block;
+  }
+
+  .marketing-nav {
+    display: inline-flex;
+    width: auto;
+    margin: 3px 2px;
+    padding: 10px;
+  }
+
+  .marketing-nav span {
+    display: none;
+  }
+
+  .marketing-main {
+    padding: 20px 13px;
+  }
+
+  .marketing-topbar h1 {
+    font-size: 23px;
+  }
+
+  .marketing-status {
+    display: none;
+  }
+
+  .marketing-welcome {
+    min-height: 150px;
+    padding: 22px;
+  }
+
+  .marketing-welcome-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    font-size: 27px;
+  }
+
+  .marketing-stats {
+    gap: 10px;
+  }
+
+  .marketing-stat,
+  .marketing-card {
+    padding: 15px;
+  }
+
+  .marketing-stat h2 {
+    font-size: 23px;
+  }
+
+  .marketing-stat p {
+    line-height: 1.6;
+  }
+
+  .marketing-card-heading {
+    align-items: flex-start;
+  }
+
+  .marketing-report {
+    padding: 25px 17px;
+  }
+}

@@ -1,0 +1,63 @@
+/* CreatorIQ Role Dashboard */
+.role-dashboard {
+  margin-top: 28px;
+  padding-bottom: 30px;
+}
+
+.role-dashboard h1 {
+  font-size: 30px;
+  color: #171b3b;
+  margin-bottom: 10px;
+}
+
+.role-dashboard > p {
+  color: #777f98;
+  margin-bottom: 28px;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 25px;
+}
+
+.dashboard-card {
+  background: #ffffff;
+  border: 1px solid #e8e8f3;
+  border-radius: 18px;
+  padding: 24px;
+  min-height: 165px;
+  box-shadow: 0 8px 24px rgba(35, 29, 85, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(35, 29, 85, 0.1);
+}
+
+.dashboard-card h3 {
+  color: #77728f;
+  font-size: 15px;
+  margin: 0 0 18px;
+}
+
+.dashboard-card h2 {
+  color: #6d50e8;
+  font-size: 25px;
+  margin: 0 0 12px;
+}
+
+.dashboard-card p {
+  color: #7b8198;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 800px) {
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+}
