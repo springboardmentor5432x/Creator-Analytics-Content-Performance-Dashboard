@@ -25,6 +25,8 @@ FRONTEND=os.getenv('FRONTEND_ORIGIN','http://localhost:5173')
 BACKEND=os.getenv('BACKEND_PUBLIC_URL','http://127.0.0.1:8000')
 GOOGLE_ID=os.getenv('GOOGLE_CLIENT_ID',''); GOOGLE_SECRET=os.getenv('GOOGLE_CLIENT_SECRET','')
 GOOGLE_REDIRECT=os.getenv('GOOGLE_REDIRECT_URI',BACKEND+'/api/oauth/youtube/callback')
+SPOTIFY_ID=os.getenv('SPOTIFY_CLIENT_ID',''); SPOTIFY_SECRET=os.getenv('SPOTIFY_CLIENT_SECRET','')
+SPOTIFY_REDIRECT=os.getenv('SPOTIFY_REDIRECT_URI',BACKEND+'/api/oauth/spotify/callback')
 YT='https://www.googleapis.com/youtube/v3'; YTA='https://youtubeanalytics.googleapis.com/v2/reports'
 SCOPES=['https://www.googleapis.com/auth/youtube.readonly','https://www.googleapis.com/auth/yt-analytics.readonly']
 
@@ -81,6 +83,7 @@ def current_user(authorization:Optional[str]=Header(default=None),db:Session=Dep
 class SignupIn(BaseModel): name:str=Field(min_length=1,max_length=100); email:EmailStr; role:str; password:str=Field(min_length=8,max_length=128)
 class LoginIn(BaseModel): email:EmailStr; password:str
 class ForgotIn(BaseModel): email:EmailStr; new_password:str=Field(min_length=8,max_length=128)
+class DeleteAccountIn(BaseModel): password:str=Field(min_length=1,max_length=128)
 @app.get('/api/health')
 def health(): return {'status':'ok','service':'creatorhub-fastapi','database':'configured' if DATABASE_URL.startswith('postgresql') else 'local-development-sqlite','youtube_oauth_configured':bool(GOOGLE_ID and GOOGLE_SECRET),'timestamp':datetime.now(timezone.utc).isoformat()}
 @app.post('/api/auth/signup')
@@ -106,6 +109,68 @@ def forgot(data:ForgotIn,db:Session=Depends(get_db)):
     user.password_hash=password_hash.hash(data.new_password); db.commit(); return {'message':'Password updated. Please sign in.'}
 @app.get('/api/auth/me')
 def me(user:User=Depends(current_user)): return {'id':user.id,'name':user.name,'email':user.email,'role':user.role}
+
+@app.delete('/api/social-accounts/{account_id}')
+def disconnect_social_account(account_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    """Disconnect a social account owned by the signed-in creator."""
+    if not user.creator:
+        raise HTTPException(status_code=403, detail='A creator account is required to manage social accounts.')
+
+    account = db.scalar(
+        select(SocialAccount).where(
+            SocialAccount.id == account_id,
+            SocialAccount.creator_id == user.creator.id,
+        )
+    )
+    if not account:
+        raise HTTPException(status_code=404, detail='Social account not found in your account.')
+
+    # Best-effort token revocation for Google/YouTube. Removing the local record
+    # still works if the provider revocation endpoint is temporarily unavailable.
+    if account.platform.lower() == 'youtube' and account.access_token:
+        try:
+            requests.post(
+                'https://oauth2.googleapis.com/revoke',
+                params={'token': account.access_token},
+                headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                timeout=10,
+            )
+        except requests.RequestException:
+            pass
+
+    try:
+        # Delete dependent analytics explicitly so this works even where database
+        # foreign-key cascade enforcement is not enabled (for example SQLite).
+        db.query(AudienceSnapshot).filter(AudienceSnapshot.account_id == account.id).delete(synchronize_session=False)
+        db.query(DailyMetric).filter(DailyMetric.account_id == account.id).delete(synchronize_session=False)
+        db.delete(account)  # ORM cascade removes the account's posts.
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500, detail='Could not disconnect this account. Please try again.')
+
+    return {'message': 'Social account disconnected successfully.', 'account_id': account_id}
+
+@app.delete('/api/auth/delete-account')
+def delete_account(data: DeleteAccountIn, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    """Permanently delete the signed-in user's account after password verification."""
+    if not password_hash.verify(data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail='Password is incorrect. Account was not deleted.')
+
+    try:
+        # Delete per-account analytics explicitly before deleting the user/creator.
+        if user.creator:
+            account_ids = select(SocialAccount.id).where(SocialAccount.creator_id == user.creator.id)
+            db.query(AudienceSnapshot).filter(AudienceSnapshot.account_id.in_(account_ids)).delete(synchronize_session=False)
+            db.query(DailyMetric).filter(DailyMetric.account_id.in_(account_ids)).delete(synchronize_session=False)
+        db.query(OAuthState).filter(OAuthState.user_id == user.id).delete(synchronize_session=False)
+        db.delete(user)  # User.creator and Creator.accounts have ORM delete cascades.
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500, detail='Could not delete your account. Please try again.')
+
+    return {'message': 'Your account and associated data have been deleted successfully.'}
 
 def google_get(url,token,params=None):
     r=requests.get(url,headers={'Authorization':f'Bearer {token}'},params=params,timeout=25)
@@ -145,16 +210,106 @@ def youtube_callback(code:str|None=None,state:str|None=None,error:str|None=None,
 def social_accounts(user:User=Depends(current_user),db:Session=Depends(get_db)):
     creator=user.creator
     accounts=[] if not creator else db.scalars(select(SocialAccount).where(SocialAccount.creator_id==creator.id)).all()
-    result=[{'provider':a.platform.title(),'connected':True,'username':a.username,'followers':a.followers,'connectedAt':a.connected_at.isoformat()} for a in accounts]
-    for platform,requires in [('instagram','Meta app credentials and eligible Instagram professional account'),('tiktok','TikTok app credentials and approved scopes'),('linkedin','LinkedIn developer app and approved product permissions')]:
+    result=[{'id':a.id,'provider':a.platform.title(),'connected':True,'username':a.username,'followers':a.followers,'connectedAt':a.connected_at.isoformat(),'profileUrl':('https://open.spotify.com/user/'+a.platform_user_id if a.platform.lower()=='spotify' else ('https://www.youtube.com/channel/'+a.platform_user_id if a.platform.lower()=='youtube' else None))} for a in accounts]
+    for platform,requires in [('instagram','Meta app credentials and eligible Instagram professional account'),('spotify','Spotify developer app credentials and account authorization'),('linkedin','LinkedIn developer app and approved product permissions')]:
         if not any(a.platform==platform for a in accounts): result.append({'provider':platform.title(),'connected':False,'requires':requires})
     return {'accounts':result}
+@app.get('/api/oauth/spotify/start')
+def spotify_start(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    """Begin Spotify account authorization to read the signed-in user's profile."""
+    if not SPOTIFY_ID or not SPOTIFY_SECRET:
+        raise HTTPException(503, 'Spotify OAuth is not configured. Add SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET to backend/.env.')
+    state = secrets.token_urlsafe(32)
+    db.add(OAuthState(state=state, user_id=user.id, expires_at=datetime.now(timezone.utc) + timedelta(minutes=10)))
+    db.commit()
+    params = {
+        'client_id': SPOTIFY_ID,
+        'response_type': 'code',
+        'redirect_uri': SPOTIFY_REDIRECT,
+        'scope': 'user-read-private user-read-email',
+        'state': state,
+    }
+    return {'authorization_url': 'https://accounts.spotify.com/authorize?' + urlencode(params)}
+
+
+@app.get('/api/oauth/spotify/callback')
+def spotify_callback(code: str | None = None, state: str | None = None, error: str | None = None, db: Session = Depends(get_db)):
+    if error:
+        return RedirectResponse(FRONTEND + '/?spotify=error')
+    record = db.get(OAuthState, state) if state else None
+    if not record or record.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(400, 'Spotify authorization state is invalid or expired. Try connecting again.')
+    user = db.get(User, record.user_id)
+    db.delete(record)
+    db.commit()
+    if not user or not user.is_active:
+        raise HTTPException(401, 'The CreatorHub account that started this connection is unavailable.')
+    if not code:
+        raise HTTPException(400, 'Spotify authorization code is missing.')
+
+    try:
+        token_response = requests.post(
+            'https://accounts.spotify.com/api/token',
+            data={'grant_type': 'authorization_code', 'code': code, 'redirect_uri': SPOTIFY_REDIRECT},
+            auth=(SPOTIFY_ID, SPOTIFY_SECRET),
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            timeout=20,
+        )
+        if not token_response.ok:
+            raise HTTPException(502, 'Spotify could not complete authorization. Check the app credentials and redirect URI.')
+        token_data = token_response.json()
+        access_token = token_data['access_token']
+        profile_response = requests.get(
+            'https://api.spotify.com/v1/me',
+            headers={'Authorization': f'Bearer {access_token}'},
+            timeout=20,
+        )
+        if not profile_response.ok:
+            raise HTTPException(502, 'Spotify authorized the app, but the profile could not be retrieved.')
+        profile = profile_response.json()
+    except requests.RequestException:
+        raise HTTPException(502, 'Could not contact Spotify. Please try connecting again.')
+
+    creator = user.creator
+    if not creator:
+        creator = Creator(user_id=user.id, creator_name=user.name)
+        db.add(creator)
+        db.flush()
+
+    spotify_user_id = profile.get('id')
+    if not spotify_user_id:
+        raise HTTPException(502, 'Spotify did not return a profile ID for this account.')
+    account = db.scalar(select(SocialAccount).where(
+        SocialAccount.creator_id == creator.id,
+        SocialAccount.platform == 'spotify',
+        SocialAccount.platform_user_id == spotify_user_id,
+    ))
+    if not account:
+        account = SocialAccount(
+            creator_id=creator.id,
+            platform='spotify',
+            platform_user_id=spotify_user_id,
+            username=profile.get('display_name') or spotify_user_id,
+            access_token=access_token,
+        )
+        db.add(account)
+    account.username = profile.get('display_name') or spotify_user_id
+    account.followers = int((profile.get('followers') or {}).get('total') or 0)
+    account.channel_views = 0
+    account.total_posts = 0
+    account.access_token = access_token
+    account.refresh_token = token_data.get('refresh_token') or account.refresh_token
+    account.token_expires_at = datetime.now(timezone.utc) + timedelta(seconds=int(token_data.get('expires_in', 3600)))
+    db.commit()
+    return RedirectResponse(FRONTEND + '/?spotify=connected')
+
+
 @app.get('/api/oauth/{provider}/start')
 def oauth_provider_setup(provider: str, user: User = Depends(current_user)):
     provider = provider.lower()
     requirements = {
         'instagram': 'Instagram connection is not yet enabled. Configure a Meta developer app, eligible Instagram professional account, OAuth callback, and approved permissions before connecting.',
-        'tiktok': 'TikTok connection is not yet enabled. Configure a TikTok developer app, Login Kit, OAuth callback, and approved API scopes before connecting.',
+        'spotify': 'Spotify connection is not yet enabled. Configure SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, and the Spotify OAuth callback in backend/.env.',
         'linkedin': 'LinkedIn connection is not yet enabled. Configure a LinkedIn developer app, the required products/permissions, and OAuth callback before connecting.',
     }
     if provider not in requirements:
@@ -209,7 +364,7 @@ def analytics_overview(user:User=Depends(current_user),db:Session=Depends(get_db
         rows=db.scalars(select(DailyMetric).where(DailyMetric.account_id==a.id).order_by(DailyMetric.date)).all()
         weekly.extend([{'date':r.date.isoformat(),'day':r.date.strftime('%a'),'views':r.total_views,'likes':r.total_likes,'comments':r.total_comments,'shares':r.total_shares} for r in rows])
         snaps=db.scalars(select(AudienceSnapshot).where(AudienceSnapshot.account_id==a.id).order_by(AudienceSnapshot.date)).all()
-        growth.extend([{'date':s.date.isoformat(),'youtube':s.followers,'instagram':None,'tiktok':None,'linkedin':None} for s in snaps])
+        growth.extend([{'date':s.date.isoformat(),'youtube':s.followers,'instagram':None,'spotify':None,'linkedin':None} for s in snaps])
     followers=sum(a.followers for a in accounts); count=sum(a.total_posts for a in accounts)
     metrics=[{'label':'Followers','value':f'{followers:,}','change':'—','icon':'users','tone':'violet','note':'Authorized channel total'},{'label':'Total Views','value':f'{sum(a.channel_views for a in accounts):,}','change':'—','icon':'eye','tone':'blue','note':'Lifetime channel views'},{'label':'Published Posts','value':f'{count:,}','change':'—','icon':'video','tone':'amber','note':'Channel video count'},{'label':'Views (fetched videos)','value':f"{totals['views']:,}",'change':'—','icon':'eye','tone':'green','note':f'{len(all_posts)} videos synchronized'}]
     return {'connected':True,'mode':'live','message':'Live YouTube data synchronized.' if not errors else 'Live channel/video data loaded. '+errors[0],'metrics':metrics,'posts':all_posts,'growth':growth,'weekly':weekly,'audience':{'followers':followers,'demographics':None,'note':'YouTube does not expose audience age/gender/location through this API integration.'},'lastUpdated':datetime.now(timezone.utc).isoformat(),'errors':errors,'comparisonAvailable':len(all_posts)>1}
@@ -224,8 +379,93 @@ def compare_posts(ids:str=Query(...,description='Comma-separated post IDs'),user
     if len(posts)!=len(set(parsed)): raise HTTPException(404,'One or more posts were not found in your account.')
     return {'posts':[{'id':p.id,'title':p.title,'views':p.views,'likes':p.likes,'comments':p.comments,'engagementRate':p.engagement_rate,'reach':p.reach} for p in posts]}
 @app.get('/api/analytics/audience')
-def audience(user:User=Depends(current_user),db:Session=Depends(get_db)):
-    if not user.creator: return {'followers':None,'growth':[],'demographics':None,'message':'Audience analytics are available for creator accounts.'}
-    accounts=db.scalars(select(SocialAccount).where(SocialAccount.creator_id==user.creator.id)).all(); snaps=[]
-    for a in accounts: snaps.extend(db.scalars(select(AudienceSnapshot).where(AudienceSnapshot.account_id==a.id).order_by(AudienceSnapshot.date)).all())
-    return {'followers':sum(a.followers for a in accounts),'growth':[{'date':s.date.isoformat(),'followers':s.followers} for s in sorted(snaps,key=lambda x:x.date)],'demographics':None,'message':'Demographics are not provided by the current YouTube API scopes.'}
+def audience(
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db)
+):
+    if not user.creator:
+        return {
+            "followers": None,
+            "growth": [],
+            "demographics": None,
+            "message": "Audience analytics are available for creator accounts."
+        }
+
+    accounts = db.scalars(
+        select(SocialAccount).where(
+            SocialAccount.creator_id == user.creator.id
+        )
+    ).all()
+
+    if not accounts:
+        return {
+            "followers": 0,
+            "growth": [],
+            "demographics": None,
+            "message": "Connect YouTube to view audience analytics."
+        }
+
+    snapshots = []
+
+    for account in accounts:
+        snapshots.extend(
+            db.scalars(
+                select(AudienceSnapshot)
+                .where(AudienceSnapshot.account_id == account.id)
+                .order_by(AudienceSnapshot.date)
+            ).all()
+        )
+
+    growth = [
+        {
+            "date": snapshot.date.isoformat(),
+            "followers": snapshot.followers
+        }
+        for snapshot in sorted(snapshots, key=lambda item: item.date)
+    ]
+
+    return {
+        "followers": sum(account.followers for account in accounts),
+        "growth": growth,
+        "demographics": None,
+        "message": (
+            "Subscriber and growth data are available. "
+            "Audience demographics require an eligible analytics report."
+        )
+    }
+@app.get('/api/analytics/revenue')
+def revenue(
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db)
+):
+    if not user.creator:
+        return {
+            "available": False,
+            "revenue": None,
+            "currency": None,
+            "message": "Revenue analytics require a creator account."
+        }
+
+    accounts = db.scalars(
+        select(SocialAccount).where(
+            SocialAccount.creator_id == user.creator.id
+        )
+    ).all()
+
+    if not accounts:
+        return {
+            "available": False,
+            "revenue": None,
+            "currency": None,
+            "message": "Connect an eligible monetization account."
+        }
+
+    return {
+        "available": False,
+        "revenue": None,
+        "currency": None,
+        "message": (
+            "A connected YouTube channel was found, but revenue reporting "
+            "has not yet been implemented."
+        )
+    }
