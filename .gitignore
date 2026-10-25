@@ -1,0 +1,6 @@
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.examplegit ls-files
