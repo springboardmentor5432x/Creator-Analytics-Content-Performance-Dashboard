@@ -1,4 +1,4 @@
-# CreatorHub --- Content Intelligence Platform
+# CreatorHub - Content Intelligence Platform
 
 A role-based social media analytics dashboard designed to help creators
 and teams connect social accounts, monitor content performance, and
