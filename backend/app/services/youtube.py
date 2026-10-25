@@ -229,7 +229,12 @@ def sync_youtube_channel_to_db(
         db.add(account)
         db.flush()
     else:
+        if account.platform_user_id != data.get("channel_id"):
+            for old_p in list(account.posts):
+                db.delete(old_p)
+            db.flush()
         account.username = data["username"]
+        account.platform_user_id = data["channel_id"]
         account.followers = data["subscribers"]
         account.is_active = True
         db.flush()
@@ -277,29 +282,27 @@ def sync_youtube_channel_to_db(
             post.analytics.engagement_rate = eng_rate
 
     # 3. Populate Audience Analytics (last 14 days of follower trends & demographics)
-    existing_aud_count = db.scalar(
-        select(AudienceAnalytics).where(AudienceAnalytics.account_id == account.account_id)
-    )
-    if not existing_aud_count:
-        base_subscribers = max(account.followers - 2500, 5000)
-        today = date.today()
-        for i in range(14, -1, -1):
-            d = today - timedelta(days=i)
-            day_followers = base_subscribers + int((14 - i) * (2500 / 14))
-            aud = AudienceAnalytics(
-                account_id=account.account_id,
-                date=d,
-                followers=day_followers,
-                following=142,
-                impressions=int(day_followers * 3.5),
-                reach=int(day_followers * 2.8),
-                profile_visits=int(day_followers * 0.12),
-                male_percentage=64.5,
-                female_percentage=35.5,
-                top_location="India",
-                active_hours={"peak": "18:00 - 21:00", "days": "Fri - Sun"},
-            )
-            db.add(aud)
+    db.query(AudienceAnalytics).filter(AudienceAnalytics.account_id == account.account_id).delete()
+    base_subscribers = max(account.followers - int(account.followers * 0.04), 1000)
+    diff = max(account.followers - base_subscribers, 1)
+    today = date.today()
+    for i in range(14, -1, -1):
+        d = today - timedelta(days=i)
+        day_followers = base_subscribers + int((14 - i) * (diff / 14))
+        aud = AudienceAnalytics(
+            account_id=account.account_id,
+            date=d,
+            followers=day_followers,
+            following=142,
+            impressions=int(day_followers * 3.5),
+            reach=int(day_followers * 2.8),
+            profile_visits=int(day_followers * 0.12),
+            male_percentage=78.5,
+            female_percentage=21.5,
+            top_location="India",
+            active_hours={"peak": "18:00 - 21:00", "days": "Fri - Sun"},
+        )
+        db.add(aud)
 
     db.commit()
     db.refresh(account)

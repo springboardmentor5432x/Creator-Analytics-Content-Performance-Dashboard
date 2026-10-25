@@ -42,7 +42,9 @@ function CreatorDashboard() {
     setSyncing(true);
     setSyncMsg("");
     try {
-      const res = await api.post("/api/analytics/youtube/sync", { channel_handle: "@techcreator" });
+      const h = window.prompt("Enter YouTube Channel handle (e.g. @CodeWithHarry, @MrBeast):", "@CodeWithHarry");
+    if (!h) { setSyncing(false); return; }
+    const res = await api.post("/api/analytics/youtube/sync", { channel_handle: h.trim() });
       setSyncMsg(res.data.message || "Channel synced successfully!");
       loadPosts();
     } catch (err) {
@@ -62,13 +64,13 @@ function CreatorDashboard() {
             {p}
           </button>
         ))}
-        <button className="chip ghost" onClick={handleSync} disabled={syncing} title="Sync YouTube Channel from database or API">
-          <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync YouTube"}
+        <button className="chip ghost" onClick={handleSync} disabled={syncing} title="Sync Any Channel Channel from database or API">
+          <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync Any Channel"}
         </button>
       </div>
 
       <p className="sample-note">
-        <span className="sample-pill live">Live</span> Connected to YouTube Channel: <strong>@techcreator</strong> (PostgreSQL + Analytics API)
+        <span className="sample-pill live">Live</span> Connected to YouTube Channel: <strong>@CodeWithHarry</strong> (10M Subscribers • YouTube Data API v3)
         {syncMsg && <span className="sample-pill live">✓ {syncMsg}</span>}
       </p>
 
