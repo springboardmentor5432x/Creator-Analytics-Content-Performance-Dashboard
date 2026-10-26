@@ -1,0 +1,19 @@
+﻿# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.env
+
+# Node
+node_modules/
+dist/
+.env
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/

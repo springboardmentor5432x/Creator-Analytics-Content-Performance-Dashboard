@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CreatorIQ - Module 1 Database Schema</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+      --pk: #f59e0b;
+      --fk: #38bdf8;
+      --badge-bg: rgba(99, 102, 241, 0.15);
+      --badge-border: rgba(99, 102, 241, 0.3);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 36px;
+      max-width: 900px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      color: #a5b4fc;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    p.sub {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .schema-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 28px;
+      max-width: 1200px;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .table-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .table-header {
+      padding: 16px 20px;
+      background: #192233;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .table-name {
+      font-size: 17px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffffff;
+    }
+    .table-icon {
+      font-size: 16px;
+    }
+    .table-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+    .columns-list {
+      list-style: none;
+      padding: 8px 0;
+    }
+    .column-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 20px;
+      font-size: 13.5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    .column-item:last-child {
+      border-bottom: none;
+    }
+    .col-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .key-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 5px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+    .key-pk {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--pk);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .key-fk {
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--fk);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .col-name {
+      font-weight: 500;
+      color: #e2e8f0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .col-type {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .relations-card {
+      max-width: 1200px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    .relations-card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .relations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .rel-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .rel-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .rel-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .footer-note {
+      margin-top: 24px;
+      font-size: 13px;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="badge">Module 1 Implementation</div>
+    <h1>CreatorIQ Database Architecture</h1>
+    <p class="sub">Exact PostgreSQL relational schema implemented in Module 1 for User Management & Role-Based Profiles.</p>
+  </div>
+
+  <div class="schema-container">
+
+    <!-- USERS TABLE -->
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-name"><span class="table-icon">👤</span> users</span>
+        <span class="table-tag">Primary Auth</span>
+      </div>
+      <ul class="columns-list">
+        <li class="column-item">
+          <div class="col-left"><span class="key-badge key-pk">PK</span><span class="col-name">user_id</span></div>
+          <span class="col-type">INTEGER</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">name</span></div>
+          <span class="col-type">VARCHAR(100)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">email</span></div>
+          <span class="col-type">VARCHAR(100) UNIQUE</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">password_hash</span></div>
+          <span class="col-type">VARCHAR(255)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">role</span></div>
+          <span class="col-type">VARCHAR(50) [CHECK]</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">is_active</span></div>
+          <span class="col-type">BOOLEAN (default: true)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">created_at</span></div>
+          <span class="col-type">TIMESTAMP</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">updated_at</span></div>
+          <span class="col-type">TIMESTAMP</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CREATORS TABLE -->
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-name"><span class="table-icon">🎨</span> creators</span>
+        <span class="table-tag">Creator Profiles</span>
+      </div>
+      <ul class="columns-list">
+        <li class="column-item">
+          <div class="col-left"><span class="key-badge key-pk">PK</span><span class="col-name">creator_id</span></div>
+          <span class="col-type">INTEGER</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="key-badge key-fk">FK</span><span class="col-name">user_id</span></div>
+          <span class="col-type">INTEGER UNIQUE</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">creator_name</span></div>
+          <span class="col-type">VARCHAR(100)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">bio</span></div>
+          <span class="col-type">TEXT</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">profile_image</span></div>
+          <span class="col-type">VARCHAR(255)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">website</span></div>
+          <span class="col-type">VARCHAR(255)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">location</span></div>
+          <span class="col-type">VARCHAR(100)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">created_at</span></div>
+          <span class="col-type">TIMESTAMP</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">updated_at</span></div>
+          <span class="col-type">TIMESTAMP</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- AGENCIES TABLE -->
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-name"><span class="table-icon">🏢</span> agencies</span>
+        <span class="table-tag">Agency Profiles</span>
+      </div>
+      <ul class="columns-list">
+        <li class="column-item">
+          <div class="col-left"><span class="key-badge key-pk">PK</span><span class="col-name">agency_id</span></div>
+          <span class="col-type">INTEGER</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="key-badge key-fk">FK</span><span class="col-name">user_id</span></div>
+          <span class="col-type">INTEGER UNIQUE</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">agency_name</span></div>
+          <span class="col-type">VARCHAR(150)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">description</span></div>
+          <span class="col-type">TEXT</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">logo</span></div>
+          <span class="col-type">VARCHAR(255)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">website</span></div>
+          <span class="col-type">VARCHAR(255)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">location</span></div>
+          <span class="col-type">VARCHAR(100)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">created_at</span></div>
+          <span class="col-type">TIMESTAMP</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">updated_at</span></div>
+          <span class="col-type">TIMESTAMP</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- AGENCY_CREATORS TABLE -->
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-name"><span class="table-icon">🔗</span> agency_creators</span>
+        <span class="table-tag">Junction (M-to-N)</span>
+      </div>
+      <ul class="columns-list">
+        <li class="column-item">
+          <div class="col-left"><span class="key-badge key-pk">PK</span><span class="key-badge key-fk">FK</span><span class="col-name">agency_id</span></div>
+          <span class="col-type">INTEGER (agencies)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="key-badge key-pk">PK</span><span class="key-badge key-fk">FK</span><span class="col-name">creator_id</span></div>
+          <span class="col-type">INTEGER (creators)</span>
+        </li>
+        <li class="column-item">
+          <div class="col-left"><span class="col-name">added_at</span></div>
+          <span class="col-type">TIMESTAMP</span>
+        </li>
+      </ul>
+      <div style="padding: 16px 20px; font-size: 12.5px; color: var(--text-muted); background: rgba(0,0,0,0.15); border-top: 1px solid var(--card-border);">
+        Allows an Agency to manage multiple Creators, and Creators to link with Agencies.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RELATIONSHIPS SUMMARY -->
+  <div class="relations-card">
+    <h2><span>⚡</span> Relational Constraints & Integrity</h2>
+    <div class="relations-grid">
+      <div class="rel-item">
+        <div class="rel-title">users ➔ creators (1 : 1)</div>
+        <div class="rel-desc">Foreign key with <code>ON DELETE CASCADE</code>. When a user with Creator role is removed, their profile is automatically removed.</div>
+      </div>
+      <div class="rel-item">
+        <div class="rel-title">users ➔ agencies (1 : 1)</div>
+        <div class="rel-desc">Foreign key with <code>ON DELETE CASCADE</code> and UNIQUE constraint ensuring one agency profile per agency user account.</div>
+      </div>
+      <div class="rel-item">
+        <div class="rel-title">agencies ➔ creators (M : N)</div>
+        <div class="rel-desc">Composite Primary Key on <code>(agency_id, creator_id)</code> preventing duplicate linkages between agency and creator.</div>
+      </div>
+      <div class="rel-item">
+        <div class="rel-title">CHECK (ck_users_role)</div>
+        <div class="rel-desc">Database-level constraint strictly allowing only <code>'creator'</code>, <code>'agency'</code>, <code>'marketing_team'</code>, and <code>'admin'</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    CreatorIQ Database Engine: PostgreSQL 17 • Migrations: Alembic (Revision 0001)
+  </div>
+
+</body>
+</html>
