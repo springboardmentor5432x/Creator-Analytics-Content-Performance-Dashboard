@@ -64,6 +64,32 @@ class DailyMetric(Base):
     id: Mapped[int]=mapped_column(Integer,primary_key=True); account_id: Mapped[int]=mapped_column(ForeignKey('social_accounts.id',ondelete='CASCADE'),index=True); date: Mapped[date]=mapped_column(Date); total_views: Mapped[int]=mapped_column(BigInteger,default=0); total_likes: Mapped[int]=mapped_column(BigInteger,default=0); total_comments: Mapped[int]=mapped_column(BigInteger,default=0); total_shares: Mapped[int]=mapped_column(BigInteger,default=0); total_posts: Mapped[int]=mapped_column(Integer,default=0)
 class OAuthState(Base):
     __tablename__='oauth_states'; state: Mapped[str]=mapped_column(String(128),primary_key=True); user_id: Mapped[int]=mapped_column(ForeignKey('users.id',ondelete='CASCADE')); expires_at: Mapped[datetime]=mapped_column(DateTime(timezone=True))
+
+class Campaign(Base):
+    __tablename__='campaigns'
+    id: Mapped[int]=mapped_column(Integer,primary_key=True)
+    owner_user_id: Mapped[int]=mapped_column(ForeignKey('users.id',ondelete='CASCADE'),index=True)
+    name: Mapped[str]=mapped_column(String(160))
+    platform: Mapped[str]=mapped_column(String(40),default='Multi-platform')
+    status: Mapped[str]=mapped_column(String(30),default='Planned')
+    budget: Mapped[float]=mapped_column(Float,default=0)
+    start_date: Mapped[Optional[date]]=mapped_column(Date,nullable=True)
+    end_date: Mapped[Optional[date]]=mapped_column(Date,nullable=True)
+    notes: Mapped[Optional[str]]=mapped_column(Text,nullable=True)
+    created_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),default=lambda:datetime.now(timezone.utc))
+
+class BrandDeal(Base):
+    __tablename__='brand_deals'
+    id: Mapped[int]=mapped_column(Integer,primary_key=True)
+    owner_user_id: Mapped[int]=mapped_column(ForeignKey('users.id',ondelete='CASCADE'),index=True)
+    brand_name: Mapped[str]=mapped_column(String(160))
+    creator_name: Mapped[Optional[str]]=mapped_column(String(160),nullable=True)
+    amount: Mapped[float]=mapped_column(Float,default=0)
+    status: Mapped[str]=mapped_column(String(30),default='Negotiating')
+    due_date: Mapped[Optional[date]]=mapped_column(Date,nullable=True)
+    notes: Mapped[Optional[str]]=mapped_column(Text,nullable=True)
+    created_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),default=lambda:datetime.now(timezone.utc))
+
 Base.metadata.create_all(engine)
 app=FastAPI(title='Content Intelligence Platform API',version='2.0.0',description='Role-based creator analytics with PostgreSQL and YouTube API integration')
 app.add_middleware(CORSMiddleware,allow_origins=[ "http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174", ],allow_credentials=True,allow_methods=['*'],allow_headers=['*'])
@@ -83,7 +109,74 @@ def current_user(authorization:Optional[str]=Header(default=None),db:Session=Dep
 class SignupIn(BaseModel): name:str=Field(min_length=1,max_length=100); email:EmailStr; role:str; password:str=Field(min_length=8,max_length=128)
 class LoginIn(BaseModel): email:EmailStr; password:str
 class ForgotIn(BaseModel): email:EmailStr; new_password:str=Field(min_length=8,max_length=128)
+
+class CampaignIn(BaseModel):
+    name: str = Field(min_length=1,max_length=160)
+    platform: str = Field(default='Multi-platform',max_length=40)
+    status: str = Field(default='Planned',max_length=30)
+    budget: float = Field(default=0,ge=0)
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    notes: Optional[str] = None
+
+class BrandDealIn(BaseModel):
+    brand_name: str = Field(min_length=1,max_length=160)
+    creator_name: Optional[str] = None
+    amount: float = Field(default=0,ge=0)
+    status: str = Field(default='Negotiating',max_length=30)
+    due_date: Optional[date] = None
+    notes: Optional[str] = None
+
 class DeleteAccountIn(BaseModel): password:str=Field(min_length=1,max_length=128)
+
+
+def require_admin(user: User):
+    if user.role.lower() != 'admin':
+        raise HTTPException(status_code=403, detail='Administrator access required.')
+    return user
+
+@app.get('/api/admin/overview')
+def admin_overview(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_admin(user)
+    users = db.scalars(select(User)).all()
+    accounts = db.scalars(select(SocialAccount)).all()
+    posts_count = db.scalar(select(func.count(Post.id))) or 0
+    platform_counts = {p: sum(1 for a in accounts if a.platform.lower() == p) for p in ('youtube','instagram','spotify','linkedin')}
+    return {'totalUsers':len(users),'creators':sum(u.role.lower()=='creator' for u in users),'agencies':sum(u.role.lower()=='agency' for u in users),'marketingTeams':sum(u.role.lower()=='marketing' for u in users),'admins':sum(u.role.lower()=='admin' for u in users),'activeUsers':sum(bool(u.is_active) for u in users),'connectedAccounts':len(accounts),'connectedCreators':len({a.creator.user_id for a in accounts if a.creator and a.creator.user_id}),'totalPosts':posts_count,'platforms':platform_counts,'database':'postgresql' if DATABASE_URL.startswith('postgresql') else 'sqlite','lastUpdated':datetime.now(timezone.utc).isoformat()}
+
+@app.get('/api/admin/users')
+def admin_users(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_admin(user)
+    users = db.scalars(select(User).order_by(desc(User.created_at))).all()
+    result=[]
+    for u in users:
+        accounts=u.creator.accounts if u.creator else []
+        result.append({'id':u.id,'name':u.name,'email':u.email,'role':u.role,'isActive':u.is_active,'createdAt':u.created_at.isoformat() if u.created_at else None,'connectedAccounts':len(accounts),'platforms':sorted({a.platform.title() for a in accounts})})
+    return {'users':result}
+
+@app.get('/api/admin/platforms')
+def admin_platforms(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_admin(user)
+    accounts=db.scalars(select(SocialAccount).order_by(desc(SocialAccount.connected_at))).all()
+    result=[]
+    for a in accounts:
+        owner=a.creator.user if a.creator else None
+        result.append({'id':a.id,'platform':a.platform.title(),'username':a.username,'followers':int(a.followers or 0),'views':int(a.channel_views or 0),'posts':int(a.total_posts or 0),'connectedAt':a.connected_at.isoformat() if a.connected_at else None,'creatorName':owner.name if owner else (a.creator.creator_name if a.creator else 'Unknown'),'creatorEmail':owner.email if owner else '—'})
+    return {'accounts':result}
+
+@app.get('/api/admin/activity')
+def admin_activity(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_admin(user)
+    users=db.scalars(select(User).order_by(desc(User.created_at)).limit(50)).all()
+    accounts=db.scalars(select(SocialAccount).order_by(desc(SocialAccount.connected_at)).limit(50)).all()
+    events=[]
+    for u in users: events.append({'type':'User registered','actor':u.name,'detail':f'{u.email} · role: {u.role}','timestamp':u.created_at.isoformat() if u.created_at else None})
+    for a in accounts:
+        owner=a.creator.user if a.creator else None
+        events.append({'type':'Social account connected','actor':owner.name if owner else 'Unknown','detail':f'{a.platform.title()} · {a.username}','timestamp':a.connected_at.isoformat() if a.connected_at else None})
+    events.sort(key=lambda e:e['timestamp'] or '',reverse=True)
+    return {'events':events[:100],'note':'Registration and connection events are shown. Sign-in audit events need a dedicated audit-log table.'}
+
 @app.get('/api/health')
 def health(): return {'status':'ok','service':'creatorhub-fastapi','database':'configured' if DATABASE_URL.startswith('postgresql') else 'local-development-sqlite','youtube_oauth_configured':bool(GOOGLE_ID and GOOGLE_SECRET),'timestamp':datetime.now(timezone.utc).isoformat()}
 @app.post('/api/auth/signup')
@@ -469,3 +562,137 @@ def revenue(
             "has not yet been implemented."
         )
     }
+
+
+# Agency and Marketing workspace modules. Records are scoped to the signed-in workspace owner.
+def require_workspace_role(user: User, allowed: set[str]):
+    if user.role not in allowed:
+        raise HTTPException(403, 'This workspace feature is not available for your role.')
+
+def campaign_dict(c: Campaign):
+    return {'id':c.id,'name':c.name,'platform':c.platform,'status':c.status,'budget':c.budget,
+            'start_date':c.start_date.isoformat() if c.start_date else None,
+            'end_date':c.end_date.isoformat() if c.end_date else None,'notes':c.notes,
+            'created_at':c.created_at.isoformat() if c.created_at else None}
+
+def deal_dict(d: BrandDeal):
+    return {'id':d.id,'brand_name':d.brand_name,'creator_name':d.creator_name,'amount':d.amount,
+            'status':d.status,'due_date':d.due_date.isoformat() if d.due_date else None,
+            'notes':d.notes,'created_at':d.created_at.isoformat() if d.created_at else None}
+
+@app.get('/api/workspace/summary')
+def workspace_summary(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_workspace_role(user, {'agency','marketing'})
+    campaigns = db.scalars(select(Campaign).where(Campaign.owner_user_id == user.id)).all()
+    deals = db.scalars(select(BrandDeal).where(BrandDeal.owner_user_id == user.id)).all()
+    posts = db.scalar(select(func.count(Post.id)).join(SocialAccount).join(Creator).where(Creator.user_id == user.id)) or 0
+    return {
+        'campaigns_total': len(campaigns),
+        'campaigns_active': sum(1 for c in campaigns if c.status.lower() in {'active','in progress','running'}),
+        'campaign_budget': sum(c.budget or 0 for c in campaigns),
+        'brand_deals': len(deals),
+        'deal_value': sum(d.amount or 0 for d in deals),
+        'posts': posts,
+        'connected_accounts': db.scalar(select(func.count(SocialAccount.id)).join(Creator).where(Creator.user_id == user.id)) or 0,
+        'creators': db.scalar(select(func.count(User.id)).where(User.role == 'creator', User.is_active == True)) or 0,
+        'followers': db.scalar(select(func.coalesce(func.sum(SocialAccount.followers),0))) or 0,
+        'post_views': db.scalar(select(func.coalesce(func.sum(Post.views),0))) or 0,
+    }
+
+@app.get('/api/workspace/creators')
+def workspace_creators(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_workspace_role(user, {'agency'})
+    creators = db.scalars(select(User).where(User.role == 'creator', User.is_active == True).order_by(User.name)).all()
+    result = []
+    for creator_user in creators:
+        creator = creator_user.creator
+        accounts = db.scalars(select(SocialAccount).where(SocialAccount.creator_id == creator.id)).all() if creator else []
+        result.append({'id':creator_user.id,'name':creator_user.name,'email':creator_user.email,
+                       'joined':creator_user.created_at.isoformat() if creator_user.created_at else None,
+                       'platforms':[a.platform for a in accounts],
+                       'followers':sum(a.followers or 0 for a in accounts),
+                       'connected_accounts':len(accounts),
+                       'relationship':'Not assigned'})
+    return {'creators':result}
+
+@app.get('/api/workspace/campaigns')
+def list_campaigns(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_workspace_role(user, {'agency','marketing'})
+    rows = db.scalars(select(Campaign).where(Campaign.owner_user_id == user.id).order_by(Campaign.created_at.desc())).all()
+    return {'campaigns':[campaign_dict(c) for c in rows]}
+
+@app.post('/api/workspace/campaigns')
+def create_campaign(data: CampaignIn, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_workspace_role(user, {'agency','marketing'})
+    if data.end_date and data.start_date and data.end_date < data.start_date:
+        raise HTTPException(422,'End date cannot be earlier than start date.')
+    campaign = Campaign(owner_user_id=user.id, **data.model_dump())
+    db.add(campaign); db.commit(); db.refresh(campaign)
+    return {'campaign':campaign_dict(campaign)}
+
+@app.delete('/api/workspace/campaigns/{campaign_id}')
+def delete_campaign(campaign_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_workspace_role(user, {'agency','marketing'})
+    campaign = db.scalar(select(Campaign).where(Campaign.id == campaign_id, Campaign.owner_user_id == user.id))
+    if not campaign: raise HTTPException(404,'Campaign not found in your workspace.')
+    db.delete(campaign); db.commit()
+    return {'message':'Campaign deleted.'}
+
+@app.get('/api/workspace/brand-deals')
+def list_brand_deals(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_workspace_role(user, {'agency','marketing'})
+    rows = db.scalars(select(BrandDeal).where(BrandDeal.owner_user_id == user.id).order_by(BrandDeal.created_at.desc())).all()
+    return {'deals':[deal_dict(d) for d in rows]}
+
+@app.post('/api/workspace/brand-deals')
+def create_brand_deal(data: BrandDealIn, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_workspace_role(user, {'agency','marketing'})
+    deal = BrandDeal(owner_user_id=user.id, **data.model_dump())
+    db.add(deal); db.commit(); db.refresh(deal)
+    return {'deal':deal_dict(deal)}
+
+@app.delete('/api/workspace/brand-deals/{deal_id}')
+def delete_brand_deal(deal_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_workspace_role(user, {'agency','marketing'})
+    deal = db.scalar(select(BrandDeal).where(BrandDeal.id == deal_id, BrandDeal.owner_user_id == user.id))
+    if not deal: raise HTTPException(404,'Brand deal not found in your workspace.')
+    db.delete(deal); db.commit()
+    return {'message':'Brand deal deleted.'}
+
+
+@app.get('/api/workspace/content')
+def workspace_content(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_workspace_role(user, {'agency','marketing'})
+    creator_users = db.scalars(select(User).where(User.role == 'creator')).all()
+    creator_ids = [u.creator.id for u in creator_users if u.creator]
+    if not creator_ids:
+        return {'posts':[],'total_views':0,'platforms':[]}
+    accounts = db.scalars(select(SocialAccount).where(SocialAccount.creator_id.in_(creator_ids))).all()
+    account_ids = [a.id for a in accounts]
+    if not account_ids:
+        return {'posts':[],'total_views':0,'platforms':[]}
+    posts = db.scalars(select(Post).where(Post.account_id.in_(account_ids)).order_by(desc(Post.views)).limit(200)).all()
+    account_map = {a.id:a for a in accounts}
+    creator_map = {u.creator.id:u for u in creator_users if u.creator}
+    rows=[]
+    for p in posts:
+        a=account_map.get(p.account_id)
+        owner=creator_map.get(a.creator_id) if a else None
+        rows.append({'id':p.id,'title':p.title,'creator':owner.name if owner else 'Creator','platform':a.platform.title() if a else 'Unknown','username':a.username if a else '',
+                     'views':p.views or 0,'likes':p.likes or 0,'comments':p.comments or 0,'url':p.post_url,
+                     'published_at':p.published_at.isoformat() if p.published_at else None})
+    return {'posts':rows,'total_views':sum(p['views'] for p in rows),'platforms':sorted(set(p['platform'] for p in rows))}
+
+@app.get('/api/workspace/analytics')
+def workspace_analytics(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_workspace_role(user, {'agency','marketing'})
+    creator_users = db.scalars(select(User).where(User.role == 'creator')).all()
+    creator_ids = [u.creator.id for u in creator_users if u.creator]
+    accounts = db.scalars(select(SocialAccount).where(SocialAccount.creator_id.in_(creator_ids))).all() if creator_ids else []
+    account_ids = [a.id for a in accounts]
+    posts = db.scalars(select(Post).where(Post.account_id.in_(account_ids))).all() if account_ids else []
+    return {'creator_count':len(creator_users),'connected_accounts':len(accounts),'posts':len(posts),
+            'followers':sum(a.followers or 0 for a in accounts),'views':sum(a.views if hasattr(a,'views') else a.channel_views or 0 for a in accounts),
+            'post_views':sum(p.views or 0 for p in posts),'likes':sum(p.likes or 0 for p in posts),
+            'comments':sum(p.comments or 0 for p in posts),
+            'platforms':{name:sum(1 for a in accounts if a.platform.lower()==name) for name in ['youtube','instagram','spotify','linkedin']}}
