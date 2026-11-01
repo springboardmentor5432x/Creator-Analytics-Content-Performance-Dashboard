@@ -22,8 +22,10 @@ __pycache__/
 
 # Node
 node_modules/
+**/node_modules/
 dist/
 .vite/
+build/
 
 # Local databases, logs, uploads and generated files
 *.db
@@ -39,5 +41,4 @@ private_uploads/
 .DS_Store
 Thumbs.db
 
-package-lock.json
-node_modules/
+
