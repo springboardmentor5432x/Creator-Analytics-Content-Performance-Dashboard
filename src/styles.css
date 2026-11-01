@@ -11,7 +11,7 @@
 .remember-hint{font-size:9px;color:#a0a5b5}
 .role-metrics{margin-bottom:17px}
 .role-banner{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:0 0 16px;padding:24px;background:linear-gradient(110deg,#f4f0ff 0%,#f7faff 70%,#effbf7 100%)}
-.role-banner .eyebrow{color:#8065ed;font-size:9px;font-weight:800;letter-spacing:1px}
+.role-banner .eyebrow{color:#79ed65;font-size:9px;font-weight:800;letter-spacing:1px}
 .role-banner h2{font-family:Manrope,sans-serif;font-size:19px;margin:8px 0 6px}
 .role-banner p{font-size:11px;line-height:1.7;color:#858ba0;margin:0;max-width:600px}
 .role-banner-mark{width:64px;height:64px;flex:0 0 64px;border-radius:20px;display:grid;place-items:center;color:#7b61e8;background:#fff;box-shadow:0 8px 24px #6550c81a}
