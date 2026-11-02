@@ -9,22 +9,23 @@ import { Icon, PlatformBadge } from "./Icons";
 const k = (n) => (n >= 1000000 ? `${(n / 1000000).toFixed(1)}M` : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n);
 const AXIS = { fontSize: 12, fill: "var(--muted)" };
 
-export function KpiRow() {
+export function KpiRow({ platform }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/api/analytics/overview")
+    const platParam = platform && platform !== "All Platforms" ? `?platform=${platform.toLowerCase()}` : "";
+    api.get(`/api/analytics/overview${platParam}`)
       .then((res) => setData(res.data))
       .catch((err) => console.error("Error loading overview analytics:", err))
       .finally(() => setLoading(false));
-  }, []);
+  }, [platform]);
 
   const items = data ? [
-    { key: "followers", icon: "user", tone: "violet", label: "Total Followers", value: k(data.subscribers), delta: "+8.4%", sub: "Across connected channels" },
-    { key: "views", icon: "video", tone: "teal", label: "Total Views", value: k(data.total_views), delta: "+18.2%", sub: `${data.total_posts} published videos` },
-    { key: "eng", icon: "heart", tone: "amber", label: "Avg Engagement", value: `${data.avg_engagement_rate}%`, delta: "+2.1%", sub: "Industry average is 3.5%" },
-    { key: "rev", icon: "rupee", tone: "green", label: "Est. Earnings", value: `₹${(data.est_revenue * 83).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, delta: "+24.5%", sub: "AdSense & brand estimates" },
+    { key: "followers", icon: "user", tone: "violet", label: "Total Followers", value: k(data.subscribers), delta: "+14.2%", sub: platform && platform !== "All Platforms" ? `Platform: ${platform}` : "Combined across YouTube, IG & LinkedIn" },
+    { key: "views", icon: "video", tone: "teal", label: "Total Views", value: k(data.total_views), delta: "+19.8%", sub: `${data.total_posts} published items` },
+    { key: "eng", icon: "heart", tone: "amber", label: "Avg Engagement", value: `${data.avg_engagement_rate}%`, delta: "+2.4%", sub: "High developer engagement" },
+    { key: "rev", icon: "rupee", tone: "green", label: "Est. Earnings", value: `₹${(data.est_revenue * 83).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, delta: "+26.1%", sub: "Course & platform estimates" },
   ] : KPIS;
 
   return (
@@ -56,8 +57,8 @@ export function FollowerGrowth({ platform }) {
           const chartData = res.data.growth_history.map((g) => ({
             d: g.date,
             YouTube: g.followers,
-            Instagram: Math.round(g.followers * 0.72),
-            TikTok: Math.round(g.followers * 0.45),
+            Instagram: Math.round(g.followers * 0.36),
+            LinkedIn: Math.round(g.followers * 0.14),
           }));
           setAudienceData(chartData);
         }
@@ -91,7 +92,7 @@ export function FollowerGrowth({ platform }) {
             </defs>
             <CartesianGrid vertical={false} stroke="var(--line)" />
             <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} />
-            <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={48} />
+            <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={54} domain={[0, 'auto']} />
             <Tooltip formatter={(v, n) => [v.toLocaleString(), n]} contentStyle={{ borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)" }} />
             {names.map((n) => (
               <Area key={n} type="monotone" dataKey={n} stroke={PLATFORM_COLORS[n]} strokeWidth={2.4} fill={`url(#fg-${n})`} dot={{ r: 3 }} />
@@ -104,9 +105,22 @@ export function FollowerGrowth({ platform }) {
 }
 
 export function ContentPerformance() {
-  const tabs = Object.keys(PERFORMANCE);
+  const [perfData, setPerfData] = useState(null);
   const [tab, setTab] = useState("Views");
-  const best = PERFORMANCE[tab].reduce((a, b) => (b.value > a.value ? b : a)).day;
+
+  useEffect(() => {
+    api.get("/api/analytics/content-performance")
+      .then((res) => setPerfData(res.data))
+      .catch((err) => console.error("Error loading content performance:", err));
+  }, []);
+
+  const dataMap = perfData || PERFORMANCE;
+  const tabs = Object.keys(dataMap);
+  const currentChartData = dataMap[tab] || [];
+  const bestDay = currentChartData.length > 0
+    ? currentChartData.reduce((a, b) => (b.value > a.value ? b : a), currentChartData[0])?.day
+    : null;
+
   return (
     <article className="card">
       <div className="card-head">
@@ -119,14 +133,14 @@ export function ContentPerformance() {
       </div>
       <div className="chart" style={{ height: 210 }}>
         <ResponsiveContainer>
-          <BarChart data={PERFORMANCE[tab]} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
+          <BarChart data={currentChartData} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--line)" />
             <XAxis dataKey="day" tick={AXIS} axisLine={false} tickLine={false} />
             <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={44} />
             <Tooltip cursor={{ fill: "var(--soft)" }} formatter={(v) => [v.toLocaleString(), tab]} contentStyle={{ borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)" }} />
             <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-              {PERFORMANCE[tab].map((d) => (
-                <Cell key={d.day} fill={d.day === best ? "#6d4ae8" : "#a79af2"} />
+              {currentChartData.map((d) => (
+                <Cell key={d.day} fill={d.day === bestDay ? "#6d4ae8" : "#a79af2"} />
               ))}
             </Bar>
           </BarChart>

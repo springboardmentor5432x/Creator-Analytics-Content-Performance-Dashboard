@@ -17,7 +17,7 @@ export const GROWTH = [
   { d: "Sep 11", YouTube: 148000, Instagram: 100000, TikTok: 58000, LinkedIn: 21000 },
   { d: "Sep 16", YouTube: 176000, Instagram: 124000, TikTok: 78000, LinkedIn: 27000 },
 ];
-export const PLATFORM_COLORS = { YouTube: "#ef4444", Instagram: "#d946a8", TikTok: "#111827", LinkedIn: "#2563eb" };
+export const PLATFORM_COLORS = { YouTube: "#ef4444", Instagram: "#d946a8", LinkedIn: "#2563eb" };
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const mk = (arr) => DAYS.map((day, i) => ({ day, value: arr[i] }));

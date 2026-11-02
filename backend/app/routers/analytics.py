@@ -72,16 +72,23 @@ def sync_youtube(
 
 @router.get("/overview")
 def get_analytics_overview(
+    platform: Optional[str] = Query(None, description="Optional platform filter: youtube, instagram, github"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Overall creator metrics: total posts, total views, likes, avg engagement."""
     creator = _get_or_create_creator(current_user, db)
-    account = _ensure_creator_data(creator, db)
+    _ensure_creator_data(creator, db)
+
+    accounts_q = select(SocialAccount).where(SocialAccount.creator_id == creator.creator_id)
+    if platform and platform.lower() not in ("all platforms", "all"):
+        accounts_q = accounts_q.where(SocialAccount.platform == platform.lower())
+    accounts = db.scalars(accounts_q).all()
+    account_ids = [a.account_id for a in accounts]
 
     posts = db.scalars(
-        select(Post).where(Post.account_id == account.account_id)
-    ).all()
+        select(Post).where(Post.account_id.in_(account_ids))
+    ).all() if account_ids else []
 
     total_posts = len(posts)
     total_views = 0
@@ -100,11 +107,13 @@ def get_analytics_overview(
                 engagement_rates.append(p.analytics.engagement_rate)
 
     avg_engagement = round(sum(engagement_rates) / max(len(engagement_rates), 1), 2)
+    total_followers = sum(a.followers for a in accounts)
+    primary_acc = accounts[0] if accounts else None
 
     return {
-        "platform": account.platform,
-        "channel_name": account.username,
-        "subscribers": account.followers,
+        "platform": platform if platform and platform.lower() != "all platforms" else "all",
+        "channel_name": primary_acc.username if primary_acc else "Chai aur Code",
+        "subscribers": total_followers,
         "total_posts": total_posts,
         "total_views": total_views,
         "total_likes": total_likes,
@@ -119,16 +128,24 @@ def get_analytics_overview(
 def get_posts(
     sort_by: str = Query("published_at", regex="^(published_at|views|likes|engagement_rate)$"),
     order: str = Query("desc", regex="^(asc|desc)$"),
+    platform: Optional[str] = Query(None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Retrieve post-level analytics with customizable sorting."""
+    """Retrieve post-level analytics with customizable sorting and platform filtering."""
     creator = _get_or_create_creator(current_user, db)
-    account = _ensure_creator_data(creator, db)
+    _ensure_creator_data(creator, db)
+
+    accounts_q = select(SocialAccount).where(SocialAccount.creator_id == creator.creator_id)
+    if platform and platform.lower() not in ("all platforms", "all"):
+        accounts_q = accounts_q.where(SocialAccount.platform == platform.lower())
+    accounts = db.scalars(accounts_q).all()
+    account_ids = [a.account_id for a in accounts]
+    acc_map = {a.account_id: a.platform for a in accounts}
 
     posts = db.scalars(
-        select(Post).where(Post.account_id == account.account_id)
-    ).all()
+        select(Post).where(Post.account_id.in_(account_ids))
+    ).all() if account_ids else []
 
     items = []
     for p in posts:
@@ -136,6 +153,7 @@ def get_posts(
         items.append({
             "post_id": p.post_id,
             "platform_post_id": p.platform_post_id,
+            "platform": acc_map.get(p.account_id, "YouTube").capitalize() if acc_map.get(p.account_id) != "github" else "GitHub",
             "title": p.caption or "Untitled Video",
             "content_type": p.content_type,
             "thumbnail_url": p.thumbnail_url,
@@ -252,6 +270,48 @@ def compare_posts(
             "engagement_leader": p1["title"] if diff_eng >= 0 else p2["title"],
             "engagement_difference": abs(diff_eng),
         },
+    }
+
+
+@router.get("/content-performance")
+def get_content_performance(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return aggregated performance metrics (Views, Likes, Comments, Shares) per day/post."""
+    creator = _get_or_create_creator(current_user, db)
+    _ensure_creator_data(creator, db)
+    
+    posts = db.scalars(
+        select(Post)
+        .join(SocialAccount)
+        .where(SocialAccount.creator_id == creator.creator_id)
+        .order_by(Post.published_at.asc())
+    ).all()
+    
+    views_data = []
+    likes_data = []
+    comments_data = []
+    shares_data = []
+    
+    for p in posts[-7:]:
+        day_label = p.published_at.strftime("%d %b") if p.published_at else f"Post {p.post_id}"
+        a = p.analytics
+        v = a.views if a else 0
+        l = a.likes if a else 0
+        c = a.comments if a else 0
+        s = a.shares if a else int(l * 0.1)
+        
+        views_data.append({"day": day_label, "value": v, "title": p.caption[:25]})
+        likes_data.append({"day": day_label, "value": l, "title": p.caption[:25]})
+        comments_data.append({"day": day_label, "value": c, "title": p.caption[:25]})
+        shares_data.append({"day": day_label, "value": s, "title": p.caption[:25]})
+        
+    return {
+        "Views": views_data,
+        "Likes": likes_data,
+        "Comments": comments_data,
+        "Shares": shares_data,
     }
 
 

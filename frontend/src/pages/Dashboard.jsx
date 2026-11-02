@@ -13,7 +13,7 @@ import {
   TopPosts,
 } from "../dashboard/Widgets.jsx";
 
-const PLATFORMS = ["All Platforms", "YouTube", "Instagram", "TikTok"];
+const PLATFORMS = ["All Platforms", "YouTube", "Instagram", "LinkedIn"];
 
 const SUBTITLE = {
   creator: "Here's an overview of your content performance across all platforms.",
@@ -28,21 +28,22 @@ function CreatorDashboard() {
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
 
-  const loadPosts = () => {
-    api.get("/api/analytics/posts?sort_by=views&order=desc")
+  const loadPosts = (selectedPlat = platform) => {
+    const q = selectedPlat && selectedPlat !== "All Platforms" ? `&platform=${selectedPlat.toLowerCase()}` : "";
+    api.get(`/api/analytics/posts?sort_by=views&order=desc${q}`)
       .then((res) => setPosts(res.data))
       .catch((e) => console.error(e));
   };
 
   useEffect(() => {
-    loadPosts();
-  }, []);
+    loadPosts(platform);
+  }, [platform]);
 
   const handleSync = async () => {
     setSyncing(true);
     setSyncMsg("");
     try {
-      const h = window.prompt("Enter YouTube Channel handle (e.g. @CodeWithHarry, @MrBeast):", "@CodeWithHarry");
+      const h = window.prompt("Enter YouTube Channel handle to sync (e.g. @chaiaurcode, @MrBeast):", "@chaiaurcode");
     if (!h) { setSyncing(false); return; }
     const res = await api.post("/api/analytics/youtube/sync", { channel_handle: h.trim() });
       setSyncMsg(res.data.message || "Channel synced successfully!");
@@ -70,12 +71,12 @@ function CreatorDashboard() {
       </div>
 
       <p className="sample-note">
-        <span className="sample-pill live">Live</span> Connected to YouTube Channel: <strong>@CodeWithHarry</strong> (10M Subscribers • YouTube Data API v3)
+        <span className="sample-pill live">Live</span> Multi-Platform Connected: <strong>Hitesh Choudhary (Chai aur Code)</strong> • 1.41M Combined Audience
         {syncMsg && <span className="sample-pill live">✓ {syncMsg}</span>}
       </p>
 
       {/* Primary KPI Metrics */}
-      <KpiRow />
+      <KpiRow platform={platform} />
 
       {/* Charts Row */}
       <div className="row row-a">
