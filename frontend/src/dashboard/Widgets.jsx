@@ -79,23 +79,35 @@ export function FollowerGrowth({ platform }) {
           ))}
         </ul>
       </div>
-      <div className="chart" style={{ height: 250 }}>
+      <div className="chart" style={{ height: 260 }}>
         <ResponsiveContainer>
-          <AreaChart data={chartSource} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
+          <AreaChart data={chartSource} margin={{ top: 12, right: 16, left: -6, bottom: 4 }}>
             <defs>
               {names.map((n) => (
                 <linearGradient key={n} id={"fg-" + n} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stopColor={PLATFORM_COLORS[n]} stopOpacity={0.14} />
-                  <stop offset="1" stopColor={PLATFORM_COLORS[n]} stopOpacity={0} />
+                  <stop offset="5%" stopColor={PLATFORM_COLORS[n]} stopOpacity={0.28} />
+                  <stop offset="95%" stopColor={PLATFORM_COLORS[n]} stopOpacity={0.01} />
                 </linearGradient>
               ))}
             </defs>
-            <CartesianGrid vertical={false} stroke="var(--line)" />
-            <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} />
-            <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={54} domain={[0, 'auto']} />
-            <Tooltip formatter={(v, n) => [v.toLocaleString(), n]} contentStyle={{ borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)" }} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--line)" opacity={0.6} />
+            <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={20} />
+            <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={52} domain={['dataMin - 20000', 'dataMax + 15000']} />
+            <Tooltip
+              formatter={(v, n) => [Number(v).toLocaleString() + " followers", n]}
+              contentStyle={{ borderRadius: 12, border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "0 8px 24px rgba(0,0,0,0.08)", padding: "10px 14px" }}
+            />
             {names.map((n) => (
-              <Area key={n} type="monotone" dataKey={n} stroke={PLATFORM_COLORS[n]} strokeWidth={2.4} fill={`url(#fg-${n})`} dot={{ r: 3 }} />
+              <Area
+                key={n}
+                type="natural"
+                dataKey={n}
+                stroke={PLATFORM_COLORS[n]}
+                strokeWidth={3}
+                fill={`url(#fg-${n})`}
+                dot={false}
+                activeDot={{ r: 6, strokeWidth: 2, stroke: "#fff" }}
+              />
             ))}
           </AreaChart>
         </ResponsiveContainer>
@@ -158,9 +170,9 @@ export function TopPosts({ posts: parentPosts }) {
   const [compData, setCompData] = useState(null);
 
   useEffect(() => {
-    if (parentPosts && parentPosts.length > 0) {
+    if (parentPosts !== undefined) {
       setPosts(parentPosts);
-      if (parentPosts.length >= 2) {
+      if (parentPosts && parentPosts.length >= 2) {
         setSelectedA(parentPosts[0].post_id);
         setSelectedB(parentPosts[1].post_id);
       }

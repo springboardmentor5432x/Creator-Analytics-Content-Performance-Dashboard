@@ -29,8 +29,8 @@ function CreatorDashboard() {
   const [syncMsg, setSyncMsg] = useState("");
 
   const loadPosts = (selectedPlat = platform) => {
-    const q = selectedPlat && selectedPlat !== "All Platforms" ? `&platform=${selectedPlat.toLowerCase()}` : "";
-    api.get(`/api/analytics/posts?sort_by=views&order=desc${q}`)
+    const p = selectedPlat && selectedPlat !== "All Platforms" ? encodeURIComponent(selectedPlat.toLowerCase()) : "all";
+    api.get(`/api/analytics/posts?sort_by=views&order=desc&platform=${p}`)
       .then((res) => setPosts(res.data))
       .catch((e) => console.error(e));
   };
