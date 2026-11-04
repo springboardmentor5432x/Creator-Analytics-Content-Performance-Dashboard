@@ -1034,9 +1034,11 @@ def request_creator_assignment(creator_user_id: int, user: User = Depends(curren
 @app.get('/api/workspace/assignment-requests')
 def creator_assignment_requests(user: User = Depends(current_user), db: Session = Depends(get_db)):
     require_workspace_role(user, {'creator'})
+    # Show both pending requests and previously approved workspace connections.
+    # This lets creators revoke access later without deleting their own account.
     rows = db.scalars(select(CreatorAssignment).where(
         CreatorAssignment.creator_user_id == user.id,
-        CreatorAssignment.status == 'pending'
+        CreatorAssignment.status.in_(['pending', 'accepted'])
     ).order_by(desc(CreatorAssignment.created_at))).all()
     requests_out=[]
     for row in rows:
@@ -1068,6 +1070,23 @@ def decide_creator_assignment(assignment_id: int, data: AssignmentDecision, user
     assignment.status=data.status
     db.commit()
     return {'message':f'Workspace access request {data.status}.','status':assignment.status}
+
+
+@app.delete('/api/workspace/creator-assignments/{assignment_id}')
+def end_creator_assignment(assignment_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    """End a workspace relationship. Either the creator or the requesting workspace may revoke it."""
+    assignment = db.get(CreatorAssignment, assignment_id)
+    if not assignment:
+        raise HTTPException(status_code=404, detail='Workspace relationship not found or already ended.')
+
+    is_creator = user.role == 'creator' and assignment.creator_user_id == user.id
+    is_workspace_owner = user.role in {'agency', 'marketing'} and assignment.agency_user_id == user.id
+    if not (is_creator or is_workspace_owner):
+        raise HTTPException(status_code=403, detail='Only the creator or the requesting workspace can end this relationship.')
+
+    db.delete(assignment)
+    db.commit()
+    return {'message': 'Workspace access has been ended. The creator account and its data have not been deleted.', 'assignmentId': assignment_id}
 
 
 @app.get('/api/workspace/summary')
@@ -1131,6 +1150,7 @@ def workspace_creators(user: User = Depends(current_user), db: Session = Depends
             'followers': sum(a.followers or 0 for a in accounts) if status == 'accepted' else None,
             'connected_accounts': len(accounts) if status == 'accepted' else None,
             'relationship': status,
+            'assignment_id': next((row.id for row in db.scalars(select(CreatorAssignment).where(CreatorAssignment.agency_user_id == user.id, CreatorAssignment.creator_user_id == creator_user.id)).all()), None),
             'canRequest': status in {'not_requested', 'rejected'}
         })
     return {
