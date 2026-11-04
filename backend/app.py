@@ -996,7 +996,8 @@ def deal_dict(d: BrandDeal):
             'notes':d.notes,'created_at':d.created_at.isoformat() if d.created_at else None}
 
 def assigned_creator_user_ids(user: User, db: Session) -> list[int]:
-    if user.role != 'agency':
+    """Return creator user IDs that explicitly approved this agency/marketing workspace."""
+    if user.role not in {'agency', 'marketing'}:
         return []
     return list(db.scalars(
         select(CreatorAssignment.creator_user_id).where(
@@ -1008,10 +1009,12 @@ def assigned_creator_user_ids(user: User, db: Session) -> list[int]:
 
 @app.post('/api/workspace/creator-assignments/{creator_user_id}')
 def request_creator_assignment(creator_user_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)):
-    require_workspace_role(user, {'agency'})
+    require_workspace_role(user, {'agency', 'marketing'})
     creator_user = db.get(User, creator_user_id)
     if not creator_user or creator_user.role != 'creator' or not creator_user.is_active or not creator_user.creator:
         raise HTTPException(status_code=404, detail='Active creator account not found.')
+    if creator_user.id == user.id:
+        raise HTTPException(status_code=400, detail='You cannot request access to your own account.')
     existing = db.scalar(select(CreatorAssignment).where(
         CreatorAssignment.agency_user_id == user.id,
         CreatorAssignment.creator_user_id == creator_user_id
@@ -1021,11 +1024,11 @@ def request_creator_assignment(creator_user_id: int, user: User = Depends(curren
             existing.status = 'pending'
             existing.created_at = datetime.now(timezone.utc)
             db.commit()
-            return {'message':'Creator assignment request sent again. Awaiting creator approval.','status':'pending'}
-        return {'message':'An assignment request or active assignment already exists.','status':existing.status}
+            return {'message':'Access request sent again. Waiting for creator approval.','status':'pending'}
+        return {'message':f'An access request or approved relationship already exists ({existing.status}).','status':existing.status}
     db.add(CreatorAssignment(agency_user_id=user.id,creator_user_id=creator_user_id,status='pending'))
     db.commit()
-    return {'message':'Creator assignment request sent. The creator must approve before their data is shared.','status':'pending'}
+    return {'message':'Access request sent. The creator must approve before their analytics are shared.','status':'pending'}
 
 
 @app.get('/api/workspace/assignment-requests')
@@ -1037,8 +1040,18 @@ def creator_assignment_requests(user: User = Depends(current_user), db: Session 
     ).order_by(desc(CreatorAssignment.created_at))).all()
     requests_out=[]
     for row in rows:
-        agency=db.get(User,row.agency_user_id)
-        requests_out.append({'id':row.id,'agencyId':row.agency_user_id,'agencyName':agency.name if agency else 'Agency','agencyEmail':agency.email if agency else None,'status':row.status,'createdAt':row.created_at.isoformat() if row.created_at else None})
+        workspace=db.get(User,row.agency_user_id)
+        requests_out.append({
+            'id':row.id,
+            'workspaceId':row.agency_user_id,
+            'workspaceName':workspace.name if workspace else 'Workspace',
+            'workspaceRole':workspace.role if workspace else 'workspace',
+            'workspaceEmail':workspace.email if workspace else None,
+            'agencyName':workspace.name if workspace else 'Workspace',
+            'agencyEmail':workspace.email if workspace else None,
+            'status':row.status,
+            'createdAt':row.created_at.isoformat() if row.created_at else None
+        })
     return {'requests':requests_out}
 
 
@@ -1051,10 +1064,10 @@ def decide_creator_assignment(assignment_id: int, data: AssignmentDecision, user
         CreatorAssignment.status == 'pending'
     ))
     if not assignment:
-        raise HTTPException(status_code=404, detail='Pending assignment request not found.')
+        raise HTTPException(status_code=404, detail='Pending workspace access request not found.')
     assignment.status=data.status
     db.commit()
-    return {'message':f'Agency request {data.status}.','status':assignment.status}
+    return {'message':f'Workspace access request {data.status}.','status':assignment.status}
 
 
 @app.get('/api/workspace/summary')
@@ -1081,23 +1094,49 @@ def workspace_summary(user: User = Depends(current_user), db: Session = Depends(
         'post_views': post_views,
     }
 
+
 @app.get('/api/workspace/creators')
 def workspace_creators(user: User = Depends(current_user), db: Session = Depends(get_db)):
-    require_workspace_role(user, {'agency'})
-    creator_user_ids = assigned_creator_user_ids(user, db)
-    creators = db.scalars(select(User).where(User.id.in_(creator_user_ids), User.role == 'creator', User.is_active == True).order_by(User.name)).all() if creator_user_ids else []
+    """List creator directory basics; reveal analytics only after creator approval."""
+    require_workspace_role(user, {'agency','marketing'})
+    all_creators = db.scalars(
+        select(User).where(
+            User.role == 'creator',
+            User.is_active == True
+        ).order_by(User.name)
+    ).all()
+    relationships = {
+        row.creator_user_id: row.status
+        for row in db.scalars(
+            select(CreatorAssignment).where(CreatorAssignment.agency_user_id == user.id)
+        ).all()
+    }
     result = []
-    for creator_user in creators:
+    for creator_user in all_creators:
+        status = relationships.get(creator_user.id, 'not_requested')
         creator = creator_user.creator
-        accounts = db.scalars(select(SocialAccount).where(SocialAccount.creator_id == creator.id)).all() if creator else []
-        result.append({'id':creator_user.id,'name':creator_user.name,'email':creator_user.email,
-                       'joined':creator_user.created_at.isoformat() if creator_user.created_at else None,
-                       'platforms':[a.platform for a in accounts],
-                       'followers':sum(a.followers or 0 for a in accounts),
-                       'connected_accounts':len(accounts),
-                       'relationship':'Assigned'})
-    pending = db.scalars(select(CreatorAssignment).where(CreatorAssignment.agency_user_id == user.id, CreatorAssignment.status == 'pending')).all()
-    return {'creators':result,'pendingRequests':[{'creatorId':x.creator_user_id,'status':x.status} for x in pending], 'note':'Creator analytics are visible only after the creator accepts an agency assignment request.'}
+        # Do not expose creator email, connected platforms, follower totals, or account counts
+        # until that creator explicitly approves this workspace.
+        accounts = []
+        if status == 'accepted' and creator:
+            accounts = db.scalars(
+                select(SocialAccount).where(SocialAccount.creator_id == creator.id)
+            ).all()
+        result.append({
+            'id': creator_user.id,
+            'name': creator_user.name,
+            'email': creator_user.email if status == 'accepted' else None,
+            'joined': creator_user.created_at.isoformat() if creator_user.created_at else None,
+            'platforms': [a.platform for a in accounts],
+            'followers': sum(a.followers or 0 for a in accounts) if status == 'accepted' else None,
+            'connected_accounts': len(accounts) if status == 'accepted' else None,
+            'relationship': status,
+            'canRequest': status in {'not_requested', 'rejected'}
+        })
+    return {
+        'creators': result,
+        'note': 'Creator analytics and connected-account details are visible only after the creator approves your workspace access request.'
+    }
 
 @app.get('/api/workspace/campaigns')
 def list_campaigns(user: User = Depends(current_user), db: Session = Depends(get_db)):
@@ -1161,7 +1200,7 @@ def workspace_content(user: User = Depends(current_user), db: Session = Depends(
         rows.append({'id':p.id,'title':p.title,'creator':owner.name if owner else 'Creator','platform':a.platform.title() if a else 'Unknown','username':a.username if a else '',
                      'views':p.views or 0,'likes':p.likes or 0,'comments':p.comments or 0,'url':p.post_url,
                      'published_at':p.published_at.isoformat() if p.published_at else None})
-    return {'posts':rows,'total_views':sum(p['views'] for p in rows),'platforms':sorted(set(p['platform'] for p in rows)), 'note':'Only creator accounts that approved this agency are included.'}
+    return {'posts':rows,'total_views':sum(p['views'] for p in rows),'platforms':sorted(set(p['platform'] for p in rows)), 'note':'Only creator accounts that approved this workspace are included.'}
 
 @app.get('/api/workspace/analytics')
 def workspace_analytics(user: User = Depends(current_user), db: Session = Depends(get_db)):
@@ -1176,5 +1215,5 @@ def workspace_analytics(user: User = Depends(current_user), db: Session = Depend
             'post_views':sum(p.views or 0 for p in posts),'likes':sum(p.likes or 0 for p in posts),
             'comments':sum(p.comments or 0 for p in posts),
             'platforms':{name:sum(1 for a in accounts if a.platform.lower()==name) for name in ['youtube','instagram','spotify','linkedin']},
-            'note':'Only creator accounts that approved this agency are included.' if user.role == 'agency' else 'No creator-level analytics are shared with marketing workspaces unless an explicit assignment workflow is added.'}
+            'note':'Only creator accounts that approved this workspace are included.'}
 
