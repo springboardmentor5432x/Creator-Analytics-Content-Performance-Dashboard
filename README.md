@@ -1,163 +1,308 @@
-# CreatorHub - Content Intelligence Platform
+# CreatorHub
 
-A role-based social media analytics dashboard designed to help creators
-and teams connect social accounts, monitor content performance, and
-explore audience growth from a centralized workspace.
+## Content Intelligence Platform for Social Media Performance and Creator Growth Analytics
 
-> **Project status:** YouTube channel/video analytics and Spotify
-> profile authorization are implemented in the current backend. Spotify
-> is used for account/profile connection; Spotify streaming, playlist,
-> and listening analytics are not currently implemented. Instagram and
-> LinkedIn integrations require their own developer-app configuration
-> and approved API permissions.
+CreatorHub is a role-based social media intelligence workspace that
+helps creators and teams manage connected social accounts, monitor
+content performance, understand audience growth, and collaborate through
+controlled creator--workspace access.
 
-## Table of Contents
+The platform provides four role-oriented workspaces: **Creator, Agency,
+Marketing, and Admin**.
 
--   [Overview](#overview)
--   [Features](#features)
+> **Integration status:** YouTube OAuth and available channel/video
+> analytics are supported when the required Google APIs, credentials,
+> scopes, and account permissions are configured. Spotify OAuth
+> retrieves the authorized user's profile; Spotify streaming,
+> playlist-performance, and listening analytics are not implemented in
+> this version. Instagram and LinkedIn require separate developer
+> applications and approved API permissions.
+
+------------------------------------------------------------------------
+
+## Contents
+
+-   [Project Overview](#project-overview)
+-   [Key Features](#key-features)
+-   [Role-Based Workspaces](#role-based-workspaces)
+-   [Creator Access Workflow](#creator-access-workflow)
 -   [Technology Stack](#technology-stack)
 -   [Architecture](#architecture)
+-   [Repository Structure](#repository-structure)
 -   [Prerequisites](#prerequisites)
--   [Getting Started](#getting-started)
+-   [Clone the Repository](#clone-the-repository)
+-   [Backend Setup](#backend-setup)
+-   [Frontend Setup](#frontend-setup)
 -   [Environment Configuration](#environment-configuration)
+-   [OAuth Configuration](#oauth-configuration)
 -   [Run the Application](#run-the-application)
 -   [API Overview](#api-overview)
--   [Supported Integrations](#supported-integrations)
--   [Security Notes](#security-notes)
+-   [Data and Integration Notes](#data-and-integration-notes)
+-   [Security](#security)
 -   [Troubleshooting](#troubleshooting)
--   [Future Improvements](#future-improvements)
+-   [Future Enhancements](#future-enhancements)
 
-## Overview
+## Project Overview
 
-CreatorHub brings social account management and content insights into
-one interface. Users can register and sign in, choose a role, connect
-supported platforms, and view the analytics available through the
-configured integrations.
+Creators often need to use multiple platforms to understand how their
+content is performing. Agencies and marketing teams also need a
+controlled way to collaborate with creators and review the information
+creators choose to share.
 
-The application is being developed as a **Content Intelligence Platform
-for Social Media Performance and Creator Growth Analytics**.
+CreatorHub provides a centralized dashboard for available content and
+audience metrics, social account authorization, YouTube analytics
+retrieval, creator-access requests and approvals, and workspace
+relationship management.
 
-## Features
+## Key Features
 
-### Authentication and user accounts
+### Authentication and account management
 
 -   User registration and login.
--   Role-based accounts: Creator, Agency, Marketing, and Admin.
--   Password hashing on the backend.
--   JWT-based authentication for protected API routes.
--   Password update endpoint.
+-   Role selection: Creator, Agency, Marketing, or Admin.
+-   Backend password hashing and JWT-based authentication for protected
+    API routes.
+-   User profile and account settings.
 -   Account deletion with password confirmation.
+-   Google sign-in UI support when the frontend Google OAuth client ID
+    is configured.
 
-### Dashboard and analytics
+### Role-based dashboards
 
--   Overview of available channel and content metrics.
--   Post/video performance listing and comparison.
--   Audience-growth history where snapshots are available.
--   Audience and revenue sections with availability messages where data
-    is not exposed or not implemented by the current integration.
+-   Separate navigation and dashboard areas for Creator, Agency,
+    Marketing, and Admin users.
+-   Role-oriented tools for creator analytics, collaboration, campaigns,
+    reports, and platform administration.
+-   Data visibility depends on the user's role, permissions, connected
+    accounts, available records, and implemented integrations.
 
 ### Social account management
 
--   View connected social accounts and their connection status.
--   Connect a YouTube channel using Google OAuth.
+-   View available platforms and connection status.
+-   Connect YouTube through Google OAuth.
 -   Authorize a Spotify account and retrieve its profile information.
--   Open a connected public profile where a profile URL is available.
+-   Open a connected public profile when a profile URL is available.
 -   Disconnect a connected social account.
 
 ### YouTube integration
 
--   Retrieves channel profile and statistics using the YouTube Data API.
--   Synchronizes available video details and engagement counts.
--   Stores retrieved posts and daily analytics in the database.
--   Uses the YouTube Analytics API for historical reports when the
-    account's permissions and API access allow it.
+When Google credentials and permissions are configured, the application
+can: - Authorize a YouTube account using Google OAuth. - Retrieve
+channel profile information and available channel statistics. -
+Synchronize available video details. - Retrieve video metrics such as
+views, likes, and comments when exposed by the API. - Store retrieved
+account, post, and analytics information in the database. - Retrieve
+historical reports through the YouTube Analytics API when access and
+permissions allow it.
 
-### Spotify integration
+### Spotify profile authorization
 
--   Uses Spotify OAuth to authorize a Spotify account.
--   Retrieves the authorized user's Spotify profile.
--   Stores the account connection in the database.
--   **Note:** authorization does not provide streaming counts,
-    song-performance analytics, or listening history in this version.
+-   Authorize a Spotify account through Spotify OAuth.
+-   Retrieve the authorized user's profile information.
+-   Store the connected account information.
+
+**Scope note:** Spotify profile authorization does not provide streaming
+counts, song performance, playlist analytics, or listening history in
+this version.
+
+### Creator discovery and access requests
+
+-   Agency and Marketing users can browse the creator directory.
+-   A workspace can request access to a creator.
+-   Creators can review incoming requests and approve or reject them.
+-   Approved relationships allow the workspace to view creator
+    information shared through the application, subject to permissions.
+
+### Revoke or remove an approved relationship
+
+-   A Creator can revoke an approved Agency or Marketing workspace's
+    access.
+-   The requesting Agency or Marketing workspace can remove a creator
+    from its workspace.
+-   The backend checks that the authenticated user is one of the parties
+    in the relationship.
+-   Ending the relationship removes the workspace access link.
+
+**Removing a creator from a workspace does not delete the creator's user
+account, social accounts, posts, or personal analytics.** It only ends
+that workspace's access to the creator's shared information.
+
+### Analytics and reports
+
+-   Dashboard overview cards for available metrics.
+-   Content and video performance views.
+-   Post comparison using available metrics.
+-   Audience-growth views where historical snapshots exist.
+-   Role-specific analytics and report sections.
+-   Report export controls where implemented in the interface.
+
+Campaign, budget, brand-deal, and revenue totals depend on corresponding
+records and implemented data sources. A displayed zero may mean no
+records have been added or synchronized.
+
+## Role-Based Workspaces
+
+  -----------------------------------------------------------------------
+  Role                    Purpose                 Main capabilities
+  ----------------------- ----------------------- -----------------------
+  **Creator**             Manage personal creator Personal dashboard,
+                          presence                social accounts,
+                                                  content analytics,
+                                                  audience insights,
+                                                  incoming workspace
+                                                  requests, and access
+                                                  revocation
+
+  **Agency**              Collaborate with        Creator directory,
+                          creators                access requests,
+                                                  approved creator
+                                                  information, workspace
+                                                  relationship
+                                                  management, campaigns,
+                                                  and reports
+
+  **Marketing**           Coordinate marketing    Creator discovery and
+                          work                    access requests,
+                                                  campaign-oriented
+                                                  workspace,
+                                                  content/performance
+                                                  views, and reports
+
+  **Admin**               Platform administration Administrative views
+                                                  and platform
+                                                  monitoring, subject to
+                                                  configured
+                                                  functionality and
+                                                  permissions
+  -----------------------------------------------------------------------
+
+A creator's private connected-account information and analytics should
+be shared with a workspace only after the creator approves its access
+request.
+
+## Creator Access Workflow
+
+1.  An Agency or Marketing user opens **Creators** and selects a
+    creator.
+2.  The workspace submits an access request.
+3.  The Creator opens the workspace/agency requests section.
+4.  The Creator reviews the requesting workspace and approves or rejects
+    the request.
+5.  After approval, the workspace can view the creator information
+    shared through the application.
+6.  If the collaboration ends, the Creator can revoke access, or the
+    workspace can remove the creator.
+7.  The relationship ends, while the Creator's own account and personal
+    data remain intact.
+
+This workflow provides controlled sharing without transferring ownership
+of creator data.
 
 ## Technology Stack
 
   -----------------------------------------------------------------------
   Layer                               Technologies
   ----------------------------------- -----------------------------------
-  Frontend                            React, Vite, JavaScript, Recharts,
-                                      Lucide React
+  Frontend                            React, Vite, JavaScript
+
+  UI and visualization                Recharts, Lucide React, CSS
 
   Backend                             Python, FastAPI, Pydantic
 
-  Database                            PostgreSQL for deployment; SQLite
-                                      supported for local development
+  Database                            PostgreSQL configuration; SQLite
+                                      fallback for local development
 
   ORM                                 SQLAlchemy
 
-  Authentication                      JWT, password hashing with `pwdlib`
+  Authentication                      JWT and backend password hashing
 
   Integrations                        YouTube Data API, YouTube Analytics
                                       API, Spotify Web API/OAuth
 
-  Development server                  Uvicorn
+  Backend server                      Uvicorn
+
+  Version control                     Git and GitHub
   -----------------------------------------------------------------------
 
 ## Architecture
 
 ``` text
+Browser
+   |
+   v
 React + Vite frontend
-        |
-        | HTTP requests / Bearer JWT
-        v
+   |
+   | HTTP requests / JWT
+   v
 FastAPI backend
-        |
-        +---- Authentication and user management
-        |
-        +---- Social account management
-        |
-        +---- YouTube OAuth and analytics APIs
-        |
-        +---- Spotify OAuth and profile API
-        |
-        v
+   |
+   +-- Authentication and user management
+   +-- Creator/workspace access requests
+   +-- Relationship approval, revocation, and removal
+   +-- Social account management
+   +-- YouTube OAuth and analytics
+   +-- Spotify OAuth and profile retrieval
+   |
+   v
 SQLAlchemy ORM
-        |
-        +---- PostgreSQL (deployment)
-        +---- SQLite (local development)
+   |
+   +-- PostgreSQL
+   +-- SQLite for local development
 ```
+
+## Repository Structure
+
+A typical project layout is shown below. Folder names may differ in your
+current checkout.
+
+``` text
+Creator-Analytics-Content-Performance-Dashboard/
+├── README.md
+├── backend/
+│   ├── app.py
+│   ├── requirements.txt
+│   └── .env                 # Create locally; do not commit
+└── frontend/
+    ├── package.json
+    ├── .env                 # Create locally; do not commit
+    ├── index.html
+    └── src/
+        ├── App.jsx
+        └── ...
+```
+
+If `package.json` or `app.py` is located elsewhere, run the
+corresponding commands from the directory containing that file.
 
 ## Prerequisites
 
-Install the following before running the project:
-
--   Node.js and npm.
--   Python 3.10 or later (use a version compatible with your installed
-    dependencies).
 -   Git.
--   PostgreSQL for a PostgreSQL-backed environment, or SQLite for local
-    development.
--   Google Cloud credentials with the required YouTube APIs and OAuth
-    configuration to use YouTube integration.
--   A Spotify Developer application to use Spotify account
-    authorization.
+-   Node.js and npm.
+-   Python 3.10 or a version compatible with the backend dependencies.
+-   PostgreSQL, if using a PostgreSQL database.
+-   Google Cloud credentials and required YouTube APIs for YouTube
+    integration.
+-   A Spotify Developer application for Spotify profile authorization.
 
-## Getting Started
-
-### 1. Clone the repository
+## Clone the Repository
 
 ``` bash
 git clone https://github.com/springboardmentor5432x/Creator-Analytics-Content-Performance-Dashboard.git
 cd Creator-Analytics-Content-Performance-Dashboard
 ```
 
-If your local folder or branch has a different name, use the folder and
-branch configured for your workspace.
+To use a particular development branch:
 
-### 2. Set up the backend
+``` bash
+git branch -a
+git switch <branch-name>
+```
 
-From the project root, enter the backend directory (adjust the path if
-your `app.py` is located elsewhere):
+Replace `<branch-name>` with the branch you are authorized to use.
+
+## Backend Setup
+
+Open a terminal in the directory containing `backend/app.py`:
 
 ``` bash
 cd backend
@@ -172,58 +317,60 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-**macOS/Linux**
+**macOS / Linux**
 
 ``` bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Install the backend dependencies:
-
-``` bash
-pip install fastapi "uvicorn[standard]" sqlalchemy psycopg2-binary python-dotenv PyJWT requests "pydantic[email]" pwdlib
-```
-
-If the project contains a maintained `requirements.txt`, prefer
-installing from it:
+Install dependencies. If the repository contains a maintained
+`requirements.txt`, use it:
 
 ``` bash
 pip install -r requirements.txt
 ```
 
-Create a `.env` file in the backend directory and configure the
-variables described below.
+Otherwise, install the backend packages used by the application:
 
-### 3. Set up the frontend
+``` bash
+pip install fastapi "uvicorn[standard]" sqlalchemy psycopg2-binary python-dotenv PyJWT requests "pydantic[email]" pwdlib
+```
 
-Open a second terminal and enter the frontend directory (the directory
-containing `package.json`):
+Create `backend/.env` as described in [Environment
+Configuration](#environment-configuration).
+
+## Frontend Setup
+
+Open a second terminal in the directory containing the frontend
+`package.json`. If the frontend folder is named `frontend`:
 
 ``` bash
 cd frontend
 npm install
 ```
 
-If the frontend is in the repository root rather than a `frontend`
-directory, run `npm install` from the directory containing
-`package.json`.
+If `package.json` is in the repository root, run `npm install` from the
+repository root instead.
 
 ## Environment Configuration
 
-Create `backend/.env` and provide the values relevant to your setup:
+### Backend: `backend/.env`
+
+Configure the variables required by your current backend:
 
 ``` env
-# Database
-DATABASE_URL=sqlite:///./creatorhub_dev.db
-# Example PostgreSQL URL:
-# DATABASE_URL=postgresql+psycopg2://USERNAME:PASSWORD@HOST:5432/DATABASE_NAME
+# Database: PostgreSQL
+DATABASE_URL=postgresql+psycopg2://USERNAME:PASSWORD@HOST:5432/DATABASE_NAME
 
-# Authentication — replace this with a long, random secret
+# For local SQLite development, use this instead:
+# DATABASE_URL=sqlite:///./creatorhub_dev.db
+
+# Authentication
 JWT_SECRET_KEY=replace_with_a_long_random_secret
 JWT_EXPIRE_MINUTES=10080
 
-# Frontend and backend URLs
+# Application URLs
 FRONTEND_ORIGIN=http://localhost:5173
 BACKEND_PUBLIC_URL=http://127.0.0.1:8000
 
@@ -238,229 +385,249 @@ SPOTIFY_CLIENT_SECRET=
 SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/api/oauth/spotify/callback
 ```
 
-### OAuth setup
+Use the exact environment variable names expected by your current
+backend. Keep `.env` local and out of version control.
 
-**Google / YouTube** 1. Create or select a project in Google Cloud
-Console. 2. Enable the required YouTube APIs. 3. Configure the OAuth
-consent screen and add test users if the application is in testing mode.
-4. Create OAuth client credentials. 5. Add the exact callback URL
-configured in `GOOGLE_REDIRECT_URI` to the authorized redirect URIs.
+### Frontend: `.env`
 
-**Spotify** 1. Create an application in the Spotify Developer Dashboard.
-2. Copy its client ID and client secret into `.env`. 3. Add the exact
-callback URL configured in `SPOTIFY_REDIRECT_URI` to the application's
-Redirect URIs. 4. Restart the backend after changing environment
+In the directory containing the Vite `package.json`, create:
+
+``` env
+VITE_API_BASE_URL=http://127.0.0.1:8000
+VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id
+```
+
+`VITE_GOOGLE_CLIENT_ID` is needed only when frontend Google sign-in is
+enabled. Vite variables prefixed with `VITE_` are exposed to frontend
+code. **Never put a client secret or private credential in this file.**
+
+Restart the relevant development server after changing environment
 variables.
 
-OAuth providers may change their access policies, scopes, and
-development-mode restrictions. Confirm the currently required
-configuration in each provider's developer documentation.
+## OAuth Configuration
+
+### Google / YouTube
+
+1.  Open Google Cloud Console and select or create a project.
+2.  Enable the YouTube APIs required by the backend.
+3.  Configure the OAuth consent screen.
+4.  Add test users if the OAuth application is in testing mode.
+5.  Create OAuth client credentials.
+6.  Configure authorized JavaScript origins for the frontend, such as
+    `http://localhost:5173` and `http://127.0.0.1:5173`.
+7.  Add the exact backend callback URL from `GOOGLE_REDIRECT_URI` to the
+    authorized redirect URIs.
+8.  Use the matching client ID in `VITE_GOOGLE_CLIENT_ID` if Google
+    sign-in is enabled.
+
+### Spotify
+
+1.  Create an application in the Spotify Developer Dashboard.
+2.  Copy its client ID and client secret into the backend `.env`.
+3.  Add the exact callback URL from `SPOTIFY_REDIRECT_URI` to the
+    Spotify application's Redirect URIs.
+4.  Restart the backend after updating the configuration.
+
+OAuth requirements, scopes, testing restrictions, and API availability
+may change. Check the provider's current developer documentation when
+configuring an integration.
 
 ## Run the Application
 
+Run the backend and frontend in **separate terminals**.
+
 ### Start the backend
 
-From the directory containing `app.py`:
+From the directory containing `app.py`, activate the virtual environment
+and run:
 
 ``` bash
 uvicorn app:app --reload
 ```
 
-The API should be available at:
+The backend is normally available at:
 
 -   API base: `http://127.0.0.1:8000`
--   Interactive API documentation: `http://127.0.0.1:8000/docs`
--   Health check: `http://127.0.0.1:8000/api/health`
+-   Swagger API documentation: `http://127.0.0.1:8000/docs`
+
+If the backend defines a health endpoint, it may be available at
+`http://127.0.0.1:8000/api/health`.
 
 ### Start the frontend
 
-From the directory containing the frontend `package.json`:
+From the directory containing `package.json`:
 
 ``` bash
 npm run dev
 ```
 
-Open the local URL printed by Vite, usually `http://localhost:5173`.
+Open the local URL printed by Vite, commonly `http://localhost:5173`.
 
-Make sure the frontend API configuration points to the backend URL. The
-frontend and backend origins must also be allowed by the backend's CORS
-configuration.
+Ensure the frontend API base URL points to the running backend and the
+backend CORS configuration allows the frontend origin.
 
 ## API Overview
 
-The following routes are available in the current backend. All routes
-marked **Protected** require a valid Bearer JWT.
+The following routes are documented for the application. Use the running
+backend's `/docs` page as the source of truth for exact request/response
+schemas and currently registered routes.
 
-  -------------------------------------------------------------------------------------------
-  Method            Endpoint                              Access            Purpose
-  ----------------- ------------------------------------- ----------------- -----------------
-  `GET`             `/api/health`                         Public            Backend health
-                                                                            and configuration
-                                                                            status
+  ------------------------------------------------------------------------------------------------------
+  Method                  Endpoint                                               Purpose
+  ----------------------- ------------------------------------------------------ -----------------------
+  `POST`                  `/api/auth/signup`                                     Register a user
 
-  `POST`            `/api/auth/signup`                    Public            Register a user
+  `POST`                  `/api/auth/login`                                      Authenticate a user and
+                                                                                 receive a JWT
 
-  `POST`            `/api/auth/login`                     Public            Sign in and
-                                                                            receive a JWT
+  `POST`                  `/api/auth/forgot-password`                            Password update/reset
+                                                                                 flow provided by the
+                                                                                 backend
 
-  `POST`            `/api/auth/forgot-password`           Public            Update a password
-                                                                            using the current
-                                                                            reset flow
+  `GET`                   `/api/auth/me`                                         Retrieve the
+                                                                                 authenticated user's
+                                                                                 profile
 
-  `GET`             `/api/auth/me`                        Protected         Return the
-                                                                            signed-in user's
-                                                                            profile
+  `DELETE`                `/api/auth/delete-account`                             Delete the
+                                                                                 authenticated user's
+                                                                                 account after password
+                                                                                 verification
 
-  `DELETE`          `/api/auth/delete-account`            Protected         Delete the
-                                                                            signed-in user's
-                                                                            account after
-                                                                            password
-                                                                            verification
+  `GET`                   `/api/social-accounts`                                 Retrieve connected
+                                                                                 social accounts
 
-  `GET`             `/api/social-accounts`                Protected         List connected
-                                                                            and available
-                                                                            social accounts
+  `DELETE`                `/api/social-accounts/{account_id}`                    Disconnect a social
+                                                                                 account owned by the
+                                                                                 authenticated user
 
-  `DELETE`          `/api/social-accounts/{account_id}`   Protected         Disconnect a
-                                                                            social account
-                                                                            owned by the
-                                                                            signed-in user
+  `GET`                   `/api/oauth/youtube/start`                             Begin YouTube OAuth
 
-  `GET`             `/api/oauth/youtube/start`            Protected         Begin YouTube
-                                                                            OAuth
+  `GET`                   `/api/oauth/youtube/callback`                          Complete YouTube OAuth
 
-  `GET`             `/api/oauth/youtube/callback`         OAuth callback    Complete YouTube
-                                                                            authorization
+  `GET`                   `/api/oauth/spotify/start`                             Begin Spotify OAuth
 
-  `GET`             `/api/oauth/spotify/start`            Protected         Begin Spotify
-                                                                            OAuth
+  `GET`                   `/api/oauth/spotify/callback`                          Complete Spotify OAuth
 
-  `GET`             `/api/oauth/spotify/callback`         OAuth callback    Complete Spotify
-                                                                            authorization
+  `GET`                   `/api/analytics/overview`                              Retrieve available
+                                                                                 overview and content
+                                                                                 metrics
 
-  `GET`             `/api/oauth/{provider}/start`         Protected         Return setup
-                                                                            guidance for
-                                                                            providers not
-                                                                            enabled for OAuth
+  `GET`                   `/api/analytics/compare`                               Compare selected posts
 
-  `GET`             `/api/analytics/overview`             Protected         Fetch overview
-                                                                            metrics and
-                                                                            available post
-                                                                            analytics
+  `GET`                   `/api/analytics/audience`                              Retrieve available
+                                                                                 audience-growth data
 
-  `GET`             `/api/analytics/compare`              Protected         Compare selected
-                                                                            posts
+  `GET`                   `/api/analytics/revenue`                               Retrieve revenue-data
+                                                                                 availability
 
-  `GET`             `/api/analytics/audience`             Protected         Retrieve
-                                                                            available
-                                                                            audience-growth
-                                                                            data
+  `DELETE`                `/api/workspace/creator-assignments/{assignment_id}`   End an approved
+                                                                                 creator--workspace
+                                                                                 relationship when
+                                                                                 requested by an
+                                                                                 authorized party
+  ------------------------------------------------------------------------------------------------------
 
-  `GET`             `/api/analytics/revenue`              Protected         Report
-                                                                            revenue-data
-                                                                            availability
-  -------------------------------------------------------------------------------------------
+## Data and Integration Notes
 
-For exact request and response schemas, use the interactive
-documentation at `/docs`.
+-   Dashboard values depend on records and metrics available to the
+    signed-in user.
+-   YouTube metrics depend on successful OAuth authorization, API
+    access, granted scopes, and successful content synchronization.
+-   A creator's connected account data is not automatically visible to
+    an Agency or Marketing workspace. The creator must approve the
+    workspace's access request.
+-   If a creator or workspace ends an approved relationship, that
+    workspace should no longer have access through that relationship.
+-   Removing a creator from a workspace does not delete the creator's
+    account or personal data.
+-   Campaign, budget, brand-deal, and revenue figures require
+    corresponding records and data sources. A zero value can mean that
+    no applicable records have been added.
+-   Spotify currently provides account/profile authorization only;
+    streaming and song-performance analytics are not implemented.
 
-## Supported Integrations
+## Security
 
-  -----------------------------------------------------------------------
-  Platform                Current capability      Limitations
-  ----------------------- ----------------------- -----------------------
-  YouTube                 OAuth, channel          Results depend on
-                          information, video      granted scopes, API
-                          details and available   access, and provider
-                          analytics               limits
-
-  Spotify                 OAuth and authorized    Streaming,
-                          public profile          listening-history, and
-                          information             song-performance
-                                                  analytics are not
-                                                  implemented
-
-  Instagram               Listed as a potential   Requires Meta developer
-                          integration             setup, an eligible
-                                                  account, and approved
-                                                  permissions
-
-  LinkedIn                Listed as a potential   Requires LinkedIn
-                          integration             developer setup and
-                                                  approved
-                                                  products/permissions
-  -----------------------------------------------------------------------
-
-## Security Notes
-
--   Never commit `.env`, OAuth client secrets, database passwords, JWT
-    secrets, or access/refresh tokens to source control.
--   Use a strong, unique `JWT_SECRET_KEY`; do not use the development
-    fallback in production.
--   Rotate any credential that has been exposed in a repository, log,
-    screenshot, or shared file.
+-   Never commit `.env` files, OAuth client secrets, database passwords,
+    JWT secrets, or access/refresh tokens.
+-   Add environment files and virtual environments to `.gitignore`.
+-   Never place a provider client secret in a `VITE_` frontend variable.
+-   Use a long, unique JWT secret outside local development.
+-   Rotate credentials immediately if they are accidentally exposed.
 -   Use HTTPS and provider-approved redirect URLs in production.
--   The current password-reset endpoint accepts a new password directly.
-    Before production use, replace it with a verified, expiring
-    password-reset flow.
--   Review account-deletion and disconnect behavior with a backup
-    database before testing against real user data.
--   Apply least-privilege OAuth scopes and follow each provider's
-    developer policies.
+-   Enforce permissions in the backend; hiding a frontend button is not
+    sufficient access control.
+-   Test account deletion and relationship removal with test accounts
+    and a database backup.
+-   Use the minimum OAuth scopes required by the application.
 
 ## Troubleshooting
 
-### Backend will not start
+### Backend does not start
 
--   Confirm your virtual environment is activated.
--   Install the required packages.
+-   Confirm the virtual environment is activated.
+-   Install the required dependencies.
 -   Run `uvicorn app:app --reload` from the directory containing
     `app.py`.
--   Review the complete terminal traceback for the first error.
+-   Review the first error in the terminal traceback.
 
-### Database connection fails
+### Database connection error
 
--   Confirm `DATABASE_URL` is correct.
--   Ensure PostgreSQL is running and the database exists when using
-    PostgreSQL.
--   For local development, verify the working directory used for the
-    SQLite database file.
+-   Check that `DATABASE_URL` is present and correctly formatted.
+-   Confirm PostgreSQL is running and the target database exists.
+-   Verify database username, password, host, port, and database name.
+-   For SQLite, confirm the working directory because relative database
+    paths depend on it.
 
-### OAuth callback fails
+### Google sign-in says the client ID is not configured
 
--   Confirm the client ID and client secret are correct.
--   Check that the redirect URI in `.env` exactly matches the provider
-    dashboard.
--   Confirm the required APIs, consent screen settings, scopes, and
-    test-user access.
--   Restart the backend after changing `.env`.
+-   Add `VITE_GOOGLE_CLIENT_ID` to the frontend `.env`.
+-   Use the OAuth client ID, not the client secret.
+-   Add the frontend origin to the Google OAuth client's authorized
+    JavaScript origins.
+-   Restart Vite after editing `.env`.
 
-### Frontend cannot reach the API
+### YouTube or Spotify OAuth callback fails
 
--   Confirm the backend is running at the expected address.
+-   Check the client ID and secret in the backend `.env`.
+-   Ensure the redirect URI exactly matches the provider dashboard.
+-   Verify required APIs, scopes, consent-screen settings, and test-user
+    access.
+-   Restart the backend after changing environment variables.
+
+### Creator analytics do not appear for Agency or Marketing
+
+-   Confirm the creator connected the relevant social account.
+-   Confirm content synchronization completed.
+-   Confirm the workspace requested access.
+-   Confirm the Creator approved the request.
+-   If the relationship is approved but metrics remain unavailable,
+    inspect the backend response and database records.
+
+### Frontend cannot reach the backend
+
+-   Confirm both development servers are running.
 -   Check the frontend API base URL.
--   Confirm the frontend origin is included in the backend CORS
+-   Confirm backend CORS allows the frontend origin.
+-   Inspect the browser console and backend terminal for request errors.
+
+## Future Enhancements
+
+-   Further role-specific workflows and reporting.
+-   More complete campaign, brand-deal, and revenue data management.
+-   Additional platform integrations subject to provider APIs and
+    permissions.
+-   Expanded audience and content analytics where supported by source
+    platforms.
+-   A verified, expiring email-based password-reset flow.
+-   Automated tests for authentication, role permissions, OAuth,
+    synchronization, and workspace access lifecycle.
+-   Database migrations, production logging, monitoring, and deployment
     configuration.
-
-## Future Improvements
-
--   Add provider-specific analytics where APIs and permissions make the
-    data available.
--   Implement Instagram and LinkedIn OAuth integrations.
--   Replace the demo-friendly password-reset endpoint with an
-    email-based reset flow.
--   Add automated tests for authentication, OAuth callbacks, account
-    disconnection, and account deletion.
--   Add production logging, monitoring, migrations, and deployment
-    configuration.
--   Improve role-specific workflows and access control across Creator,
-    Agency, Marketing, and Admin dashboards.
-
-------------------------------------------------------------------------
 
 ## Disclaimer
 
 CreatorHub is an independent project and is not affiliated with,
-endorsed by, or officially connected to YouTube, Google, Spotify, Meta,
-or LinkedIn. Availability of third-party API features is controlled by
-each provider and may change.
+endorsed by, or officially connected to Google, YouTube, Spotify, Meta,
+or LinkedIn. Third-party API access, available metrics, and provider
+requirements are controlled by the respective platforms and may change.
