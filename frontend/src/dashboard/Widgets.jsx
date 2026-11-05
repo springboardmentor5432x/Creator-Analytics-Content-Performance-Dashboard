@@ -316,7 +316,7 @@ export function Audience({ followers }) {
   return (
     <article className="card">
       <div className="card-head">
-        <h2>Audience Demographics <Icon name="info" size={14} /><span className="sample-pill sm">Sample</span></h2>
+        <h2>Audience Demographics <Icon name="info" size={14} /></h2>
         <a href="#" className="view-all" onClick={(e) => e.preventDefault()}>View All <Icon name="right" size={14} /></a>
       </div>
       <div className="tabs" role="tablist">
