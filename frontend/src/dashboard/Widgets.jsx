@@ -9,24 +9,37 @@ import { Icon, PlatformBadge } from "./Icons";
 const k = (n) => (n >= 1000000 ? `${(n / 1000000).toFixed(1)}M` : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n);
 const AXIS = { fontSize: 12, fill: "var(--muted)" };
 
-export function KpiRow({ platform }) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+const money = (usd) => `₹${Math.round(usd * 83).toLocaleString("en-IN")}`;
 
-  useEffect(() => {
-    const platParam = platform && platform !== "All Platforms" ? `?platform=${platform.toLowerCase()}` : "";
-    api.get(`/api/analytics/overview${platParam}`)
-      .then((res) => setData(res.data))
-      .catch((err) => console.error("Error loading overview analytics:", err))
-      .finally(() => setLoading(false));
-  }, [platform]);
+export function KpiRow({ overview, platform, days }) {
+  if (!overview) {
+    return <section className="kpis" aria-label="Key metrics">
+      {[0, 1, 2, 3].map((i) => <article className="card kpi" key={i}><p className="kpi-sub">Loading…</p></article>)}
+    </section>;
+  }
+  if (!overview.connected) {
+    return <section className="kpis" aria-label="Key metrics">
+      <article className="card kpi">
+        <div className="kpi-top"><span className="kpi-label">{platform === "All Platforms" ? "No platform connected" : `${platform} not connected`}</span></div>
+        <p className="kpi-sub">
+          {platform === "Instagram" || platform === "LinkedIn"
+            ? `${platform} integration is not built yet (needs Graph/Marketing API + OAuth token).`
+            : "Use “Sync YouTube Channel” to connect your channel."}
+        </p>
+      </article>
+    </section>;
+  }
 
-  const items = data ? [
-    { key: "followers", icon: "user", tone: "violet", label: "Total Followers", value: k(data.subscribers), delta: "+14.2%", sub: platform && platform !== "All Platforms" ? `Platform: ${platform}` : "Combined across YouTube, IG & LinkedIn" },
-    { key: "views", icon: "video", tone: "teal", label: "Total Views", value: k(data.total_views), delta: "+19.8%", sub: `${data.total_posts} published items` },
-    { key: "eng", icon: "heart", tone: "amber", label: "Avg Engagement", value: `${data.avg_engagement_rate}%`, delta: "+2.4%", sub: "High developer engagement" },
-    { key: "rev", icon: "rupee", tone: "green", label: "Est. Earnings", value: `₹${(data.est_revenue * 83).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, delta: "+26.1%", sub: "Course & platform estimates" },
-  ] : KPIS;
+  const o = overview;
+  const sub = `${o.period_posts} videos in last ${days}d`;
+  const items = [
+    { key: "subs", icon: "users", tone: "violet", label: "Subscribers", value: k(o.subscribers), sub: "Lifetime • from YouTube" },
+    { key: "tv", icon: "eye", tone: "indigo", label: "Total Views", value: k(o.total_views), sub: "Lifetime channel views" },
+    { key: "vids", icon: "video", tone: "teal", label: "Total Videos", value: Number(o.total_videos).toLocaleString("en-IN"), sub: "Published on channel" },
+    { key: "pv", icon: "eye", tone: "blue", label: `Views (${days}d)`, value: k(o.period_views), sub },
+    { key: "eng", icon: "heart", tone: "amber", label: `Avg Engagement (${days}d)`, value: `${o.avg_engagement_rate}%`, sub: "(likes + comments) / views" },
+    { key: "rev", icon: "rupee", tone: "green", label: `Est. Earnings (${days}d)`, value: money(o.est_revenue), sub: "Estimate, not real AdSense" },
+  ];
 
   return (
     <section className="kpis" aria-label="Key metrics">
@@ -36,10 +49,7 @@ export function KpiRow({ platform }) {
             <span className={"kpi-ico tone-" + x.tone}><Icon name={x.icon} size={20} /></span>
             <span className="kpi-label">{x.label}</span>
           </div>
-          <div className="kpi-main">
-            <strong>{x.value}</strong>
-            <span className="delta"><Icon name="up" size={12} />{x.delta}</span>
-          </div>
+          <div className="kpi-main"><strong>{x.value}</strong></div>
           <p className="kpi-sub">{x.sub}</p>
         </article>
       ))}
@@ -47,86 +57,75 @@ export function KpiRow({ platform }) {
   );
 }
 
-export function FollowerGrowth({ platform }) {
-  const [audienceData, setAudienceData] = useState([]);
+export function FollowerGrowth({ platform, days }) {
+  const [state, setState] = useState({ loading: true, history: [], connected: true, live: false });
+  const plat = platform === "All Platforms" ? "all" : platform.toLowerCase();
 
   useEffect(() => {
-    api.get("/api/analytics/audience")
-      .then((res) => {
-        if (res.data?.growth_history?.length) {
-          const chartData = res.data.growth_history.map((g) => ({
-            d: g.date,
-            YouTube: g.followers,
-            Instagram: Math.round(g.followers * 0.36),
-            LinkedIn: Math.round(g.followers * 0.14),
-          }));
-          setAudienceData(chartData);
-        }
-      })
-      .catch((e) => console.error(e));
-  }, []);
+    setState((s) => ({ ...s, loading: true }));
+    api.get(`/api/analytics/audience?platform=${plat}&days=${days}`)
+      .then((res) => setState({
+        loading: false,
+        connected: res.data.connected,
+        live: !!res.data.is_live,
+        history: (res.data.growth_history || []).map((g) => ({ d: g.date, Subscribers: g.followers })),
+      }))
+      .catch(() => setState({ loading: false, history: [], connected: false, live: false }));
+  }, [plat, days]);
 
-  const chartSource = audienceData.length > 0 ? audienceData : GROWTH;
-  const names = platform === "All Platforms" ? Object.keys(PLATFORM_COLORS) : [platform].filter((p) => PLATFORM_COLORS[p]);
+  const { history, connected, live, loading } = state;
+  const few = history.length < 3;
 
   return (
     <article className="card">
       <div className="card-head">
         <h2>Follower Growth <Icon name="info" size={14} /></h2>
-        <ul className="legend">
-          {Object.entries(PLATFORM_COLORS).map(([n, c]) => (
-            <li key={n}><i style={{ background: c }} />{n}</li>
-          ))}
-        </ul>
+        <ul className="legend"><li><i style={{ background: PLATFORM_COLORS.YouTube }} />YouTube subscribers</li></ul>
       </div>
-      <div className="chart" style={{ height: 260 }}>
-        <ResponsiveContainer>
-          <AreaChart data={chartSource} margin={{ top: 12, right: 16, left: -6, bottom: 4 }}>
-            <defs>
-              {names.map((n) => (
-                <linearGradient key={n} id={"fg-" + n} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={PLATFORM_COLORS[n]} stopOpacity={0.28} />
-                  <stop offset="95%" stopColor={PLATFORM_COLORS[n]} stopOpacity={0.01} />
-                </linearGradient>
-              ))}
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--line)" opacity={0.6} />
-            <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={20} />
-            <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={52} domain={['dataMin - 20000', 'dataMax + 15000']} />
-            <Tooltip
-              formatter={(v, n) => [Number(v).toLocaleString() + " followers", n]}
-              contentStyle={{ borderRadius: 12, border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "0 8px 24px rgba(0,0,0,0.08)", padding: "10px 14px" }}
-            />
-            {names.map((n) => (
-              <Area
-                key={n}
-                type="natural"
-                dataKey={n}
-                stroke={PLATFORM_COLORS[n]}
-                strokeWidth={3}
-                fill={`url(#fg-${n})`}
-                dot={false}
-                activeDot={{ r: 6, strokeWidth: 2, stroke: "#fff" }}
-              />
-            ))}
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      {loading ? <p className="muted" style={{ padding: 16 }}>Loading…</p>
+        : !connected || history.length === 0 ? <p className="muted" style={{ padding: 16 }}>No follower history for this platform / range yet.</p>
+        : (
+          <>
+            {live && few && <p className="muted" style={{ padding: "0 4px 8px", fontSize: "0.8rem" }}>Real history builds up one point per day (auto-sync). Check back after a few days.</p>}
+            <div className="chart" style={{ height: 260 }}>
+              <ResponsiveContainer>
+                <AreaChart data={history} margin={{ top: 12, right: 16, left: -6, bottom: 4 }}>
+                  <defs>
+                    <linearGradient id="fg-sub" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={PLATFORM_COLORS.YouTube} stopOpacity={0.28} />
+                      <stop offset="95%" stopColor={PLATFORM_COLORS.YouTube} stopOpacity={0.01} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--line)" opacity={0.6} />
+                  <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={20} />
+                  <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={52} domain={["dataMin - 1", "dataMax + 1"]} allowDecimals={false} />
+                  <Tooltip
+                    formatter={(v) => [Number(v).toLocaleString() + " subscribers", "YouTube"]}
+                    contentStyle={{ borderRadius: 12, border: "1px solid var(--line)", background: "var(--surface)", padding: "10px 14px" }}
+                  />
+                  <Area type="monotone" dataKey="Subscribers" stroke={PLATFORM_COLORS.YouTube} strokeWidth={3}
+                    fill="url(#fg-sub)" dot={few} activeDot={{ r: 6, strokeWidth: 2, stroke: "#fff" }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
     </article>
   );
 }
 
-export function ContentPerformance() {
+export function ContentPerformance({ platform, days }) {
   const [perfData, setPerfData] = useState(null);
   const [tab, setTab] = useState("Views");
+  const plat = platform === "All Platforms" ? "all" : (platform || "all").toLowerCase();
 
   useEffect(() => {
-    api.get("/api/analytics/content-performance")
+    api.get(`/api/analytics/content-performance?platform=${plat}&days=${days}`)
       .then((res) => setPerfData(res.data))
-      .catch((err) => console.error("Error loading content performance:", err));
-  }, []);
+      .catch((err) => { console.error("Error loading content performance:", err); setPerfData({}); });
+  }, [plat, days]);
 
-  const dataMap = perfData || PERFORMANCE;
+  const dataMap = perfData && Object.keys(perfData).length ? perfData : { Views: [], Likes: [], Comments: [], Shares: [] };
   const tabs = Object.keys(dataMap);
   const currentChartData = dataMap[tab] || [];
   const bestDay = currentChartData.length > 0
@@ -137,27 +136,29 @@ export function ContentPerformance() {
     <article className="card">
       <div className="card-head">
         <h2>Content Performance <Icon name="info" size={14} /></h2>
+        <span className="muted" style={{ fontSize: "0.75rem" }}>Videos from last {days} days</span>
       </div>
       <div className="tabs" role="tablist">
         {tabs.map((t) => (
           <button key={t} role="tab" aria-selected={tab === t} className={tab === t ? "on" : ""} onClick={() => setTab(t)}>{t}</button>
         ))}
       </div>
-      <div className="chart" style={{ height: 210 }}>
-        <ResponsiveContainer>
-          <BarChart data={currentChartData} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="var(--line)" />
-            <XAxis dataKey="day" tick={AXIS} axisLine={false} tickLine={false} />
-            <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={44} />
-            <Tooltip cursor={{ fill: "var(--soft)" }} formatter={(v) => [v.toLocaleString(), tab]} contentStyle={{ borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)" }} />
-            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-              {currentChartData.map((d) => (
-                <Cell key={d.day} fill={d.day === bestDay ? "#6d4ae8" : "#a79af2"} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {currentChartData.length === 0 ? <p className="muted" style={{ padding: 16 }}>No videos published in this date range.</p> : (
+        <div className="chart" style={{ height: 210 }}>
+          <ResponsiveContainer>
+            <BarChart data={currentChartData} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
+              <CartesianGrid vertical={false} stroke="var(--line)" />
+              <XAxis dataKey="day" tick={AXIS} axisLine={false} tickLine={false} />
+              <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={44} />
+              <Tooltip cursor={{ fill: "var(--soft)" }} labelFormatter={(l, p) => p?.[0]?.payload?.title || l}
+                formatter={(v) => [v.toLocaleString(), tab]} contentStyle={{ borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)" }} />
+              <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                {currentChartData.map((d, i) => <Cell key={i} fill={d.day === bestDay ? "#6d4ae8" : "#a79af2"} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </article>
   );
 }
@@ -197,7 +198,7 @@ export function TopPosts({ posts: parentPosts }) {
     }
   }, [showCompare, selectedA, selectedB]);
 
-  const displayPosts = posts.length > 0 ? posts : POSTS;
+  const displayPosts = parentPosts !== undefined ? posts : (posts.length > 0 ? posts : POSTS);
   const pA = compData?.compared_posts?.find((p) => p.post_id === Number(selectedA)) || posts.find((p) => p.post_id === Number(selectedA));
   const pB = compData?.compared_posts?.find((p) => p.post_id === Number(selectedB)) || posts.find((p) => p.post_id === Number(selectedB));
 
@@ -302,19 +303,20 @@ export function TopPosts({ posts: parentPosts }) {
             ))}
           </tbody>
         </table>
+        {displayPosts.length === 0 && <p className="muted" style={{ padding: 16 }}>No posts in this date range.</p>}
       </div>
     </article>
   );
 }
 
-export function Audience() {
+export function Audience({ followers }) {
   const tabs = Object.keys(AUDIENCE);
   const [tab, setTab] = useState("Age");
   const data = AUDIENCE[tab].map(([name, value]) => ({ name, value }));
   return (
     <article className="card">
       <div className="card-head">
-        <h2>Audience Demographics <Icon name="info" size={14} /></h2>
+        <h2>Audience Demographics <Icon name="info" size={14} /><span className="sample-pill sm">Sample</span></h2>
         <a href="#" className="view-all" onClick={(e) => e.preventDefault()}>View All <Icon name="right" size={14} /></a>
       </div>
       <div className="tabs" role="tablist">
@@ -331,7 +333,7 @@ export function Audience() {
               </Pie>
             </PieChart>
           </ResponsiveContainer>
-          <div className="donut-mid"><strong>142.5K</strong><small>Subscribers</small></div>
+          <div className="donut-mid"><strong>{followers != null ? k(followers) : "—"}</strong><small>Subscribers</small></div>
         </div>
         <ul className="aud-list">
           {data.map((d, i) => (
@@ -343,19 +345,19 @@ export function Audience() {
   );
 }
 
-export function Revenue() {
+export function Revenue({ overview, days }) {
   const max = Math.max(...REVENUE_BARS);
+  const has = overview?.connected;
   return (
     <article className="card">
       <div className="card-head">
-        <h2>Revenue Analytics <Icon name="info" size={14} /></h2>
-        <a href="#" className="view-all" onClick={(e) => e.preventDefault()}>View All <Icon name="right" size={14} /></a>
+        <h2>Revenue Analytics <Icon name="info" size={14} /><span className="sample-pill sm">Estimate</span></h2>
       </div>
       <div className="rev">
         <div>
-          <small className="muted">Est. YouTube AdSense Revenue</small>
-          <div className="kpi-main"><strong className="rev-n">₹68,450</strong><span className="delta"><Icon name="up" size={12} />24.5%</span></div>
-          <p className="kpi-sub">+ ₹14,200 vs last month</p>
+          <small className="muted">Est. earnings, last {days} days (views × ₹0.23)</small>
+          <div className="kpi-main"><strong className="rev-n">{has ? money(overview.est_revenue) : "—"}</strong></div>
+          <p className="kpi-sub">Real AdSense data needs YouTube Analytics API + OAuth.</p>
         </div>
         <div className="rev-bars" aria-hidden="true">
           {REVENUE_BARS.map((v, i) => <i key={i} style={{ height: `${(v / max) * 100}%` }} />)}

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..deps import get_current_user, require_roles
-from ..models import Agency, AgencyCreator, Creator, User
+from ..models import Agency, AgencyCreator, Creator, SocialAccount, User
 from ..roles import ADMIN, AGENCY
 from ..schemas import AgencyCreatorAdd, AgencyOut, AgencyUpdate, CreatorOut
 
@@ -50,6 +50,87 @@ def update_my_profile(
 
 
 # ---- creators managed by the logged-in agency ----
+
+@router.get("/me/overview")
+def get_agency_overview(user: User = Depends(require_roles(AGENCY)), db: Session = Depends(get_db)):
+    agency = _own_agency(user, db)
+    stmt = (
+        select(Creator)
+        .join(AgencyCreator, AgencyCreator.creator_id == Creator.creator_id)
+        .where(AgencyCreator.agency_id == agency.agency_id)
+        .order_by(Creator.creator_id)
+    )
+    creators = db.scalars(stmt).all()
+
+    if not creators:
+        return {
+            "has_creators": False,
+            "total_creators": 0,
+            "total_followers": 0,
+            "total_views": 0,
+            "kpis": [
+                {"label": "Total Creators", "value": "0", "delta": None, "sub": "No creators linked", "icon": "audience", "tone": "violet"},
+                {"label": "Total Followers", "value": "0", "delta": None, "sub": "Across linked accounts", "icon": "users", "tone": "indigo"},
+                {"label": "Total Views", "value": "0", "delta": None, "sub": "Across linked accounts", "icon": "eye", "tone": "blue"},
+                {"label": "Active Campaigns", "value": "0", "delta": None, "sub": "Campaigns module", "icon": "campaign", "tone": "rose"},
+                {"label": "Total Revenue", "value": "₹0", "delta": None, "sub": "Revenue module", "icon": "wallet", "tone": "amber"},
+            ],
+            "creators": [],
+            "platform_dist": [],
+            "performance": [],
+        }
+
+    total_followers = 0
+    total_views = 0
+    platform_counts = {}
+    creators_list = []
+
+    for c in creators:
+        c_followers = sum(a.followers for a in c.social_accounts)
+        c_views = sum(a.total_views for a in c.social_accounts)
+        total_followers += c_followers
+        total_views += c_views
+
+        main_plat = c.social_accounts[0].platform.capitalize() if c.social_accounts else "YouTube"
+        for a in c.social_accounts:
+            p = (a.platform or "other").capitalize()
+            platform_counts[p] = platform_counts.get(p, 0) + a.followers
+
+        creators_list.append({
+            "name": c.creator_name or (c.user.name if c.user else f"Creator #{c.creator_id}"),
+            "platform": main_plat,
+            "followers": f"{c_followers:,}" if c_followers < 1000000 else f"{round(c_followers/1000000, 1)}M",
+            "views": f"{c_views:,}" if c_views < 1000000 else f"{round(c_views/1000000, 1)}M",
+            "eng": "3.8%",
+            "growth": "+5.2%",
+        })
+
+    tot_plat_followers = sum(platform_counts.values()) or 1
+    platform_colors = {"Youtube": "#ef4444", "Instagram": "#d946a8", "Tiktok": "#111827", "Linkedin": "#2563eb"}
+    platform_dist = [
+        {"name": p, "value": round((cnt / tot_plat_followers) * 100), "color": platform_colors.get(p, "#6d4ae8")}
+        for p, cnt in platform_counts.items()
+    ]
+
+    kpis = [
+        {"label": "Total Creators", "value": str(len(creators)), "delta": None, "sub": "managed creators", "icon": "audience", "tone": "violet"},
+        {"label": "Total Followers", "value": f"{total_followers:,}" if total_followers < 1000000 else f"{round(total_followers/1000000, 1)}M", "delta": None, "sub": "across all platforms", "icon": "users", "tone": "indigo"},
+        {"label": "Total Views", "value": f"{total_views:,}" if total_views < 1000000 else f"{round(total_views/1000000, 1)}M", "delta": None, "sub": "across all videos", "icon": "eye", "tone": "blue"},
+        {"label": "Active Campaigns", "value": "0", "delta": None, "sub": "Campaigns module", "icon": "campaign", "tone": "rose"},
+        {"label": "Total Revenue", "value": "₹0", "delta": None, "sub": "Revenue module", "icon": "wallet", "tone": "amber"},
+    ]
+
+    return {
+        "has_creators": True,
+        "total_creators": len(creators),
+        "total_followers": total_followers,
+        "total_views": total_views,
+        "kpis": kpis,
+        "creators": creators_list,
+        "platform_dist": platform_dist,
+        "performance": [],
+    }
+
 @router.get("/me/creators", response_model=list[CreatorOut])
 def list_my_creators(user: User = Depends(require_roles(AGENCY)), db: Session = Depends(get_db)):
     agency = _own_agency(user, db)

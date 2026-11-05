@@ -1,0 +1,1602 @@
+From bf0b16156c639a6a0665bb7668b47195fca6cf81 Mon Sep 17 00:00:00 2001
+From: fix <fix@x>
+Date: Mon, 2 Nov 2026 16:22:47 +0000
+Subject: [PATCH] Fix: real YouTube totals, working date range, no silent demo
+ fallback, daily follower snapshots
+
+---
+ .../versions/0003_youtube_channel_totals.py   |  32 ++
+ backend/app/config.py                         |   1 +
+ backend/app/main.py                           |  30 +-
+ backend/app/models.py                         |   6 +
+ backend/app/routers/analytics.py              | 437 ++++++++----------
+ backend/app/services/youtube.py               | 304 ++++++------
+ frontend/src/components/AppLayout.jsx         |   3 +
+ frontend/src/dashboard/DateRangeContext.jsx   |  23 +
+ frontend/src/dashboard/Topbar.jsx             |   4 +-
+ frontend/src/dashboard/Widgets.jsx            | 214 ++++-----
+ frontend/src/pages/Dashboard.jsx              |  75 +--
+ 11 files changed, 584 insertions(+), 545 deletions(-)
+ create mode 100644 backend/alembic/versions/0003_youtube_channel_totals.py
+ create mode 100644 frontend/src/dashboard/DateRangeContext.jsx
+
+diff --git a/backend/alembic/versions/0003_youtube_channel_totals.py b/backend/alembic/versions/0003_youtube_channel_totals.py
+new file mode 100644
+index 0000000..11a92a3
+--- /dev/null
++++ b/backend/alembic/versions/0003_youtube_channel_totals.py
+@@ -0,0 +1,32 @@
++"""store real channel totals + live flag on social_accounts
++
++Revision ID: 0003
++Revises: 0002
++Create Date: 2026-11-02
++
++"""
++from typing import Sequence, Union
++
++from alembic import op
++import sqlalchemy as sa
++
++revision: str = '0003'
++down_revision: Union[str, Sequence[str], None] = '0002'
++branch_labels: Union[str, Sequence[str], None] = None
++depends_on: Union[str, Sequence[str], None] = None
++
++
++def upgrade() -> None:
++    with op.batch_alter_table('social_accounts') as b:
++        b.add_column(sa.Column('total_views', sa.BigInteger(), nullable=False, server_default='0'))
++        b.add_column(sa.Column('video_count', sa.Integer(), nullable=False, server_default='0'))
++        b.add_column(sa.Column('is_live', sa.Boolean(), nullable=False, server_default=sa.false()))
++        b.add_column(sa.Column('last_synced_at', sa.DateTime(), nullable=True))
++
++
++def downgrade() -> None:
++    with op.batch_alter_table('social_accounts') as b:
++        b.drop_column('last_synced_at')
++        b.drop_column('is_live')
++        b.drop_column('video_count')
++        b.drop_column('total_views')
+diff --git a/backend/app/config.py b/backend/app/config.py
+index 33971ec..fc7b530 100644
+--- a/backend/app/config.py
++++ b/backend/app/config.py
+@@ -12,3 +12,4 @@ FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+ SEED_DEMO_USERS = os.getenv("SEED_DEMO_USERS", "true").lower() == "true"
+ BCRYPT_ROUNDS = int(os.getenv("BCRYPT_ROUNDS", "12"))  # tests lower this for speed
+ YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
++SYNC_INTERVAL_MINUTES = int(os.getenv("SYNC_INTERVAL_MINUTES", "360"))  # auto re-sync of connected YouTube channels (0 = off)
+diff --git a/backend/app/main.py b/backend/app/main.py
+index 783c261..df05d9f 100644
+--- a/backend/app/main.py
++++ b/backend/app/main.py
+@@ -1,3 +1,4 @@
++import asyncio
+ import logging
+ from contextlib import asynccontextmanager
+ 
+@@ -5,14 +6,36 @@ from fastapi import FastAPI
+ from fastapi.middleware.cors import CORSMiddleware
+ from sqlalchemy.exc import OperationalError, ProgrammingError
+ 
+-from .config import FRONTEND_ORIGIN, SEED_DEMO_USERS
++from .config import FRONTEND_ORIGIN, SEED_DEMO_USERS, SYNC_INTERVAL_MINUTES, YOUTUBE_API_KEY
+ from .database import SessionLocal
+ from .routers import account, admin, agencies, analytics, auth, creators
+ from .seed import seed_demo_users
++from .models import SocialAccount
++from .services.youtube import sync_youtube_channel_to_db
++from sqlalchemy import select
+ 
+ log = logging.getLogger("creatoriq")
+ 
+ 
++def _resync_all() -> None:
++    """Re-sync every live YouTube account -> stores today's follower snapshot (real growth history)."""
++    with SessionLocal() as db:
++        accounts = db.scalars(select(SocialAccount).where(
++            SocialAccount.platform == "youtube", SocialAccount.is_live.is_(True))).all()
++        for acc in accounts:
++            try:
++                sync_youtube_channel_to_db(db, acc.creator_id, acc.username or acc.platform_user_id)
++            except Exception as e:  # keep the loop alive
++                db.rollback()
++                log.warning("Auto-sync failed for %s: %s", acc.username, e)
++
++
++async def _sync_loop() -> None:
++    while True:
++        await asyncio.sleep(SYNC_INTERVAL_MINUTES * 60)
++        await asyncio.to_thread(_resync_all)
++
++
+ @asynccontextmanager
+ async def lifespan(app: FastAPI):
+     # Tables come from Alembic: run `alembic upgrade head` once before starting.
+@@ -22,7 +45,12 @@ async def lifespan(app: FastAPI):
+                 seed_demo_users(db)
+         except (OperationalError, ProgrammingError):
+             log.error("Database tables not found. Run: alembic upgrade head")
++    task = None
++    if YOUTUBE_API_KEY and SYNC_INTERVAL_MINUTES > 0:
++        task = asyncio.create_task(_sync_loop())
+     yield
++    if task:
++        task.cancel()
+ 
+ 
+ app = FastAPI(title="CreatorIQ API", version="0.2.0", lifespan=lifespan)
+diff --git a/backend/app/models.py b/backend/app/models.py
+index 3bc7d2a..15698f8 100644
+--- a/backend/app/models.py
++++ b/backend/app/models.py
+@@ -18,6 +18,7 @@ from sqlalchemy import (
+     Text,
+     UniqueConstraint,
+     func,
++    false,
+     true,
+ )
+ from sqlalchemy.orm import Mapped, mapped_column, relationship
+@@ -124,6 +125,11 @@ class SocialAccount(Base):
+     token_expires_at: Mapped[datetime | None] = mapped_column(DateTime)
+     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
+     connected_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
++    # Lifetime channel totals straight from the platform API (YouTube: statistics.viewCount / videoCount)
++    total_views: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0, server_default="0")
++    video_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
++    is_live: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
++    last_synced_at: Mapped[datetime | None] = mapped_column(DateTime)
+ 
+     creator: Mapped[Creator] = relationship(back_populates="social_accounts")
+     posts: Mapped[list["Post"]] = relationship(
+diff --git a/backend/app/routers/analytics.py b/backend/app/routers/analytics.py
+index 73c1eed..44cf6ce 100644
+--- a/backend/app/routers/analytics.py
++++ b/backend/app/routers/analytics.py
+@@ -1,70 +1,110 @@
+-from typing import List, Optional
++from datetime import date, datetime, timedelta
++from typing import Optional
+ 
+ from fastapi import APIRouter, Depends, HTTPException, Query, status
+ from pydantic import BaseModel
+-from sqlalchemy import desc, select
++from sqlalchemy import select
++from sqlalchemy.exc import IntegrityError
+ from sqlalchemy.orm import Session
+ 
++from ..config import YOUTUBE_API_KEY
+ from ..database import get_db
+ from ..deps import get_current_user
+-from ..models import AudienceAnalytics, Creator, Post, PostAnalytics, SocialAccount, User
+-from ..roles import CREATOR
+-from ..services.youtube import sync_youtube_channel_to_db
++from ..models import AudienceAnalytics, Creator, Post, SocialAccount, User
++from ..services.youtube import YouTubeAPIError, sync_youtube_channel_to_db
+ 
+ router = APIRouter(prefix="/api/analytics", tags=["Analytics & Content"])
+ 
++ALL = ("all", "all platforms", "", None)
++
+ 
+ def _get_or_create_creator(user: User, db: Session) -> Creator:
+-    """Helper to ensure creator record exists and belongs to current user."""
+     creator = db.scalar(select(Creator).where(Creator.user_id == user.user_id))
+     if not creator:
+-        creator = Creator(
+-            user_id=user.user_id,
+-            creator_name=user.name,
+-            bio="Digital content creator & storyteller.",
+-        )
++        creator = Creator(user_id=user.user_id, creator_name=user.name, bio="Digital content creator & storyteller.")
+         db.add(creator)
+         db.commit()
+         db.refresh(creator)
+     return creator
+ 
+ 
+-def _ensure_creator_data(creator: Creator, db: Session) -> SocialAccount:
+-    """Ensure at least one social account (YouTube) and sample/live posts are synced."""
+-    account = db.scalar(
+-        select(SocialAccount).where(
+-            SocialAccount.creator_id == creator.creator_id,
+-            SocialAccount.platform == "youtube",
+-        )
+-    )
+-    if not account or not account.posts:
+-        account = sync_youtube_channel_to_db(db, creator.creator_id, "@techcreator")
+-    return account
++def _ensure_demo_data(creator: Creator, db: Session) -> None:
++    """Demo data ONLY when no YOUTUBE_API_KEY is configured. With a key, the user must sync a real channel."""
++    if YOUTUBE_API_KEY:
++        return
++    has = db.scalar(select(SocialAccount.account_id).where(
++        SocialAccount.creator_id == creator.creator_id, SocialAccount.platform == "youtube"))
++    if not has:
++        try:
++            sync_youtube_channel_to_db(db, creator.creator_id, "@techcreator")
++        except IntegrityError:
++            db.rollback()
++
++
++def _accounts(creator: Creator, db: Session, platform: Optional[str]) -> list[SocialAccount]:
++    q = select(SocialAccount).where(
++        SocialAccount.creator_id == creator.creator_id, SocialAccount.is_active.is_(True))
++    if platform and platform.lower() not in ALL:
++        q = q.where(SocialAccount.platform == platform.lower())
++    return list(db.scalars(q).all())
++
++
++def _posts(db: Session, accounts: list[SocialAccount], days: Optional[int] = None) -> list[Post]:
++    ids = [a.account_id for a in accounts]
++    if not ids:
++        return []
++    q = select(Post).where(Post.account_id.in_(ids))
++    if days:
++        q = q.where(Post.published_at >= datetime.utcnow() - timedelta(days=days))
++    return list(db.scalars(q).all())
++
++
++def _post_dict(p: Post, platform: str) -> dict:
++    a = p.analytics
++    return {
++        "post_id": p.post_id,
++        "platform_post_id": p.platform_post_id,
++        "platform": platform.capitalize(),
++        "title": p.caption or "Untitled Video",
++        "content_type": p.content_type,
++        "thumbnail_url": p.thumbnail_url,
++        "post_url": p.post_url,
++        "published_at": p.published_at.isoformat() if p.published_at else None,
++        "views": a.views if a else 0,
++        "likes": a.likes if a else 0,
++        "comments": a.comments if a else 0,
++        "shares": a.shares if a else 0,
++        "reach": (a.reach or 0) if a else 0,
++        "impressions": (a.impressions or 0) if a else 0,
++        "watch_time_hours": (a.watch_time or 0) if a else 0,
++        "engagement_rate": (a.engagement_rate or 0.0) if a else 0.0,
++    }
+ 
+ 
+ class SyncRequest(BaseModel):
+-    channel_handle: Optional[str] = "@techcreator"
++    channel_handle: Optional[str] = None
+     api_key: Optional[str] = None
+ 
+ 
+ @router.post("/youtube/sync")
+-def sync_youtube(
+-    data: SyncRequest,
+-    current_user: User = Depends(get_current_user),
+-    db: Session = Depends(get_db),
+-):
+-    """Synchronize YouTube channel metrics and video statistics."""
++def sync_youtube(data: SyncRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
++    """Sync a YouTube channel. Real API errors are returned to the UI, never hidden."""
+     creator = _get_or_create_creator(current_user, db)
+-    account = sync_youtube_channel_to_db(
+-        db,
+-        creator.creator_id,
+-        channel_handle=data.channel_handle or "@techcreator",
+-        api_key=data.api_key,
+-    )
++    handle = (data.channel_handle or "").strip()
++    if not handle:
++        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Channel handle is required (e.g. @chaiaurcode)")
++    try:
++        account = sync_youtube_channel_to_db(db, creator.creator_id, handle, data.api_key)
++    except YouTubeAPIError as e:
++        raise HTTPException(e.status, e.message)
++    except IntegrityError:
++        db.rollback()
++        raise HTTPException(status.HTTP_409_CONFLICT, "This channel is already connected to another creator.")
+     return {
+         "status": "success",
+-        "message": f"Channel {account.username} synced successfully",
++        "message": f"{account.username} synced ({'live' if account.is_live else 'demo'} data)",
+         "platform": account.platform,
++        "is_live": account.is_live,
+         "followers": account.followers,
+         "total_posts": len(account.posts),
+     }
+@@ -72,149 +112,91 @@ def sync_youtube(
+ 
+ @router.get("/overview")
+ def get_analytics_overview(
+-    platform: Optional[str] = Query(None, description="Optional platform filter: youtube, instagram, github"),
++    platform: Optional[str] = Query(None),
++    days: int = Query(30, ge=1, le=3650),
+     current_user: User = Depends(get_current_user),
+     db: Session = Depends(get_db),
+ ):
+-    """Overall creator metrics: total posts, total views, likes, avg engagement."""
++    """Lifetime channel totals (from the platform) + stats for posts published in the last `days` days."""
+     creator = _get_or_create_creator(current_user, db)
+-    _ensure_creator_data(creator, db)
+-
+-    accounts_q = select(SocialAccount).where(SocialAccount.creator_id == creator.creator_id)
+-    if platform and platform.lower() not in ("all platforms", "all"):
+-        accounts_q = accounts_q.where(SocialAccount.platform == platform.lower())
+-    accounts = db.scalars(accounts_q).all()
+-    account_ids = [a.account_id for a in accounts]
+-
+-    posts = db.scalars(
+-        select(Post).where(Post.account_id.in_(account_ids))
+-    ).all() if account_ids else []
+-
+-    total_posts = len(posts)
+-    total_views = 0
+-    total_likes = 0
+-    total_comments = 0
+-    total_shares = 0
+-    engagement_rates = []
++    _ensure_demo_data(creator, db)
++    accounts = _accounts(creator, db, platform)
++    platform_of = {a.account_id: a.platform for a in accounts}
+ 
++    posts = _posts(db, accounts, days)
++    views = likes = comments = shares = 0
++    rates = []
+     for p in posts:
+         if p.analytics:
+-            total_views += p.analytics.views
+-            total_likes += p.analytics.likes
+-            total_comments += p.analytics.comments
+-            total_shares += p.analytics.shares
++            views += p.analytics.views
++            likes += p.analytics.likes
++            comments += p.analytics.comments
++            shares += p.analytics.shares
+             if p.analytics.engagement_rate is not None:
+-                engagement_rates.append(p.analytics.engagement_rate)
+-
+-    avg_engagement = round(sum(engagement_rates) / max(len(engagement_rates), 1), 2)
+-    total_followers = sum(a.followers for a in accounts)
+-    primary_acc = accounts[0] if accounts else None
+-
+-    # Total published videos on channel from YouTube API:
+-    # Chai aur Code has 1,021 total published videos on YouTube and 117.4M total channel views
+-    channel_video_count = 1021 if (not platform or platform.lower() in ("all", "all platforms", "youtube")) else total_posts
+-    channel_views = 117453743 if (not platform or platform.lower() in ("all", "all platforms", "youtube")) else total_views
++                rates.append(p.analytics.engagement_rate)
+ 
+     return {
+-        "platform": platform if platform and platform.lower() != "all platforms" else "all",
+-        "channel_name": primary_acc.username if primary_acc else "Chai aur Code",
+-        "subscribers": total_followers,
+-        "total_posts": channel_video_count,
+-        "synced_posts_count": total_posts,
+-        "total_views": channel_views,
+-        "total_likes": total_likes,
+-        "total_comments": total_comments,
+-        "total_shares": total_shares,
+-        "avg_engagement_rate": avg_engagement,
+-        "est_revenue": round(total_views * 0.0028, 2),
++        "platform": (platform or "all").lower(),
++        "connected": bool(accounts),
++        "is_live": bool(accounts) and all(a.is_live for a in accounts),
++        "channel_name": accounts[0].username if accounts else None,
++        "last_synced_at": max((a.last_synced_at for a in accounts if a.last_synced_at), default=None),
++        # lifetime numbers straight from the platform
++        "subscribers": sum(a.followers for a in accounts),
++        "total_views": sum(a.total_views for a in accounts),
++        "total_videos": sum(a.video_count for a in accounts),
++        # selected date range
++        "days": days,
++        "period_posts": len(posts),
++        "period_views": views,
++        "period_likes": likes,
++        "period_comments": comments,
++        "period_shares": shares,
++        "avg_engagement_rate": round(sum(rates) / len(rates), 2) if rates else 0.0,
++        "est_revenue": round(views * 0.0028, 2),  # ESTIMATE: ~$2.8 RPM, not real AdSense
++        "platforms": [
++            {"platform": a.platform, "followers": a.followers, "total_views": a.total_views,
++             "total_videos": a.video_count, "is_live": a.is_live}
++            for a in accounts
++        ],
+     }
+ 
+ 
+ @router.get("/posts")
+ def get_posts(
+-    sort_by: str = Query("published_at", regex="^(published_at|views|likes|engagement_rate)$"),
+-    order: str = Query("desc", regex="^(asc|desc)$"),
++    sort_by: str = Query("published_at", pattern="^(published_at|views|likes|engagement_rate)$"),
++    order: str = Query("desc", pattern="^(asc|desc)$"),
+     platform: Optional[str] = Query(None),
++    days: int = Query(30, ge=1, le=3650),
+     current_user: User = Depends(get_current_user),
+     db: Session = Depends(get_db),
+ ):
+-    """Retrieve post-level analytics with customizable sorting and platform filtering."""
+     creator = _get_or_create_creator(current_user, db)
+-    _ensure_creator_data(creator, db)
+-
+-    accounts_q = select(SocialAccount).where(SocialAccount.creator_id == creator.creator_id)
+-    if platform and platform.lower() not in ("all platforms", "all"):
+-        accounts_q = accounts_q.where(SocialAccount.platform == platform.lower())
+-    accounts = db.scalars(accounts_q).all()
+-    account_ids = [a.account_id for a in accounts]
+-    acc_map = {a.account_id: a.platform for a in accounts}
+-
+-    posts = db.scalars(
+-        select(Post).where(Post.account_id.in_(account_ids))
+-    ).all() if account_ids else []
+-
+-    items = []
+-    for p in posts:
+-        a = p.analytics
+-        items.append({
+-            "post_id": p.post_id,
+-            "platform_post_id": p.platform_post_id,
+-            "platform": acc_map.get(p.account_id, "YouTube").capitalize() if acc_map.get(p.account_id) != "github" else "GitHub",
+-            "title": p.caption or "Untitled Video",
+-            "content_type": p.content_type,
+-            "thumbnail_url": p.thumbnail_url,
+-            "post_url": p.post_url,
+-            "published_at": p.published_at.isoformat() if p.published_at else None,
+-            "views": a.views if a else 0,
+-            "likes": a.likes if a else 0,
+-            "comments": a.comments if a else 0,
+-            "shares": a.shares if a else 0,
+-            "reach": a.reach if a and a.reach else 0,
+-            "impressions": a.impressions if a and a.impressions else 0,
+-            "watch_time_hours": a.watch_time if a and a.watch_time else 0,
+-            "engagement_rate": a.engagement_rate if a and a.engagement_rate else 0.0,
+-        })
+-
+-    reverse = (order == "desc")
+-    if sort_by in ("views", "likes", "engagement_rate"):
+-        items.sort(key=lambda x: x.get(sort_by, 0), reverse=reverse)
++    _ensure_demo_data(creator, db)
++    accounts = _accounts(creator, db, platform)
++    plat = {a.account_id: a.platform for a in accounts}
++    items = [_post_dict(p, plat.get(p.account_id, "youtube")) for p in _posts(db, accounts, days)]
++    rev = order == "desc"
++    if sort_by == "published_at":
++        items.sort(key=lambda x: x.get("published_at") or "", reverse=rev)
+     else:
+-        items.sort(key=lambda x: x.get("published_at") or "", reverse=reverse)
+-
++        items.sort(key=lambda x: x.get(sort_by, 0), reverse=rev)
+     return items
+ 
+ 
+ @router.get("/posts/top")
+ def get_top_posts(
+     limit: int = 4,
++    days: int = Query(30, ge=1, le=3650),
++    platform: Optional[str] = Query(None),
+     current_user: User = Depends(get_current_user),
+     db: Session = Depends(get_db),
+ ):
+-    """Retrieve top-performing posts by views and engagement."""
+     creator = _get_or_create_creator(current_user, db)
+-    account = _ensure_creator_data(creator, db)
+-
+-    posts = db.scalars(
+-        select(Post).where(Post.account_id == account.account_id)
+-    ).all()
+-
+-    items = []
+-    for p in posts:
+-        a = p.analytics
+-        items.append({
+-            "post_id": p.post_id,
+-            "platform_post_id": p.platform_post_id,
+-            "title": p.caption or "Untitled Video",
+-            "thumbnail_url": p.thumbnail_url,
+-            "post_url": p.post_url,
+-            "published_at": p.published_at.strftime("%b %d, %Y") if p.published_at else "Recent",
+-            "views": a.views if a else 0,
+-            "likes": a.likes if a else 0,
+-            "comments": a.comments if a else 0,
+-            "shares": a.shares if a else 0,
+-            "engagement_rate": a.engagement_rate if a and a.engagement_rate else 0.0,
+-        })
+-
++    _ensure_demo_data(creator, db)
++    accounts = _accounts(creator, db, platform)
++    plat = {a.account_id: a.platform for a in accounts}
++    items = [_post_dict(p, plat.get(p.account_id, "youtube")) for p in _posts(db, accounts, days)]
+     items.sort(key=lambda x: x["views"], reverse=True)
+     return items[:limit]
+ 
+@@ -225,149 +207,102 @@ def compare_posts(
+     current_user: User = Depends(get_current_user),
+     db: Session = Depends(get_db),
+ ):
+-    """Side-by-side post performance comparison."""
+     creator = _get_or_create_creator(current_user, db)
+-    account = _ensure_creator_data(creator, db)
+-
++    accounts = _accounts(creator, db, None)
+     try:
+         ids = [int(i.strip()) for i in post_ids.split(",") if i.strip()]
+     except ValueError:
+-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid post IDs format")
+-
++        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid post IDs format")
+     if len(ids) < 2:
+-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Please select at least 2 posts to compare")
+-
+-    posts = db.scalars(
+-        select(Post).where(
+-            Post.post_id.in_(ids),
+-            Post.account_id == account.account_id,
+-        )
+-    ).all()
++        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Please select at least 2 posts to compare")
+ 
++    acc_ids = [a.account_id for a in accounts]
++    posts = db.scalars(select(Post).where(Post.post_id.in_(ids), Post.account_id.in_(acc_ids))).all() if acc_ids else []
+     if len(posts) < 2:
+-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="One or more specified posts were not found")
+-
+-    compared_items = []
+-    for p in posts:
+-        a = p.analytics
+-        compared_items.append({
+-            "post_id": p.post_id,
+-            "title": p.caption or "Untitled",
+-            "thumbnail_url": p.thumbnail_url,
+-            "published_at": p.published_at.strftime("%d %b %Y") if p.published_at else "N/A",
+-            "views": a.views if a else 0,
+-            "likes": a.likes if a else 0,
+-            "comments": a.comments if a else 0,
+-            "shares": a.shares if a else 0,
+-            "engagement_rate": a.engagement_rate if a and a.engagement_rate else 0.0,
+-        })
+-
+-    # Metric comparison winner summary
+-    p1 = compared_items[0]
+-    p2 = compared_items[1]
+-    diff_views = p1["views"] - p2["views"]
+-    diff_eng = round(p1["engagement_rate"] - p2["engagement_rate"], 2)
++        raise HTTPException(status.HTTP_404_NOT_FOUND, "One or more specified posts were not found")
+ 
++    plat = {a.account_id: a.platform for a in accounts}
++    compared = [_post_dict(p, plat.get(p.account_id, "youtube")) for p in posts]
++    p1, p2 = compared[0], compared[1]
++    dv = p1["views"] - p2["views"]
++    de = round(p1["engagement_rate"] - p2["engagement_rate"], 2)
+     return {
+-        "compared_posts": compared_items,
++        "compared_posts": compared,
+         "summary": {
+-            "views_leader": p1["title"] if diff_views >= 0 else p2["title"],
+-            "views_difference": abs(diff_views),
+-            "engagement_leader": p1["title"] if diff_eng >= 0 else p2["title"],
+-            "engagement_difference": abs(diff_eng),
++            "views_leader": p1["title"] if dv >= 0 else p2["title"],
++            "views_difference": abs(dv),
++            "engagement_leader": p1["title"] if de >= 0 else p2["title"],
++            "engagement_difference": abs(de),
+         },
+     }
+ 
+ 
+ @router.get("/content-performance")
+ def get_content_performance(
++    days: int = Query(30, ge=1, le=3650),
++    platform: Optional[str] = Query(None),
+     current_user: User = Depends(get_current_user),
+     db: Session = Depends(get_db),
+ ):
+-    """Return aggregated performance metrics (Views, Likes, Comments, Shares) per day/post."""
++    """Views/Likes/Comments/Shares of the latest posts published inside the selected range."""
+     creator = _get_or_create_creator(current_user, db)
+-    _ensure_creator_data(creator, db)
+-    
+-    posts = db.scalars(
+-        select(Post)
+-        .join(SocialAccount)
+-        .where(SocialAccount.creator_id == creator.creator_id)
+-        .order_by(Post.published_at.asc())
+-    ).all()
+-    
+-    views_data = []
+-    likes_data = []
+-    comments_data = []
+-    shares_data = []
+-    
+-    for p in posts[-7:]:
+-        day_label = p.published_at.strftime("%d %b") if p.published_at else f"Post {p.post_id}"
++    _ensure_demo_data(creator, db)
++    posts = sorted(_posts(db, _accounts(creator, db, platform), days), key=lambda p: p.published_at or datetime.min)[-12:]
++
++    out = {"Views": [], "Likes": [], "Comments": [], "Shares": []}
++    for p in posts:
+         a = p.analytics
+-        v = a.views if a else 0
+-        l = a.likes if a else 0
+-        c = a.comments if a else 0
+-        s = a.shares if a else int(l * 0.1)
+-        
+-        views_data.append({"day": day_label, "value": v, "title": p.caption[:25]})
+-        likes_data.append({"day": day_label, "value": l, "title": p.caption[:25]})
+-        comments_data.append({"day": day_label, "value": c, "title": p.caption[:25]})
+-        shares_data.append({"day": day_label, "value": s, "title": p.caption[:25]})
+-        
+-    return {
+-        "Views": views_data,
+-        "Likes": likes_data,
+-        "Comments": comments_data,
+-        "Shares": shares_data,
+-    }
++        label = p.published_at.strftime("%d %b") if p.published_at else f"Post {p.post_id}"
++        title = (p.caption or "")[:25]
++        out["Views"].append({"day": label, "value": a.views if a else 0, "title": title})
++        out["Likes"].append({"day": label, "value": a.likes if a else 0, "title": title})
++        out["Comments"].append({"day": label, "value": a.comments if a else 0, "title": title})
++        out["Shares"].append({"day": label, "value": a.shares if a else 0, "title": title})
++    return out
+ 
+ 
+ @router.get("/audience")
+ def get_audience_analytics(
++    days: int = Query(30, ge=1, le=3650),
++    platform: Optional[str] = Query(None),
+     current_user: User = Depends(get_current_user),
+     db: Session = Depends(get_db),
+ ):
+-    """Retrieve audience growth history and demographic breakdown."""
+     creator = _get_or_create_creator(current_user, db)
+-    account = _ensure_creator_data(creator, db)
++    _ensure_demo_data(creator, db)
++    accounts = _accounts(creator, db, platform)
++    if not accounts:
++        return {"connected": False, "current_followers": 0, "growth_history": [], "demographics": None}
+ 
++    ids = [a.account_id for a in accounts]
++    since = date.today() - timedelta(days=days)
+     records = db.scalars(
+         select(AudienceAnalytics)
+-        .where(AudienceAnalytics.account_id == account.account_id)
++        .where(AudienceAnalytics.account_id.in_(ids), AudienceAnalytics.date >= since)
+         .order_by(AudienceAnalytics.date.asc())
+     ).all()
+ 
+-    growth_history = []
+-    for r in records:
+-        growth_history.append({
+-            "date": r.date.strftime("%d %b"),
+-            "followers": r.followers or 0,
+-            "impressions": r.impressions or 0,
+-            "reach": r.reach or 0,
+-        })
+-
++    history = [{"date": r.date.strftime("%d %b"), "followers": r.followers or 0} for r in records]
+     latest = records[-1] if records else None
++    has_gender = bool(latest and latest.male_percentage is not None)
++    is_live = all(a.is_live for a in accounts)
++
++    # YouTube Data API v3 does NOT provide demographics (needs YouTube Analytics API + OAuth).
++    # So these are always labelled as sample data.
+     demographics = {
++        "is_sample": True,
+         "gender": [
+-            {"name": "Male", "value": latest.male_percentage if latest else 64.5, "color": "#6d4ae8"},
+-            {"name": "Female", "value": latest.female_percentage if latest else 35.5, "color": "#22c55e"},
++            {"name": "Male", "value": latest.male_percentage if has_gender else 64.5, "color": "#6d4ae8"},
++            {"name": "Female", "value": latest.female_percentage if has_gender else 35.5, "color": "#22c55e"},
+         ],
+-        "age_brackets": [
+-            ["18-24", 38],
+-            ["25-34", 44],
+-            ["35-44", 12],
+-            ["45+", 6],
+-        ],
+-        "top_locations": [
+-            ["India", 48],
+-            ["United States", 24],
+-            ["United Kingdom", 14],
+-            ["Others", 14],
+-        ],
+-        "peak_activity": latest.active_hours.get("peak", "18:00 - 21:00") if latest and latest.active_hours else "18:00 - 21:00",
++        "age_brackets": [["18-24", 38], ["25-34", 44], ["35-44", 12], ["45+", 6]],
++        "top_locations": [["India", 48], ["United States", 24], ["United Kingdom", 14], ["Others", 14]],
++        "peak_activity": (latest.active_hours or {}).get("peak", "18:00 - 21:00") if latest else "18:00 - 21:00",
+     }
+-
+     return {
+-        "current_followers": account.followers,
+-        "growth_history": growth_history,
++        "connected": True,
++        "is_live": is_live,
++        "current_followers": sum(a.followers for a in accounts),
++        "growth_history": history,
+         "demographics": demographics,
+     }
+diff --git a/backend/app/services/youtube.py b/backend/app/services/youtube.py
+index 848e404..8866682 100644
+--- a/backend/app/services/youtube.py
++++ b/backend/app/services/youtube.py
+@@ -96,104 +96,118 @@ DEMO_VIDEOS = [
+ ]
+ 
+ 
+-def fetch_youtube_channel_data(handle_or_id: str = "@techcreator", api_key: str | None = None) -> dict:
+-    """Fetch channel and video statistics.
+-    
+-    If api_key is available, requests live YouTube Data API v3.
+-    Otherwise gracefully falls back to structured realistic data.
+-    """
+-    key = api_key or YOUTUBE_API_KEY
+-    clean_handle = handle_or_id.strip()
++class YouTubeAPIError(Exception):
++    """Raised when the live YouTube API call fails. Never silently swapped for demo data."""
+ 
+-    if key:
+-        try:
+-            # Query by handle or channel id
+-            if clean_handle.startswith("@"):
+-                encoded_handle = urllib.parse.quote(clean_handle)
+-                url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&forHandle={encoded_handle}&key={key}"
+-            else:
+-                encoded_id = urllib.parse.quote(clean_handle)
+-                url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id={encoded_id}&key={key}"
++    def __init__(self, message: str, status: int = 502):
++        super().__init__(message)
++        self.message = message
++        self.status = status
+ 
+-            req = urllib.request.Request(url, headers={"User-Agent": "CreatorIQ/2.0"})
+-            with urllib.request.urlopen(req, timeout=7) as resp:
+-                data = json.loads(resp.read().decode("utf-8"))
+ 
+-            items = data.get("items", [])
+-            if items:
+-                item = items[0]
+-                snippet = item.get("snippet", {})
+-                stats = item.get("statistics", {})
+-                channel_id = item.get("id")
+-                uploads_id = item.get("contentDetails", {}).get("relatedPlaylists", {}).get("uploads")
++def _get_json(url: str) -> dict:
++    req = urllib.request.Request(url, headers={"User-Agent": "CreatorIQ/2.0"})
++    try:
++        with urllib.request.urlopen(req, timeout=10) as resp:
++            return json.loads(resp.read().decode("utf-8"))
++    except HTTPError as err:
++        reason, msg = "", ""
++        try:
++            body = json.loads(err.read().decode("utf-8"))
++            e = body.get("error", {})
++            msg = e.get("message", "")
++            reason = (e.get("errors") or [{}])[0].get("reason", "")
++        except Exception:
++            pass
++        hints = {
++            "keyInvalid": "YouTube API key is invalid. Check YOUTUBE_API_KEY in backend/.env.",
++            "quotaExceeded": "YouTube API daily quota exceeded. Try again tomorrow or use another key.",
++            "accessNotConfigured": "YouTube Data API v3 is not enabled for this key's Google Cloud project.",
++            "forbidden": "YouTube API refused the request (check key restrictions).",
++        }
++        raise YouTubeAPIError(hints.get(reason) or f"YouTube API error {err.code}: {msg or reason}", 502)
++    except URLError as err:
++        raise YouTubeAPIError(f"Cannot reach YouTube API: {err.reason}", 502)
+ 
+-                videos = []
+-                if uploads_id:
+-                    v_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId={uploads_id}&maxResults=10&key={key}"
+-                    v_req = urllib.request.Request(v_url, headers={"User-Agent": "CreatorIQ/2.0"})
+-                    with urllib.request.urlopen(v_req, timeout=7) as v_resp:
+-                        v_data = json.loads(v_resp.read().decode("utf-8"))
+ 
+-                    v_items = v_data.get("items", [])
+-                    vid_ids = [vi["contentDetails"]["videoId"] for vi in v_items if "contentDetails" in vi]
++def fetch_youtube_channel_data(handle_or_id: str = "@techcreator", api_key: str | None = None) -> dict:
++    """Fetch channel + latest videos.
+ 
+-                    if vid_ids:
+-                        stats_url = f"https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id={','.join(vid_ids)}&key={key}"
+-                        s_req = urllib.request.Request(stats_url, headers={"User-Agent": "CreatorIQ/2.0"})
+-                        with urllib.request.urlopen(s_req, timeout=7) as s_resp:
+-                            s_data = json.loads(s_resp.read().decode("utf-8"))
++    - API key present  -> LIVE data. Any failure raises YouTubeAPIError (no silent demo fallback).
++    - No API key       -> clearly flagged demo data (is_live=False).
++    """
++    key = api_key or YOUTUBE_API_KEY
++    clean_handle = handle_or_id.strip()
+ 
+-                        for sv in s_data.get("items", []):
+-                            v_snip = sv.get("snippet", {})
+-                            v_st = sv.get("statistics", {})
+-                            pub_str = v_snip.get("publishedAt")
+-                            try:
+-                                pub_dt = datetime.fromisoformat(pub_str.replace("Z", "+00:00")).replace(tzinfo=None)
+-                            except Exception:
+-                                pub_dt = datetime.now()
++    if not key:
++        return {
++            "is_live": False,
++            "channel_id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
++            "title": clean_handle.lstrip("@").capitalize() or "Creator Studio",
++            "username": clean_handle if clean_handle.startswith("@") else f"@{clean_handle}",
++            "description": "Demo channel (no YOUTUBE_API_KEY configured).",
++            "subscribers": 142500,
++            "total_views": 3250000,
++            "video_count": 52,
++            "videos": DEMO_VIDEOS,
++        }
+ 
+-                            v_views = int(v_st.get("viewCount", 0))
+-                            v_likes = int(v_st.get("likeCount", 0))
+-                            v_comments = int(v_st.get("commentCount", 0))
++    q = urllib.parse.quote(clean_handle)
++    lookup = f"forHandle={q}" if clean_handle.startswith("@") else f"id={q}"
++    data = _get_json(
++        f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&{lookup}&key={key}"
++    )
++    items = data.get("items", [])
++    if not items:
++        raise YouTubeAPIError(f"No YouTube channel found for '{clean_handle}'. Use @handle or a UC... channel id.", 404)
+ 
+-                            videos.append({
+-                                "id": sv.get("id"),
+-                                "title": v_snip.get("title", "Untitled Video"),
+-                                "thumbnail": v_snip.get("thumbnails", {}).get("high", {}).get("url", ""),
+-                                "published_at": pub_dt,
+-                                "views": v_views,
+-                                "likes": v_likes,
+-                                "comments": v_comments,
+-                                "shares": int(v_likes * 0.08),
+-                                "content_type": "video",
+-                                "url": f"https://www.youtube.com/watch?v={sv.get('id')}",
+-                            })
++    item = items[0]
++    snippet, stats = item.get("snippet", {}), item.get("statistics", {})
++    uploads_id = item.get("contentDetails", {}).get("relatedPlaylists", {}).get("uploads")
+ 
+-                return {
+-                    "is_live": True,
+-                    "channel_id": channel_id,
+-                    "title": snippet.get("title", clean_handle),
+-                    "username": clean_handle,
+-                    "description": snippet.get("description", ""),
+-                    "subscribers": int(stats.get("subscriberCount", 128400)),
+-                    "total_views": int(stats.get("viewCount", 2450000)),
+-                    "video_count": int(stats.get("videoCount", len(videos) or 48)),
+-                    "videos": videos or DEMO_VIDEOS,
+-                }
+-        except (HTTPError, URLError, Exception) as err:
+-            log.warning("YouTube API fetch failed, falling back to structured data: %s", err)
++    videos = []
++    if uploads_id:
++        pl = _get_json(
++            "https://www.googleapis.com/youtube/v3/playlistItems"
++            f"?part=contentDetails&playlistId={uploads_id}&maxResults=50&key={key}"
++        )
++        vid_ids = [i["contentDetails"]["videoId"] for i in pl.get("items", []) if "contentDetails" in i]
++        if vid_ids:
++            vd = _get_json(
++                f"https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id={','.join(vid_ids)}&key={key}"
++            )
++            for sv in vd.get("items", []):
++                sn, st = sv.get("snippet", {}), sv.get("statistics", {})
++                try:
++                    pub = datetime.fromisoformat(sn["publishedAt"].replace("Z", "+00:00")).replace(tzinfo=None)
++                except Exception:
++                    pub = datetime.utcnow()
++                likes = int(st.get("likeCount", 0))
++                thumbs = sn.get("thumbnails", {})
++                videos.append({
++                    "id": sv["id"],
++                    "title": sn.get("title", "Untitled Video"),
++                    "thumbnail": (thumbs.get("high") or thumbs.get("medium") or thumbs.get("default") or {}).get("url", ""),
++                    "published_at": pub,
++                    "views": int(st.get("viewCount", 0)),
++                    "likes": likes,
++                    "comments": int(st.get("commentCount", 0)),
++                    "shares": 0,  # YouTube Data API does not expose shares
++                    "content_type": "video",
++                    "url": f"https://www.youtube.com/watch?v={sv['id']}",
++                })
+ 
+-    # Fallback / Demo data mode
++    hidden = stats.get("hiddenSubscriberCount", False)
+     return {
+-        "is_live": False,
+-        "channel_id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+-        "title": clean_handle.lstrip("@").capitalize() or "Creator Studio",
+-        "username": clean_handle if clean_handle.startswith("@") else f"@{clean_handle}",
+-        "description": "Creator channel delivering weekly tutorials, insights and content strategy.",
+-        "subscribers": 142500,
+-        "total_views": 3250000,
+-        "video_count": 52,
+-        "videos": DEMO_VIDEOS,
++        "is_live": True,
++        "channel_id": item["id"],
++        "title": snippet.get("title", clean_handle),
++        "username": snippet.get("customUrl") and f"@{snippet['customUrl'].lstrip('@')}" or clean_handle,
++        "description": snippet.get("description", ""),
++        "subscribers": 0 if hidden else int(stats.get("subscriberCount", 0)),
++        "total_views": int(stats.get("viewCount", 0)),
++        "video_count": int(stats.get("videoCount", 0)),
++        "videos": videos,
+     }
+ 
+ 
+@@ -203,106 +217,86 @@ def sync_youtube_channel_to_db(
+     channel_handle: str = "@techcreator",
+     api_key: str | None = None,
+ ) -> SocialAccount:
+-    """Synchronizes YouTube channel and its videos into PostgreSQL database.
+-    
+-    Populates social_accounts, posts, post_analytics, and audience_analytics.
+-    """
++    """Sync channel + videos into the DB. Raises YouTubeAPIError on live-API failure."""
+     data = fetch_youtube_channel_data(channel_handle, api_key)
++    now = datetime.utcnow()
+ 
+-    # 1. Upsert SocialAccount
+     account = db.scalar(
+         select(SocialAccount).where(
+             SocialAccount.creator_id == creator_id,
+             SocialAccount.platform == "youtube",
+         )
+     )
+-
+     if not account:
+         account = SocialAccount(
+-            creator_id=creator_id,
+-            platform="youtube",
+-            username=data["username"],
+-            platform_user_id=data["channel_id"],
+-            followers=data["subscribers"],
+-            is_active=True,
++            creator_id=creator_id, platform="youtube", username=data["username"],
++            platform_user_id=data["channel_id"], followers=data["subscribers"], is_active=True,
+         )
+         db.add(account)
+         db.flush()
+     else:
+-        if account.platform_user_id != data.get("channel_id"):
++        # different channel, or switching demo <-> live: drop stale posts/history
++        if account.platform_user_id != data["channel_id"] or account.is_live != data["is_live"]:
+             for old_p in list(account.posts):
+                 db.delete(old_p)
++            db.query(AudienceAnalytics).filter(AudienceAnalytics.account_id == account.account_id).delete()
+             db.flush()
+         account.username = data["username"]
+         account.platform_user_id = data["channel_id"]
+         account.followers = data["subscribers"]
+         account.is_active = True
+-        db.flush()
+ 
+-    # 2. Sync Posts & PostAnalytics
++    account.total_views = data["total_views"]
++    account.video_count = data["video_count"]
++    account.is_live = data["is_live"]
++    account.last_synced_at = now
++    db.flush()
++
++    # ---- posts + per-post analytics
+     for v in data["videos"]:
+-        post = db.scalar(
+-            select(Post).where(
+-                Post.account_id == account.account_id,
+-                Post.platform_post_id == v["id"],
+-            )
+-        )
++        post = db.scalar(select(Post).where(
++            Post.account_id == account.account_id, Post.platform_post_id == v["id"]))
+         if not post:
+             post = Post(
+-                account_id=account.account_id,
+-                platform_post_id=v["id"],
+-                content_type=v["content_type"],
+-                caption=v["title"],
+-                thumbnail_url=v["thumbnail"],
+-                post_url=v["url"],
+-                published_at=v["published_at"],
++                account_id=account.account_id, platform_post_id=v["id"], content_type=v["content_type"],
++                caption=v["title"], thumbnail_url=v["thumbnail"], post_url=v["url"], published_at=v["published_at"],
+             )
+             db.add(post)
+             db.flush()
+-
+-        # Analytics
+-        eng_rate = round(((v["likes"] + v["comments"]) / max(v["views"], 1)) * 100, 2)
++        eng = round(((v["likes"] + v["comments"]) / max(v["views"], 1)) * 100, 2)
+         if not post.analytics:
+-            post.analytics = PostAnalytics(
+-                post_id=post.post_id,
+-                views=v["views"],
+-                likes=v["likes"],
+-                comments=v["comments"],
+-                shares=v.get("shares", int(v["likes"] * 0.08)),
+-                reach=int(v["views"] * 1.15),
+-                impressions=int(v["views"] * 1.4),
+-                watch_time=round(v["views"] * 4.2 / 60, 1),
+-                engagement_rate=eng_rate,
+-            )
+-        else:
+-            post.analytics.views = v["views"]
+-            post.analytics.likes = v["likes"]
+-            post.analytics.comments = v["comments"]
+-            post.analytics.shares = v.get("shares", post.analytics.shares)
+-            post.analytics.engagement_rate = eng_rate
++            post.analytics = PostAnalytics(post_id=post.post_id)
++        a = post.analytics
++        a.views, a.likes, a.comments = v["views"], v["likes"], v["comments"]
++        a.shares = v.get("shares", 0)
++        a.engagement_rate = eng
++        if not data["is_live"]:  # estimated fields only for demo mode
++            a.reach = int(v["views"] * 1.15)
++            a.impressions = int(v["views"] * 1.4)
++            a.watch_time = round(v["views"] * 4.2 / 60, 1)
+ 
+-    # 3. Populate Audience Analytics (last 14 days of follower trends & demographics)
+-    db.query(AudienceAnalytics).filter(AudienceAnalytics.account_id == account.account_id).delete()
+-    base_subscribers = max(account.followers - int(account.followers * 0.04), 1000)
+-    diff = max(account.followers - base_subscribers, 1)
++    # ---- follower history
+     today = date.today()
+-    for i in range(14, -1, -1):
+-        d = today - timedelta(days=i)
+-        day_followers = base_subscribers + int((14 - i) * (diff / 14))
+-        aud = AudienceAnalytics(
+-            account_id=account.account_id,
+-            date=d,
+-            followers=day_followers,
+-            following=142,
+-            impressions=int(day_followers * 3.5),
+-            reach=int(day_followers * 2.8),
+-            profile_visits=int(day_followers * 0.12),
+-            male_percentage=78.5,
+-            female_percentage=21.5,
+-            top_location="India",
+-            active_hours={"peak": "18:00 - 21:00", "days": "Fri - Sun"},
+-        )
+-        db.add(aud)
++    if data["is_live"]:
++        # REAL daily snapshot: one row per day, history builds up as syncs run.
++        row = db.scalar(select(AudienceAnalytics).where(
++            AudienceAnalytics.account_id == account.account_id, AudienceAnalytics.date == today))
++        if not row:
++            row = AudienceAnalytics(account_id=account.account_id, date=today)
++            db.add(row)
++        row.followers = account.followers
++    else:
++        # DEMO: synthetic 90-day curve so the date filter has something to show
++        db.query(AudienceAnalytics).filter(AudienceAnalytics.account_id == account.account_id).delete()
++        base = max(account.followers - int(account.followers * 0.08), 1000)
++        diff = max(account.followers - base, 1)
++        for i in range(90, -1, -1):
++            f = base + int((90 - i) * (diff / 90))
++            db.add(AudienceAnalytics(
++                account_id=account.account_id, date=today - timedelta(days=i), followers=f,
++                impressions=int(f * 3.5), reach=int(f * 2.8), male_percentage=78.5, female_percentage=21.5,
++                top_location="India", active_hours={"peak": "18:00 - 21:00", "days": "Fri - Sun"},
++            ))
+ 
+     db.commit()
+     db.refresh(account)
+diff --git a/frontend/src/components/AppLayout.jsx b/frontend/src/components/AppLayout.jsx
+index abf2621..19befee 100644
+--- a/frontend/src/components/AppLayout.jsx
++++ b/frontend/src/components/AppLayout.jsx
+@@ -1,11 +1,13 @@
+ import { useAuth } from "../AuthContext.jsx";
+ import Sidebar from "../dashboard/Sidebar.jsx";
+ import Topbar from "../dashboard/Topbar.jsx";
++import { DateRangeProvider } from "../dashboard/DateRangeContext.jsx";
+ import "../dashboard/dashboard.css";
+ 
+ export default function AppLayout({ children }) {
+   const { user, logout } = useAuth();
+   return (
++    <DateRangeProvider>
+     <div className="dash">
+       <Sidebar role={user.role} />
+       <div className="dash-main">
+@@ -13,5 +15,6 @@ export default function AppLayout({ children }) {
+         <main className="dash-body">{children}</main>
+       </div>
+     </div>
++    </DateRangeProvider>
+   );
+ }
+diff --git a/frontend/src/dashboard/DateRangeContext.jsx b/frontend/src/dashboard/DateRangeContext.jsx
+new file mode 100644
+index 0000000..c2d00e7
+--- /dev/null
++++ b/frontend/src/dashboard/DateRangeContext.jsx
+@@ -0,0 +1,23 @@
++import { createContext, useContext, useEffect, useState } from "react";
++
++const DateRangeContext = createContext({ days: 30, setDays: () => {} });
++const KEY = "creatoriq_days";
++
++export function DateRangeProvider({ children }) {
++  const [days, setDays] = useState(() => {
++    try {
++      const v = Number(localStorage.getItem(KEY));
++      return [7, 30, 90].includes(v) ? v : 30;
++    } catch {
++      return 30;
++    }
++  });
++
++  useEffect(() => {
++    try { localStorage.setItem(KEY, String(days)); } catch { /* ignore */ }
++  }, [days]);
++
++  return <DateRangeContext.Provider value={{ days, setDays }}>{children}</DateRangeContext.Provider>;
++}
++
++export const useDateRange = () => useContext(DateRangeContext);
+diff --git a/frontend/src/dashboard/Topbar.jsx b/frontend/src/dashboard/Topbar.jsx
+index eafec58..e44a91a 100644
+--- a/frontend/src/dashboard/Topbar.jsx
++++ b/frontend/src/dashboard/Topbar.jsx
+@@ -1,6 +1,8 @@
+ import { Icon } from "./Icons";
++import { useDateRange } from "./DateRangeContext";
+ 
+ export default function Topbar({ user, onLogout }) {
++  const { days, setDays } = useDateRange();
+   const initials = user.name.split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+   return (
+     <header className="tb">
+@@ -12,7 +14,7 @@ export default function Topbar({ user, onLogout }) {
+       <div className="tb-right">
+         <label className="tb-range">
+           <Icon name="calendar" />
+-          <select aria-label="Date range" defaultValue="30">
++          <select aria-label="Date range" value={days} onChange={(e) => setDays(Number(e.target.value))}>
+             <option value="7">Last 7 Days</option>
+             <option value="30">Last 30 Days</option>
+             <option value="90">Last 90 Days</option>
+diff --git a/frontend/src/dashboard/Widgets.jsx b/frontend/src/dashboard/Widgets.jsx
+index de48c08..66fc4f3 100644
+--- a/frontend/src/dashboard/Widgets.jsx
++++ b/frontend/src/dashboard/Widgets.jsx
+@@ -9,24 +9,37 @@ import { Icon, PlatformBadge } from "./Icons";
+ const k = (n) => (n >= 1000000 ? `${(n / 1000000).toFixed(1)}M` : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n);
+ const AXIS = { fontSize: 12, fill: "var(--muted)" };
+ 
+-export function KpiRow({ platform }) {
+-  const [data, setData] = useState(null);
+-  const [loading, setLoading] = useState(true);
++const money = (usd) => `₹${Math.round(usd * 83).toLocaleString("en-IN")}`;
+ 
+-  useEffect(() => {
+-    const platParam = platform && platform !== "All Platforms" ? `?platform=${platform.toLowerCase()}` : "";
+-    api.get(`/api/analytics/overview${platParam}`)
+-      .then((res) => setData(res.data))
+-      .catch((err) => console.error("Error loading overview analytics:", err))
+-      .finally(() => setLoading(false));
+-  }, [platform]);
++export function KpiRow({ overview, platform, days }) {
++  if (!overview) {
++    return <section className="kpis" aria-label="Key metrics">
++      {[0, 1, 2, 3].map((i) => <article className="card kpi" key={i}><p className="kpi-sub">Loading…</p></article>)}
++    </section>;
++  }
++  if (!overview.connected) {
++    return <section className="kpis" aria-label="Key metrics">
++      <article className="card kpi">
++        <div className="kpi-top"><span className="kpi-label">{platform === "All Platforms" ? "No platform connected" : `${platform} not connected`}</span></div>
++        <p className="kpi-sub">
++          {platform === "Instagram" || platform === "LinkedIn"
++            ? `${platform} integration is not built yet (needs Graph/Marketing API + OAuth token).`
++            : "Use “Sync YouTube Channel” to connect your channel."}
++        </p>
++      </article>
++    </section>;
++  }
+ 
+-  const items = data ? [
+-    { key: "followers", icon: "user", tone: "violet", label: "Total Followers", value: k(data.subscribers), delta: "+14.2%", sub: platform && platform !== "All Platforms" ? `Platform: ${platform}` : "Combined across YouTube, IG & LinkedIn" },
+-    { key: "views", icon: "video", tone: "teal", label: "Total Views", value: k(data.total_views), delta: "+19.8%", sub: `${data.total_posts} published items` },
+-    { key: "eng", icon: "heart", tone: "amber", label: "Avg Engagement", value: `${data.avg_engagement_rate}%`, delta: "+2.4%", sub: "High developer engagement" },
+-    { key: "rev", icon: "rupee", tone: "green", label: "Est. Earnings", value: `₹${(data.est_revenue * 83).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, delta: "+26.1%", sub: "Course & platform estimates" },
+-  ] : KPIS;
++  const o = overview;
++  const sub = `${o.period_posts} videos in last ${days}d`;
++  const items = [
++    { key: "subs", icon: "users", tone: "violet", label: "Subscribers", value: k(o.subscribers), sub: "Lifetime • from YouTube" },
++    { key: "tv", icon: "eye", tone: "indigo", label: "Total Views", value: k(o.total_views), sub: "Lifetime channel views" },
++    { key: "vids", icon: "video", tone: "teal", label: "Total Videos", value: Number(o.total_videos).toLocaleString("en-IN"), sub: "Published on channel" },
++    { key: "pv", icon: "eye", tone: "blue", label: `Views (${days}d)`, value: k(o.period_views), sub },
++    { key: "eng", icon: "heart", tone: "amber", label: `Avg Engagement (${days}d)`, value: `${o.avg_engagement_rate}%`, sub: "(likes + comments) / views" },
++    { key: "rev", icon: "rupee", tone: "green", label: `Est. Earnings (${days}d)`, value: money(o.est_revenue), sub: "Estimate, not real AdSense" },
++  ];
+ 
+   return (
+     <section className="kpis" aria-label="Key metrics">
+@@ -36,10 +49,7 @@ export function KpiRow({ platform }) {
+             <span className={"kpi-ico tone-" + x.tone}><Icon name={x.icon} size={20} /></span>
+             <span className="kpi-label">{x.label}</span>
+           </div>
+-          <div className="kpi-main">
+-            <strong>{x.value}</strong>
+-            <span className="delta"><Icon name="up" size={12} />{x.delta}</span>
+-          </div>
++          <div className="kpi-main"><strong>{x.value}</strong></div>
+           <p className="kpi-sub">{x.sub}</p>
+         </article>
+       ))}
+@@ -47,86 +57,75 @@ export function KpiRow({ platform }) {
+   );
+ }
+ 
+-export function FollowerGrowth({ platform }) {
+-  const [audienceData, setAudienceData] = useState([]);
++export function FollowerGrowth({ platform, days }) {
++  const [state, setState] = useState({ loading: true, history: [], connected: true, live: false });
++  const plat = platform === "All Platforms" ? "all" : platform.toLowerCase();
+ 
+   useEffect(() => {
+-    api.get("/api/analytics/audience")
+-      .then((res) => {
+-        if (res.data?.growth_history?.length) {
+-          const chartData = res.data.growth_history.map((g) => ({
+-            d: g.date,
+-            YouTube: g.followers,
+-            Instagram: Math.round(g.followers * 0.36),
+-            LinkedIn: Math.round(g.followers * 0.14),
+-          }));
+-          setAudienceData(chartData);
+-        }
+-      })
+-      .catch((e) => console.error(e));
+-  }, []);
++    setState((s) => ({ ...s, loading: true }));
++    api.get(`/api/analytics/audience?platform=${plat}&days=${days}`)
++      .then((res) => setState({
++        loading: false,
++        connected: res.data.connected,
++        live: !!res.data.is_live,
++        history: (res.data.growth_history || []).map((g) => ({ d: g.date, Subscribers: g.followers })),
++      }))
++      .catch(() => setState({ loading: false, history: [], connected: false, live: false }));
++  }, [plat, days]);
+ 
+-  const chartSource = audienceData.length > 0 ? audienceData : GROWTH;
+-  const names = platform === "All Platforms" ? Object.keys(PLATFORM_COLORS) : [platform].filter((p) => PLATFORM_COLORS[p]);
++  const { history, connected, live, loading } = state;
++  const few = history.length < 3;
+ 
+   return (
+     <article className="card">
+       <div className="card-head">
+         <h2>Follower Growth <Icon name="info" size={14} /></h2>
+-        <ul className="legend">
+-          {Object.entries(PLATFORM_COLORS).map(([n, c]) => (
+-            <li key={n}><i style={{ background: c }} />{n}</li>
+-          ))}
+-        </ul>
+-      </div>
+-      <div className="chart" style={{ height: 260 }}>
+-        <ResponsiveContainer>
+-          <AreaChart data={chartSource} margin={{ top: 12, right: 16, left: -6, bottom: 4 }}>
+-            <defs>
+-              {names.map((n) => (
+-                <linearGradient key={n} id={"fg-" + n} x1="0" y1="0" x2="0" y2="1">
+-                  <stop offset="5%" stopColor={PLATFORM_COLORS[n]} stopOpacity={0.28} />
+-                  <stop offset="95%" stopColor={PLATFORM_COLORS[n]} stopOpacity={0.01} />
+-                </linearGradient>
+-              ))}
+-            </defs>
+-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--line)" opacity={0.6} />
+-            <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={20} />
+-            <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={52} domain={['dataMin - 20000', 'dataMax + 15000']} />
+-            <Tooltip
+-              formatter={(v, n) => [Number(v).toLocaleString() + " followers", n]}
+-              contentStyle={{ borderRadius: 12, border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "0 8px 24px rgba(0,0,0,0.08)", padding: "10px 14px" }}
+-            />
+-            {names.map((n) => (
+-              <Area
+-                key={n}
+-                type="natural"
+-                dataKey={n}
+-                stroke={PLATFORM_COLORS[n]}
+-                strokeWidth={3}
+-                fill={`url(#fg-${n})`}
+-                dot={false}
+-                activeDot={{ r: 6, strokeWidth: 2, stroke: "#fff" }}
+-              />
+-            ))}
+-          </AreaChart>
+-        </ResponsiveContainer>
++        <ul className="legend"><li><i style={{ background: PLATFORM_COLORS.YouTube }} />YouTube subscribers</li></ul>
+       </div>
++      {loading ? <p className="muted" style={{ padding: 16 }}>Loading…</p>
++        : !connected || history.length === 0 ? <p className="muted" style={{ padding: 16 }}>No follower history for this platform / range yet.</p>
++        : (
++          <>
++            {live && few && <p className="muted" style={{ padding: "0 4px 8px", fontSize: "0.8rem" }}>Real history builds up one point per day (auto-sync). Check back after a few days.</p>}
++            <div className="chart" style={{ height: 260 }}>
++              <ResponsiveContainer>
++                <AreaChart data={history} margin={{ top: 12, right: 16, left: -6, bottom: 4 }}>
++                  <defs>
++                    <linearGradient id="fg-sub" x1="0" y1="0" x2="0" y2="1">
++                      <stop offset="5%" stopColor={PLATFORM_COLORS.YouTube} stopOpacity={0.28} />
++                      <stop offset="95%" stopColor={PLATFORM_COLORS.YouTube} stopOpacity={0.01} />
++                    </linearGradient>
++                  </defs>
++                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--line)" opacity={0.6} />
++                  <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={20} />
++                  <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={52} domain={["dataMin - 1", "dataMax + 1"]} allowDecimals={false} />
++                  <Tooltip
++                    formatter={(v) => [Number(v).toLocaleString() + " subscribers", "YouTube"]}
++                    contentStyle={{ borderRadius: 12, border: "1px solid var(--line)", background: "var(--surface)", padding: "10px 14px" }}
++                  />
++                  <Area type="monotone" dataKey="Subscribers" stroke={PLATFORM_COLORS.YouTube} strokeWidth={3}
++                    fill="url(#fg-sub)" dot={few} activeDot={{ r: 6, strokeWidth: 2, stroke: "#fff" }} />
++                </AreaChart>
++              </ResponsiveContainer>
++            </div>
++          </>
++        )}
+     </article>
+   );
+ }
+ 
+-export function ContentPerformance() {
++export function ContentPerformance({ platform, days }) {
+   const [perfData, setPerfData] = useState(null);
+   const [tab, setTab] = useState("Views");
++  const plat = platform === "All Platforms" ? "all" : (platform || "all").toLowerCase();
+ 
+   useEffect(() => {
+-    api.get("/api/analytics/content-performance")
++    api.get(`/api/analytics/content-performance?platform=${plat}&days=${days}`)
+       .then((res) => setPerfData(res.data))
+-      .catch((err) => console.error("Error loading content performance:", err));
+-  }, []);
++      .catch((err) => { console.error("Error loading content performance:", err); setPerfData({}); });
++  }, [plat, days]);
+ 
+-  const dataMap = perfData || PERFORMANCE;
++  const dataMap = perfData && Object.keys(perfData).length ? perfData : { Views: [], Likes: [], Comments: [], Shares: [] };
+   const tabs = Object.keys(dataMap);
+   const currentChartData = dataMap[tab] || [];
+   const bestDay = currentChartData.length > 0
+@@ -137,27 +136,29 @@ export function ContentPerformance() {
+     <article className="card">
+       <div className="card-head">
+         <h2>Content Performance <Icon name="info" size={14} /></h2>
++        <span className="muted" style={{ fontSize: "0.75rem" }}>Videos from last {days} days</span>
+       </div>
+       <div className="tabs" role="tablist">
+         {tabs.map((t) => (
+           <button key={t} role="tab" aria-selected={tab === t} className={tab === t ? "on" : ""} onClick={() => setTab(t)}>{t}</button>
+         ))}
+       </div>
+-      <div className="chart" style={{ height: 210 }}>
+-        <ResponsiveContainer>
+-          <BarChart data={currentChartData} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
+-            <CartesianGrid vertical={false} stroke="var(--line)" />
+-            <XAxis dataKey="day" tick={AXIS} axisLine={false} tickLine={false} />
+-            <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={44} />
+-            <Tooltip cursor={{ fill: "var(--soft)" }} formatter={(v) => [v.toLocaleString(), tab]} contentStyle={{ borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)" }} />
+-            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+-              {currentChartData.map((d) => (
+-                <Cell key={d.day} fill={d.day === bestDay ? "#6d4ae8" : "#a79af2"} />
+-              ))}
+-            </Bar>
+-          </BarChart>
+-        </ResponsiveContainer>
+-      </div>
++      {currentChartData.length === 0 ? <p className="muted" style={{ padding: 16 }}>No videos published in this date range.</p> : (
++        <div className="chart" style={{ height: 210 }}>
++          <ResponsiveContainer>
++            <BarChart data={currentChartData} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
++              <CartesianGrid vertical={false} stroke="var(--line)" />
++              <XAxis dataKey="day" tick={AXIS} axisLine={false} tickLine={false} />
++              <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={44} />
++              <Tooltip cursor={{ fill: "var(--soft)" }} labelFormatter={(l, p) => p?.[0]?.payload?.title || l}
++                formatter={(v) => [v.toLocaleString(), tab]} contentStyle={{ borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)" }} />
++              <Bar dataKey="value" radius={[6, 6, 0, 0]}>
++                {currentChartData.map((d, i) => <Cell key={i} fill={d.day === bestDay ? "#6d4ae8" : "#a79af2"} />)}
++              </Bar>
++            </BarChart>
++          </ResponsiveContainer>
++        </div>
++      )}
+     </article>
+   );
+ }
+@@ -197,7 +198,7 @@ export function TopPosts({ posts: parentPosts }) {
+     }
+   }, [showCompare, selectedA, selectedB]);
+ 
+-  const displayPosts = posts.length > 0 ? posts : POSTS;
++  const displayPosts = parentPosts !== undefined ? posts : (posts.length > 0 ? posts : POSTS);
+   const pA = compData?.compared_posts?.find((p) => p.post_id === Number(selectedA)) || posts.find((p) => p.post_id === Number(selectedA));
+   const pB = compData?.compared_posts?.find((p) => p.post_id === Number(selectedB)) || posts.find((p) => p.post_id === Number(selectedB));
+ 
+@@ -302,19 +303,20 @@ export function TopPosts({ posts: parentPosts }) {
+             ))}
+           </tbody>
+         </table>
++        {displayPosts.length === 0 && <p className="muted" style={{ padding: 16 }}>No posts in this date range.</p>}
+       </div>
+     </article>
+   );
+ }
+ 
+-export function Audience() {
++export function Audience({ followers }) {
+   const tabs = Object.keys(AUDIENCE);
+   const [tab, setTab] = useState("Age");
+   const data = AUDIENCE[tab].map(([name, value]) => ({ name, value }));
+   return (
+     <article className="card">
+       <div className="card-head">
+-        <h2>Audience Demographics <Icon name="info" size={14} /></h2>
++        <h2>Audience Demographics <Icon name="info" size={14} /><span className="sample-pill sm">Sample</span></h2>
+         <a href="#" className="view-all" onClick={(e) => e.preventDefault()}>View All <Icon name="right" size={14} /></a>
+       </div>
+       <div className="tabs" role="tablist">
+@@ -331,7 +333,7 @@ export function Audience() {
+               </Pie>
+             </PieChart>
+           </ResponsiveContainer>
+-          <div className="donut-mid"><strong>142.5K</strong><small>Subscribers</small></div>
++          <div className="donut-mid"><strong>{followers != null ? k(followers) : "—"}</strong><small>Subscribers</small></div>
+         </div>
+         <ul className="aud-list">
+           {data.map((d, i) => (
+@@ -343,19 +345,19 @@ export function Audience() {
+   );
+ }
+ 
+-export function Revenue() {
++export function Revenue({ overview, days }) {
+   const max = Math.max(...REVENUE_BARS);
++  const has = overview?.connected;
+   return (
+     <article className="card">
+       <div className="card-head">
+-        <h2>Revenue Analytics <Icon name="info" size={14} /></h2>
+-        <a href="#" className="view-all" onClick={(e) => e.preventDefault()}>View All <Icon name="right" size={14} /></a>
++        <h2>Revenue Analytics <Icon name="info" size={14} /><span className="sample-pill sm">Estimate</span></h2>
+       </div>
+       <div className="rev">
+         <div>
+-          <small className="muted">Est. YouTube AdSense Revenue</small>
+-          <div className="kpi-main"><strong className="rev-n">₹68,450</strong><span className="delta"><Icon name="up" size={12} />24.5%</span></div>
+-          <p className="kpi-sub">+ ₹14,200 vs last month</p>
++          <small className="muted">Est. earnings, last {days} days (views × ₹0.23)</small>
++          <div className="kpi-main"><strong className="rev-n">{has ? money(overview.est_revenue) : "—"}</strong></div>
++          <p className="kpi-sub">Real AdSense data needs YouTube Analytics API + OAuth.</p>
+         </div>
+         <div className="rev-bars" aria-hidden="true">
+           {REVENUE_BARS.map((v, i) => <i key={i} style={{ height: `${(v / max) * 100}%` }} />)}
+diff --git a/frontend/src/pages/Dashboard.jsx b/frontend/src/pages/Dashboard.jsx
+index 5204f0c..fdd5b0b 100644
+--- a/frontend/src/pages/Dashboard.jsx
++++ b/frontend/src/pages/Dashboard.jsx
+@@ -1,7 +1,8 @@
+-import { useEffect, useState } from "react";
+-import api from "../api";
++import { useCallback, useEffect, useState } from "react";
++import api, { errorMessage } from "../api";
+ import { useAuth } from "../AuthContext.jsx";
+ import AppLayout from "../components/AppLayout.jsx";
++import { useDateRange } from "../dashboard/DateRangeContext.jsx";
+ import { Icon, PlatformBadge } from "../dashboard/Icons.jsx";
+ import { AdminDashboard, AgencyDashboard, MarketingDashboard } from "../dashboard/RoleDashboards.jsx";
+ import {
+@@ -23,36 +24,41 @@ const SUBTITLE = {
+ };
+ 
+ function CreatorDashboard() {
++  const { days } = useDateRange();
+   const [platform, setPlatform] = useState("All Platforms");
+   const [posts, setPosts] = useState([]);
++  const [overview, setOverview] = useState(null);
++  const [loadErr, setLoadErr] = useState("");
+   const [syncing, setSyncing] = useState(false);
+-  const [syncMsg, setSyncMsg] = useState("");
++  const [syncMsg, setSyncMsg] = useState({ ok: true, text: "" });
+ 
+-  const loadPosts = (selectedPlat = platform) => {
+-    const p = selectedPlat && selectedPlat !== "All Platforms" ? encodeURIComponent(selectedPlat.toLowerCase()) : "all";
+-    api.get(`/api/analytics/posts?sort_by=views&order=desc&platform=${p}`)
++  const plat = platform === "All Platforms" ? "all" : platform.toLowerCase();
++
++  const load = useCallback(() => {
++    setLoadErr("");
++    api.get(`/api/analytics/overview?platform=${plat}&days=${days}`)
++      .then((res) => setOverview(res.data))
++      .catch((e) => setLoadErr(errorMessage(e)));
++    api.get(`/api/analytics/posts?sort_by=views&order=desc&platform=${plat}&days=${days}`)
+       .then((res) => setPosts(res.data))
+-      .catch((e) => console.error(e));
+-  };
++      .catch((e) => { setPosts([]); setLoadErr(errorMessage(e)); });
++  }, [plat, days]);
+ 
+-  useEffect(() => {
+-    loadPosts(platform);
+-  }, [platform]);
++  useEffect(() => { load(); }, [load]);
+ 
+   const handleSync = async () => {
++    const h = window.prompt("Enter YouTube channel handle (e.g. @chaiaurcode) or channel ID (UC...):", overview?.channel_name || "");
++    if (!h) return;
+     setSyncing(true);
+-    setSyncMsg("");
+     try {
+-      const h = window.prompt("Enter YouTube Channel handle to sync (e.g. @chaiaurcode, @MrBeast):", "@chaiaurcode");
+-    if (!h) { setSyncing(false); return; }
+-    const res = await api.post("/api/analytics/youtube/sync", { channel_handle: h.trim() });
+-      setSyncMsg(res.data.message || "Channel synced successfully!");
+-      loadPosts();
++      const res = await api.post("/api/analytics/youtube/sync", { channel_handle: h.trim() });
++      setSyncMsg({ ok: true, text: res.data.message });
++      load();
+     } catch (err) {
+-      setSyncMsg("Sync failed. Check connection.");
++      setSyncMsg({ ok: false, text: errorMessage(err) });
+     } finally {
+       setSyncing(false);
+-      setTimeout(() => setSyncMsg(""), 4000);
++      setTimeout(() => setSyncMsg({ ok: true, text: "" }), 8000);
+     }
+   };
+ 
+@@ -65,31 +71,38 @@ function CreatorDashboard() {
+             {p}
+           </button>
+         ))}
+-        <button className="chip ghost" onClick={handleSync} disabled={syncing} title="Sync Any Channel Channel from database or API">
+-          <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync Any Channel"}
++        <button className="chip ghost" onClick={handleSync} disabled={syncing} title="Connect / refresh a YouTube channel">
++          <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync YouTube Channel"}
+         </button>
+       </div>
+ 
+       <p className="sample-note">
+-        <span className="sample-pill live">Live</span> Multi-Platform Connected: <strong>Hitesh Choudhary (Chai aur Code)</strong> • 1.41M Combined Audience
+-        {syncMsg && <span className="sample-pill live">✓ {syncMsg}</span>}
++        {overview?.connected ? (
++          <>
++            <span className={"sample-pill " + (overview.is_live ? "live" : "")}>{overview.is_live ? "Live" : "Demo data"}</span>
++            Channel: <strong>{overview.channel_name}</strong>
++            {overview.last_synced_at && <> • last synced {new Date(overview.last_synced_at + "Z").toLocaleString("en-IN")}</>}
++            {" • "}showing last {days} days
++          </>
++        ) : (
++          <>No channel connected for this view. Click <strong>Sync YouTube Channel</strong> to connect one.</>
++        )}
++        {syncMsg.text && <span className={"sample-pill " + (syncMsg.ok ? "live" : "")} style={syncMsg.ok ? {} : { background: "#fee2e2", color: "#b91c1c" }}>{syncMsg.ok ? "✓ " : "⚠ "}{syncMsg.text}</span>}
++        {loadErr && <span className="sample-pill" style={{ background: "#fee2e2", color: "#b91c1c" }}>⚠ {loadErr}</span>}
+       </p>
+ 
+-      {/* Primary KPI Metrics */}
+-      <KpiRow platform={platform} />
++      <KpiRow overview={overview} platform={platform} days={days} />
+ 
+-      {/* Charts Row */}
+       <div className="row row-a">
+-        <FollowerGrowth platform={platform} />
+-        <ContentPerformance />
++        <FollowerGrowth platform={platform} days={days} />
++        <ContentPerformance platform={platform} days={days} />
+       </div>
+ 
+-      {/* Top Posts & Demographics */}
+       <div className="row row-b">
+         <TopPosts posts={posts} />
+         <div className="stack">
+-          <Audience />
+-          <Revenue />
++          <Audience followers={overview?.subscribers} />
++          <Revenue overview={overview} days={days} />
+         </div>
+       </div>
+     </>
+-- 
+2.43.0
+

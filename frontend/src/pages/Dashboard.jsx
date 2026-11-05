@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import api from "../api";
+import { useCallback, useEffect, useState } from "react";
+import api, { errorMessage } from "../api";
 import { useAuth } from "../AuthContext.jsx";
 import AppLayout from "../components/AppLayout.jsx";
+import { useDateRange } from "../dashboard/DateRangeContext.jsx";
 import { Icon, PlatformBadge } from "../dashboard/Icons.jsx";
 import { AdminDashboard, AgencyDashboard, MarketingDashboard } from "../dashboard/RoleDashboards.jsx";
 import {
@@ -23,36 +24,41 @@ const SUBTITLE = {
 };
 
 function CreatorDashboard() {
+  const { days } = useDateRange();
   const [platform, setPlatform] = useState("All Platforms");
   const [posts, setPosts] = useState([]);
+  const [overview, setOverview] = useState(null);
+  const [loadErr, setLoadErr] = useState("");
   const [syncing, setSyncing] = useState(false);
-  const [syncMsg, setSyncMsg] = useState("");
+  const [syncMsg, setSyncMsg] = useState({ ok: true, text: "" });
 
-  const loadPosts = (selectedPlat = platform) => {
-    const p = selectedPlat && selectedPlat !== "All Platforms" ? encodeURIComponent(selectedPlat.toLowerCase()) : "all";
-    api.get(`/api/analytics/posts?sort_by=views&order=desc&platform=${p}`)
+  const plat = platform === "All Platforms" ? "all" : platform.toLowerCase();
+
+  const load = useCallback(() => {
+    setLoadErr("");
+    api.get(`/api/analytics/overview?platform=${plat}&days=${days}`)
+      .then((res) => setOverview(res.data))
+      .catch((e) => setLoadErr(errorMessage(e)));
+    api.get(`/api/analytics/posts?sort_by=views&order=desc&platform=${plat}&days=${days}`)
       .then((res) => setPosts(res.data))
-      .catch((e) => console.error(e));
-  };
+      .catch((e) => { setPosts([]); setLoadErr(errorMessage(e)); });
+  }, [plat, days]);
 
-  useEffect(() => {
-    loadPosts(platform);
-  }, [platform]);
+  useEffect(() => { load(); }, [load]);
 
   const handleSync = async () => {
+    const h = window.prompt("Enter YouTube channel handle (e.g. @chaiaurcode) or channel ID (UC...):", overview?.channel_name || "");
+    if (!h) return;
     setSyncing(true);
-    setSyncMsg("");
     try {
-      const h = window.prompt("Enter YouTube Channel handle to sync (e.g. @chaiaurcode, @MrBeast):", "@chaiaurcode");
-    if (!h) { setSyncing(false); return; }
-    const res = await api.post("/api/analytics/youtube/sync", { channel_handle: h.trim() });
-      setSyncMsg(res.data.message || "Channel synced successfully!");
-      loadPosts();
+      const res = await api.post("/api/analytics/youtube/sync", { channel_handle: h.trim() });
+      setSyncMsg({ ok: true, text: res.data.message });
+      load();
     } catch (err) {
-      setSyncMsg("Sync failed. Check connection.");
+      setSyncMsg({ ok: false, text: errorMessage(err) });
     } finally {
       setSyncing(false);
-      setTimeout(() => setSyncMsg(""), 4000);
+      setTimeout(() => setSyncMsg({ ok: true, text: "" }), 8000);
     }
   };
 
@@ -65,31 +71,38 @@ function CreatorDashboard() {
             {p}
           </button>
         ))}
-        <button className="chip ghost" onClick={handleSync} disabled={syncing} title="Sync Any Channel Channel from database or API">
-          <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync Any Channel"}
+        <button className="chip ghost" onClick={handleSync} disabled={syncing} title="Connect / refresh a YouTube channel">
+          <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync YouTube Channel"}
         </button>
       </div>
 
       <p className="sample-note">
-        <span className="sample-pill live">Live</span> Multi-Platform Connected: <strong>Hitesh Choudhary (Chai aur Code)</strong> • 1.41M Combined Audience
-        {syncMsg && <span className="sample-pill live">✓ {syncMsg}</span>}
+        {overview?.connected ? (
+          <>
+            <span className={"sample-pill " + (overview.is_live ? "live" : "")}>{overview.is_live ? "Live" : "Demo data"}</span>
+            Channel: <strong>{overview.channel_name}</strong>
+            {overview.last_synced_at && <> • last synced {new Date(overview.last_synced_at + "Z").toLocaleString("en-IN")}</>}
+            {" • "}showing last {days} days
+          </>
+        ) : (
+          <>No channel connected for this view. Click <strong>Sync YouTube Channel</strong> to connect one.</>
+        )}
+        {syncMsg.text && <span className={"sample-pill " + (syncMsg.ok ? "live" : "")} style={syncMsg.ok ? {} : { background: "#fee2e2", color: "#b91c1c" }}>{syncMsg.ok ? "✓ " : "⚠ "}{syncMsg.text}</span>}
+        {loadErr && <span className="sample-pill" style={{ background: "#fee2e2", color: "#b91c1c" }}>⚠ {loadErr}</span>}
       </p>
 
-      {/* Primary KPI Metrics */}
-      <KpiRow platform={platform} />
+      <KpiRow overview={overview} platform={platform} days={days} />
 
-      {/* Charts Row */}
       <div className="row row-a">
-        <FollowerGrowth platform={platform} />
-        <ContentPerformance />
+        <FollowerGrowth platform={platform} days={days} />
+        <ContentPerformance platform={platform} days={days} />
       </div>
 
-      {/* Top Posts & Demographics */}
       <div className="row row-b">
         <TopPosts posts={posts} />
         <div className="stack">
-          <Audience />
-          <Revenue />
+          <Audience followers={overview?.subscribers} />
+          <Revenue overview={overview} days={days} />
         </div>
       </div>
     </>

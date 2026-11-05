@@ -12,3 +12,4 @@ FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 SEED_DEMO_USERS = os.getenv("SEED_DEMO_USERS", "true").lower() == "true"
 BCRYPT_ROUNDS = int(os.getenv("BCRYPT_ROUNDS", "12"))  # tests lower this for speed
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
+SYNC_INTERVAL_MINUTES = int(os.getenv("SYNC_INTERVAL_MINUTES", "360"))  # auto re-sync of connected YouTube channels (0 = off)

@@ -18,6 +18,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    false,
     true,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -124,6 +125,11 @@ class SocialAccount(Base):
     token_expires_at: Mapped[datetime | None] = mapped_column(DateTime)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
     connected_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
+    # Lifetime channel totals straight from the platform API (YouTube: statistics.viewCount / videoCount)
+    total_views: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0, server_default="0")
+    video_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    is_live: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+    last_synced_at: Mapped[datetime | None] = mapped_column(DateTime)
 
     creator: Mapped[Creator] = relationship(back_populates="social_accounts")
     posts: Mapped[list["Post"]] = relationship(

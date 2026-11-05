@@ -1,6 +1,8 @@
 import { Icon } from "./Icons";
+import { useDateRange } from "./DateRangeContext";
 
 export default function Topbar({ user, onLogout }) {
+  const { days, setDays } = useDateRange();
   const initials = user.name.split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
   return (
     <header className="tb">
@@ -12,7 +14,7 @@ export default function Topbar({ user, onLogout }) {
       <div className="tb-right">
         <label className="tb-range">
           <Icon name="calendar" />
-          <select aria-label="Date range" defaultValue="30">
+          <select aria-label="Date range" value={days} onChange={(e) => setDays(Number(e.target.value))}>
             <option value="7">Last 7 Days</option>
             <option value="30">Last 30 Days</option>
             <option value="90">Last 90 Days</option>
