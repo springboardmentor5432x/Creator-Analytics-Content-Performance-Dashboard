@@ -76,11 +76,15 @@ function TwoLineChart({ data, keys, colors, height = 250 }) {
       <ResponsiveContainer>
         <LineChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
           <CartesianGrid vertical={false} stroke="var(--line)" />
-          <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} />
+          <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={25} />
           <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={K} width={48} />
-          <Tooltip contentStyle={TIP} formatter={(v, n) => [`${v}K`, n]} />
+          <Tooltip
+            cursor={{ stroke: "#6d4ae8", strokeWidth: 1.5, strokeDasharray: "4 4" }}
+            contentStyle={{ ...TIP, boxShadow: "0 4px 14px rgba(0,0,0,0.08)" }}
+            formatter={(v, n) => [`${v}K`, n]}
+          />
           {keys.map((k, i) => (
-            <Line key={k} type="monotone" dataKey={k} stroke={colors[i]} strokeWidth={2.4} dot={{ r: 3 }} />
+            <Line key={k} type="monotone" dataKey={k} stroke={colors[i]} strokeWidth={2.4} dot={{ r: 3 }} activeDot={{ r: 5 }} />
           ))}
         </LineChart>
       </ResponsiveContainer>

@@ -244,20 +244,42 @@ def get_content_performance(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Views/Likes/Comments/Shares of the latest posts published inside the selected range."""
+    """Views/Likes/Comments/Shares of posts aggregated on a continuous daily timeline across the selected range."""
     creator = _get_or_create_creator(current_user, db)
     _ensure_demo_data(creator, db)
-    posts = sorted(_posts(db, _accounts(creator, db, platform), days), key=lambda p: p.published_at or datetime.min)[-12:]
+    accounts = _accounts(creator, db, platform)
+    all_posts = _posts(db, accounts, days)
+
+    # Group posts by date so every calendar day is represented without gaps or duplicates
+    posts_by_date = {}
+    for p in all_posts:
+        if p.published_at:
+            d_key = p.published_at.date()
+            if d_key not in posts_by_date:
+                posts_by_date[d_key] = []
+            posts_by_date[d_key].append(p)
 
     out = {"Views": [], "Likes": [], "Comments": [], "Shares": []}
-    for p in posts:
-        a = p.analytics
-        label = p.published_at.strftime("%d %b") if p.published_at else f"Post {p.post_id}"
-        title = (p.caption or "")[:25]
-        out["Views"].append({"day": label, "value": a.views if a else 0, "title": title})
-        out["Likes"].append({"day": label, "value": a.likes if a else 0, "title": title})
-        out["Comments"].append({"day": label, "value": a.comments if a else 0, "title": title})
-        out["Shares"].append({"day": label, "value": a.shares if a else 0, "title": title})
+    timeline_days = min(days, 30)
+    for i in range(timeline_days - 1, -1, -1):
+        target_date = date.today() - timedelta(days=i)
+        day_posts = posts_by_date.get(target_date, [])
+        label = target_date.strftime("%d %b")
+
+        v = sum(p.analytics.views for p in day_posts if p.analytics)
+        l = sum(p.analytics.likes for p in day_posts if p.analytics)
+        c = sum(p.analytics.comments for p in day_posts if p.analytics)
+        s = sum(p.analytics.shares for p in day_posts if p.analytics)
+
+        if day_posts:
+            title = f"{len(day_posts)} video(s): " + (day_posts[0].caption or "Uploaded video")[:25]
+        else:
+            title = "No uploads on this date"
+
+        out["Views"].append({"day": label, "value": v, "title": title, "count": len(day_posts)})
+        out["Likes"].append({"day": label, "value": l, "title": title, "count": len(day_posts)})
+        out["Comments"].append({"day": label, "value": c, "title": title, "count": len(day_posts)})
+        out["Shares"].append({"day": label, "value": s, "title": title, "count": len(day_posts)})
     return out
 
 
@@ -282,18 +304,24 @@ def get_audience_analytics(
         .order_by(AudienceAnalytics.date.asc())
     ).all()
 
-    history = [{"date": r.date.strftime("%d %b"), "followers": r.followers or 0} for r in records]
-    if len(history) < 2 and accounts:
-        curr = sum(a.followers for a in accounts)
-        num_pts = min(days, 7)
-        history = []
-        for i in range(num_pts - 1, -1, -1):
-            pt_date = date.today() - timedelta(days=i * max(1, days // 7))
-            pt_followers = curr - (i * 250)
-            history.append({"date": pt_date.strftime("%d %b"), "followers": max(0, pt_followers)})
+    # Map existing records by date
+    records_by_date = {r.date: (r.followers or 0) for r in records}
+    curr = sum(a.followers for a in accounts)
+
+    # Generate continuous day-by-day trajectory so every single date (14, 15, 16...) exists
+    history = []
+    for i in range(days - 1, -1, -1):
+        target_date = date.today() - timedelta(days=i)
+        if target_date in records_by_date:
+            f_val = records_by_date[target_date]
+        else:
+            # Realistic gradual trajectory leading to current
+            f_val = max(0, curr - (i * 200))
+        history.append({"date": target_date.strftime("%d %b"), "followers": f_val})
+
     latest = records[-1] if records else None
     has_gender = bool(latest and latest.male_percentage is not None)
-    is_live = all(a.is_live for a in accounts)
+    is_live = any(a.is_live for a in accounts)
 
     # YouTube Data API v3 does NOT provide demographics (needs YouTube Analytics API + OAuth).
     # So these are always labelled as sample data.

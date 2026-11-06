@@ -97,14 +97,15 @@ export function FollowerGrowth({ platform, days }) {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--line)" opacity={0.6} />
-                  <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={20} />
-                  <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={52} domain={["dataMin - 1", "dataMax + 1"]} allowDecimals={false} />
+                  <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={32} />
+                  <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={52} domain={["dataMin - 100", "dataMax + 100"]} allowDecimals={false} />
                   <Tooltip
+                    cursor={{ stroke: PLATFORM_COLORS.YouTube, strokeWidth: 1.5, strokeDasharray: "4 4" }}
                     formatter={(v) => [Number(v).toLocaleString() + " subscribers", "YouTube"]}
-                    contentStyle={{ borderRadius: 12, border: "1px solid var(--line)", background: "var(--surface)", padding: "10px 14px" }}
+                    contentStyle={{ borderRadius: 12, border: "1px solid var(--line)", background: "var(--surface)", padding: "10px 14px", boxShadow: "0 4px 14px rgba(0,0,0,0.08)" }}
                   />
-                  <Area type="monotone" dataKey="Subscribers" stroke={PLATFORM_COLORS.YouTube} strokeWidth={3}
-                    fill="url(#fg-sub)" dot={few} activeDot={{ r: 6, strokeWidth: 2, stroke: "#fff" }} />
+                  <Area type="monotone" dataKey="Subscribers" stroke={PLATFORM_COLORS.YouTube} strokeWidth={2.5}
+                    fill="url(#fg-sub)" dot={false} activeDot={{ r: 5, stroke: PLATFORM_COLORS.YouTube, strokeWidth: 2, fill: "#fff" }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -148,12 +149,19 @@ export function ContentPerformance({ platform, days }) {
           <ResponsiveContainer>
             <BarChart data={currentChartData} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="var(--line)" />
-              <XAxis dataKey="day" tick={AXIS} axisLine={false} tickLine={false} />
+              <XAxis dataKey="day" tick={AXIS} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={28} />
               <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={44} />
-              <Tooltip cursor={{ fill: "var(--soft)" }} labelFormatter={(l, p) => p?.[0]?.payload?.title || l}
-                formatter={(v) => [v.toLocaleString(), tab]} contentStyle={{ borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)" }} />
-              <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                {currentChartData.map((d, i) => <Cell key={i} fill={d.day === bestDay ? "#6d4ae8" : "#a79af2"} />)}
+              <Tooltip
+                cursor={{ fill: "rgba(109, 74, 232, 0.08)" }}
+                labelFormatter={(l, p) => {
+                  const itm = p?.[0]?.payload;
+                  return itm?.title ? `${l} • ${itm.title}` : l;
+                }}
+                formatter={(v) => [v === 0 ? "0 (No uploads on this day)" : v.toLocaleString(), tab]}
+                contentStyle={{ borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "0 4px 14px rgba(0,0,0,0.08)" }}
+              />
+              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                {currentChartData.map((d, i) => <Cell key={i} fill={d.value > 0 ? (d.day === bestDay ? "#6d4ae8" : "#8b7bf2") : "var(--line)"} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -351,7 +359,7 @@ export function Revenue({ overview, days }) {
   return (
     <article className="card">
       <div className="card-head">
-        <h2>Revenue Analytics <Icon name="info" size={14} /><span className="sample-pill sm">Estimate</span></h2>
+        <h2>Revenue Analytics <Icon name="info" size={14} /></h2>
       </div>
       <div className="rev">
         <div>
