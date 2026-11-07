@@ -62,6 +62,19 @@ function CreatorDashboard() {
     }
   };
 
+  const handleLinkedInConnect = async () => {
+    const token = localStorage.getItem("creatoriq_token");
+    if (!token) return;
+    try {
+      const res = await api.get(`/api/auth/linkedin/login?token=${token}`);
+      if (res.data?.auth_url) {
+        window.location.href = res.data.auth_url;
+      }
+    } catch (err) {
+      setSyncMsg({ ok: false, text: errorMessage(err) });
+    }
+  };
+
   return (
     <>
       <div className="chips" role="group" aria-label="Platform filter">
