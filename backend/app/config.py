@@ -13,3 +13,7 @@ SEED_DEMO_USERS = os.getenv("SEED_DEMO_USERS", "true").lower() == "true"
 BCRYPT_ROUNDS = int(os.getenv("BCRYPT_ROUNDS", "12"))  # tests lower this for speed
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
 SYNC_INTERVAL_MINUTES = int(os.getenv("SYNC_INTERVAL_MINUTES", "360"))  # auto re-sync of connected YouTube channels (0 = off)
+
+LINKEDIN_CLIENT_ID = os.getenv('LINKEDIN_CLIENT_ID', '')
+LINKEDIN_CLIENT_SECRET = os.getenv('LINKEDIN_CLIENT_SECRET', '')
+LINKEDIN_REDIRECT_URI = os.getenv('LINKEDIN_REDIRECT_URI', 'http://localhost:8000/api/auth/linkedin/callback')
