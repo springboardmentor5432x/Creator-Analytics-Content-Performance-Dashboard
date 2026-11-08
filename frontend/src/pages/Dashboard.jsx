@@ -134,7 +134,7 @@ function CreatorDashboard() {
       <div className="row row-b">
         <TopPosts posts={posts} />
         <div className="stack">
-          <Audience followers={overview?.subscribers} />
+          <Audience followers={overview?.subscribers} platform={platform} />
           <Revenue overview={overview} days={days} />
         </div>
       </div>

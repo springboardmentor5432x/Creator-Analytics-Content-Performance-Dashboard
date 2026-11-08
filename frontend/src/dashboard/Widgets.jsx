@@ -22,23 +22,24 @@ export function KpiRow({ overview, platform, days }) {
       <article className="card kpi">
         <div className="kpi-top"><span className="kpi-label">{platform === "All Platforms" ? "No platform connected" : `${platform} not connected`}</span></div>
         <p className="kpi-sub">
-          {platform === "Instagram" || platform === "LinkedIn"
-            ? `${platform} integration is not built yet (needs Graph/Marketing API + OAuth token).`
-            : "Use “Sync YouTube Channel” to connect your channel."}
+          {platform === "LinkedIn"
+            ? "LinkedIn integration requires OAuth token."
+            : `Use “Sync ${platform === "All Platforms" ? "YouTube or Instagram" : platform}” above to connect.`}
         </p>
       </article>
     </section>;
   }
 
   const o = overview;
-  const sub = `${o.period_posts} videos in last ${days}d`;
+  const isIg = platform === "Instagram";
+  const sub = `${o.period_posts} ${isIg ? "posts/reels" : "videos"} in last ${days}d`;
   const items = [
-    { key: "subs", icon: "users", tone: "violet", label: "Subscribers", value: k(o.subscribers), sub: "Lifetime • from YouTube" },
-    { key: "tv", icon: "eye", tone: "indigo", label: "Total Views", value: k(o.total_views), sub: "Lifetime channel views" },
-    { key: "vids", icon: "video", tone: "teal", label: "Total Videos", value: Number(o.total_videos).toLocaleString("en-IN"), sub: "Published on channel" },
+    { key: "subs", icon: "users", tone: "violet", label: isIg ? "Followers" : "Subscribers", value: k(o.subscribers), sub: isIg ? "Lifetime • from Instagram" : "Lifetime • from YouTube" },
+    { key: "tv", icon: "eye", tone: "indigo", label: "Total Views", value: k(o.total_views), sub: isIg ? "Lifetime Reel / Post views" : "Lifetime channel views" },
+    { key: "vids", icon: "video", tone: "teal", label: isIg ? "Total Posts" : "Total Videos", value: Number(o.total_videos).toLocaleString("en-IN"), sub: isIg ? "Published on Instagram" : "Published on channel" },
     { key: "pv", icon: "eye", tone: "blue", label: `Views (${days}d)`, value: k(o.period_views), sub },
     { key: "eng", icon: "heart", tone: "amber", label: `Avg Engagement (${days}d)`, value: `${o.avg_engagement_rate}%`, sub: "(likes + comments) / views" },
-    { key: "rev", icon: "rupee", tone: "green", label: `Est. Earnings (${days}d)`, value: money(o.est_revenue), sub: "Estimate, not real AdSense" },
+    { key: "rev", icon: "rupee", tone: "green", label: `Est. Value (${days}d)`, value: money(o.est_revenue), sub: isIg ? "Est. Brand / Post Value" : "Estimate, not real AdSense" },
   ];
 
   return (
@@ -80,7 +81,7 @@ export function FollowerGrowth({ platform, days }) {
     <article className="card">
       <div className="card-head">
         <h2>Follower Growth <Icon name="info" size={14} /></h2>
-        <ul className="legend"><li><i style={{ background: PLATFORM_COLORS.YouTube }} />YouTube subscribers</li></ul>
+        <ul className="legend"><li><i style={{ background: platform === "Instagram" ? (PLATFORM_COLORS.Instagram || "#d946a8") : PLATFORM_COLORS.YouTube }} />{platform === "Instagram" ? "Instagram followers" : "YouTube subscribers"}</li></ul>
       </div>
       {loading ? <p className="muted" style={{ padding: 16 }}>Loading…</p>
         : !connected || history.length === 0 ? <p className="muted" style={{ padding: 16 }}>No follower history for this platform / range yet.</p>
@@ -317,7 +318,7 @@ export function TopPosts({ posts: parentPosts }) {
   );
 }
 
-export function Audience({ followers }) {
+export function Audience({ followers, platform }) {
   const tabs = Object.keys(AUDIENCE);
   const [tab, setTab] = useState("Age");
   const data = AUDIENCE[tab].map(([name, value]) => ({ name, value }));
@@ -341,7 +342,7 @@ export function Audience({ followers }) {
               </Pie>
             </PieChart>
           </ResponsiveContainer>
-          <div className="donut-mid"><strong>{followers != null ? k(followers) : "—"}</strong><small>Subscribers</small></div>
+          <div className="donut-mid"><strong>{followers != null ? k(followers) : "—"}</strong><small>{platform === "Instagram" ? "Followers" : "Subscribers"}</small></div>
         </div>
         <ul className="aud-list">
           {data.map((d, i) => (

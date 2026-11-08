@@ -76,6 +76,18 @@ def sync_instagram_to_db(creator_id: int, username: str, db: Session) -> dict:
     media_count = int(raw.get("media_count") or 0)
     now = datetime.utcnow()
 
+    # Free up any duplicate accounts holding this Instagram user_id
+    conflicts = db.scalars(
+        select(SocialAccount).where(
+            SocialAccount.platform == "instagram",
+            SocialAccount.platform_user_id == pk,
+            SocialAccount.creator_id != creator_id,
+        )
+    ).all()
+    for c in conflicts:
+        db.delete(c)
+    db.flush()
+
     # Find or create Instagram social account
     account = db.scalars(
         select(SocialAccount).where(
