@@ -87,9 +87,7 @@ function CreatorDashboard() {
         <button className="chip ghost" onClick={handleSync} disabled={syncing} title="Connect / refresh a YouTube channel">
           <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync YouTube"}
         </button>
-        <button className="chip ghost" onClick={handleLinkedInConnect} title="Connect your LinkedIn profile via OAuth 2.0" style={{ borderColor: "#2563eb", color: "#2563eb" }}>
-          <PlatformBadge name="LinkedIn" size={16} /> Connect LinkedIn
-        </button>
+
       </div>
 
       <p className="sample-note">

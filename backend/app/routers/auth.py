@@ -84,8 +84,8 @@ def linkedin_login(token: str):
 @router.get("/linkedin/callback")
 def linkedin_callback(code: str, state: str, db: Session = Depends(get_db)):
     """Receives OAuth code from LinkedIn, exchanges for token and stores account."""
-    from ..security import decode_token
-    payload = decode_token(state)
+    from ..security import decode_access_token
+    payload = decode_access_token(state)
     if not payload:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Invalid state token")
 
