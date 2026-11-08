@@ -112,13 +112,13 @@ function CreatorDashboard() {
       <p className="sample-note">
         {overview?.connected ? (
           <>
-            <span className={"sample-pill " + (overview.is_live ? "live" : "")}>{overview.is_live ? "Live" : "Demo data"}</span>
+            <span className={"sample-pill " + (overview.is_live ? "live" : "")}>{overview.is_live ? "Live" : "Synced"}</span>
             Channel: <strong>{overview.channel_name}</strong>
             {overview.last_synced_at && <> • last synced {new Date(overview.last_synced_at + "Z").toLocaleString("en-IN")}</>}
             {" • "}showing last {days} days
           </>
         ) : (
-          <>No channel connected for this view. Click <strong>Sync YouTube Channel</strong> to connect one.</>
+          <>No account connected for this view. Click <strong>Sync YouTube or Instagram</strong> to connect one.</>
         )}
         {syncMsg.text && <span className={"sample-pill " + (syncMsg.ok ? "live" : "")} style={syncMsg.ok ? {} : { background: "#fee2e2", color: "#b91c1c" }}>{syncMsg.ok ? "✓ " : "⚠ "}{syncMsg.text}</span>}
         {loadErr && <span className="sample-pill" style={{ background: "#fee2e2", color: "#b91c1c" }}>⚠ {loadErr}</span>}

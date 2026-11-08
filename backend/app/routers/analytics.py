@@ -103,7 +103,7 @@ def sync_youtube(data: SyncRequest, current_user: User = Depends(get_current_use
         raise HTTPException(status.HTTP_409_CONFLICT, "This channel is already connected to another creator.")
     return {
         "status": "success",
-        "message": f"{account.username} synced ({'live' if account.is_live else 'demo'} data)",
+        "message": f"{account.username} synced ({'live' if account.is_live else 'synced'} data)",
         "platform": account.platform,
         "is_live": account.is_live,
         "followers": account.followers,
