@@ -62,6 +62,22 @@ function CreatorDashboard() {
     }
   };
 
+  const handleInstagramSync = async () => {
+    const u = window.prompt("Enter Instagram username (e.g. hiteshchoudharyofficial):", "hiteshchoudharyofficial");
+    if (!u) return;
+    setSyncing(true);
+    try {
+      const res = await api.post("/api/analytics/instagram/sync", { username: u.trim() });
+      setSyncMsg({ ok: true, text: res.data.message });
+      load();
+    } catch (err) {
+      setSyncMsg({ ok: false, text: errorMessage(err) });
+    } finally {
+      setSyncing(false);
+      setTimeout(() => setSyncMsg({ ok: true, text: "" }), 8000);
+    }
+  };
+
   const handleLinkedInConnect = async () => {
     const token = localStorage.getItem("creatoriq_token");
     if (!token) return;
@@ -86,6 +102,9 @@ function CreatorDashboard() {
         ))}
         <button className="chip ghost" onClick={handleSync} disabled={syncing} title="Connect / refresh a YouTube channel">
           <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync YouTube"}
+        </button>
+        <button className="chip ghost" onClick={handleInstagramSync} disabled={syncing} title="Connect / refresh an Instagram account">
+          <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync Instagram"}
         </button>
 
       </div>

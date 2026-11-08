@@ -12,6 +12,7 @@ from ..database import get_db
 from ..deps import get_current_user
 from ..models import AudienceAnalytics, Creator, Post, PostAnalytics, SocialAccount, User
 from ..services.youtube import YouTubeAPIError, sync_youtube_channel_to_db
+from ..services.instagram import InstagramAPIError, sync_instagram_to_db
 
 router = APIRouter(prefix="/api/analytics", tags=["Analytics & Content"])
 
@@ -108,6 +109,26 @@ def sync_youtube(data: SyncRequest, current_user: User = Depends(get_current_use
         "followers": account.followers,
         "total_posts": len(account.posts),
     }
+
+
+class InstagramSyncRequest(BaseModel):
+    username: Optional[str] = None
+
+
+@router.post("/instagram/sync")
+def sync_instagram(data: InstagramSyncRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Sync a public Instagram profile via RapidAPI."""
+    creator = _get_or_create_creator(current_user, db)
+    username = (data.username or "").strip()
+    if not username:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Instagram username is required (e.g. hiteshchoudharyofficial)")
+    try:
+        return sync_instagram_to_db(creator.creator_id, username, db)
+    except InstagramAPIError as e:
+        raise HTTPException(e.status, e.message)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, "This Instagram account is already connected to another creator.")
 
 
 @router.get("/overview")
