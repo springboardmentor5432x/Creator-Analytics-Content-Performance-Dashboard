@@ -76,12 +76,16 @@ export function FollowerGrowth({ platform, days }) {
 
   const { history, connected, live, loading } = state;
   const few = history.length < 3;
+  const isIg = platform === "Instagram";
+  const isAll = platform === "All Platforms";
+  const themeColor = isIg ? (PLATFORM_COLORS.Instagram || "#d946a8") : isAll ? "#6d4ae8" : PLATFORM_COLORS.YouTube;
+  const legendLabel = isIg ? "Instagram followers" : isAll ? "Total Followers (All Platforms)" : "YouTube subscribers";
 
   return (
     <article className="card">
       <div className="card-head">
         <h2>Follower Growth <Icon name="info" size={14} /></h2>
-        <ul className="legend"><li><i style={{ background: platform === "Instagram" ? (PLATFORM_COLORS.Instagram || "#d946a8") : PLATFORM_COLORS.YouTube }} />{platform === "Instagram" ? "Instagram followers" : "YouTube subscribers"}</li></ul>
+        <ul className="legend"><li><i style={{ background: themeColor }} />{legendLabel}</li></ul>
       </div>
       {loading ? <p className="muted" style={{ padding: 16 }}>Loading…</p>
         : !connected || history.length === 0 ? <p className="muted" style={{ padding: 16 }}>No follower history for this platform / range yet.</p>
@@ -93,20 +97,20 @@ export function FollowerGrowth({ platform, days }) {
                 <AreaChart data={history} margin={{ top: 12, right: 16, left: -6, bottom: 4 }}>
                   <defs>
                     <linearGradient id="fg-sub" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={PLATFORM_COLORS.YouTube} stopOpacity={0.28} />
-                      <stop offset="95%" stopColor={PLATFORM_COLORS.YouTube} stopOpacity={0.01} />
+                      <stop offset="5%" stopColor={themeColor} stopOpacity={0.28} />
+                      <stop offset="95%" stopColor={themeColor} stopOpacity={0.01} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--line)" opacity={0.6} />
                   <XAxis dataKey="d" tick={AXIS} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={32} />
                   <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={52} domain={["dataMin - 100", "dataMax + 100"]} allowDecimals={false} />
                   <Tooltip
-                    cursor={{ stroke: PLATFORM_COLORS.YouTube, strokeWidth: 1.5, strokeDasharray: "4 4" }}
-                    formatter={(v) => [Number(v).toLocaleString() + " subscribers", "YouTube"]}
+                    cursor={{ stroke: themeColor, strokeWidth: 1.5, strokeDasharray: "4 4" }}
+                    formatter={(v) => [Number(v).toLocaleString() + (isIg ? " followers" : isAll ? " total followers" : " subscribers"), isIg ? "Instagram" : isAll ? "All Platforms" : "YouTube"]}
                     contentStyle={{ borderRadius: 12, border: "1px solid var(--line)", background: "var(--surface)", padding: "10px 14px", boxShadow: "0 4px 14px rgba(0,0,0,0.08)" }}
                   />
-                  <Area type="monotone" dataKey="Subscribers" stroke={PLATFORM_COLORS.YouTube} strokeWidth={2.5}
-                    fill="url(#fg-sub)" dot={false} activeDot={{ r: 5, stroke: PLATFORM_COLORS.YouTube, strokeWidth: 2, fill: "#fff" }} />
+                  <Area type="monotone" dataKey="Subscribers" stroke={themeColor} strokeWidth={2.5}
+                    fill="url(#fg-sub)" dot={false} activeDot={{ r: 5, stroke: themeColor, strokeWidth: 2, fill: "#fff" }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

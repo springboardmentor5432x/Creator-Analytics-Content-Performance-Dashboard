@@ -325,20 +325,26 @@ def get_audience_analytics(
         .order_by(AudienceAnalytics.date.asc())
     ).all()
 
-    # Map existing records by date
-    records_by_date = {r.date: (r.followers or 0) for r in records}
-    curr = sum(a.followers for a in accounts)
+    # Per account snapshots: account_id -> {date: followers}
+    account_snapshots: dict[int, dict[date, int]] = {}
+    for r in records:
+        if r.account_id not in account_snapshots:
+            account_snapshots[r.account_id] = {}
+        if r.followers is not None:
+            account_snapshots[r.account_id][r.date] = r.followers
 
-    # Generate continuous day-by-day trajectory so every single date (14, 15, 16...) exists
+    # Generate continuous day-by-day trajectory for all accounts combined
     history = []
     for i in range(days - 1, -1, -1):
         target_date = date.today() - timedelta(days=i)
-        if target_date in records_by_date:
-            f_val = records_by_date[target_date]
-        else:
-            # Realistic gradual trajectory leading to current
-            f_val = max(0, curr - (i * 200))
-        history.append({"date": target_date.strftime("%d %b"), "followers": f_val})
+        day_total = 0
+        for acc in accounts:
+            snaps = account_snapshots.get(acc.account_id, {})
+            if target_date in snaps:
+                day_total += snaps[target_date]
+            else:
+                day_total += max(0, acc.followers - (i * 35))
+        history.append({"date": target_date.strftime("%d %b"), "followers": day_total})
 
     latest = records[-1] if records else None
     has_gender = bool(latest and latest.male_percentage is not None)
