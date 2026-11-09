@@ -109,9 +109,10 @@ def sync_linkedin_to_db(creator_id: int, userinfo: dict, access_token: str, expi
     ).first()
 
     now = datetime.utcnow()
-    followers = 1420  # realistic creator connection/follower baseline
-    posts_count = 14
-    total_views = 48500
+    # Real data only: no fake posts, no synthetic follower count
+    followers = 0
+    posts_count = len(account.posts) if account else 0
+    total_views = 0
 
     if not account:
         account = SocialAccount(
@@ -140,7 +141,6 @@ def sync_linkedin_to_db(creator_id: int, userinfo: dict, access_token: str, expi
         account.is_live = True
         account.last_synced_at = now
 
-    # Record audience analytics snapshot so Follower Growth graphs smoothly
     today = date.today()
     snap = db.scalars(
         select(AudienceAnalytics).where(
@@ -152,36 +152,6 @@ def sync_linkedin_to_db(creator_id: int, userinfo: dict, access_token: str, expi
         snap = AudienceAnalytics(account_id=account.account_id, date=today)
         db.add(snap)
     snap.followers = account.followers
-
-    # Create professional tech posts if account has none
-    if not account.posts:
-        sample_posts = [
-            ("Building Scalable System Architectures with FastAPI & PostgreSQL", 14200, 840, 92, 115),
-            ("How We Optimized Frontend Bundle Size by 40% with Vite & Code Splitting", 18500, 1120, 140, 185),
-            ("Key Takeaways from Designing Multi-Tenant Creator Platforms in 2026", 9600, 610, 64, 78),
-            ("My Journey Transitioning from Junior Engineer to Fullstack Architecture Lead", 6200, 430, 48, 52),
-        ]
-        for i, (caption, v, l, c, s) in enumerate(sample_posts):
-            p_date = now - timedelta(days=(i * 4) + 1)
-            p = Post(
-                account_id=account.account_id,
-                platform_post_id=f"li_{account.account_id}_{i}",
-                content_type="article",
-                caption=caption,
-                published_at=p_date,
-                post_url=f"https://www.linkedin.com/feed/update/urn:li:activity:{account.account_id}00{i}",
-            )
-            db.add(p)
-            db.flush()
-            p_analytics = PostAnalytics(
-                post_id=p.post_id,
-                views=v,
-                likes=l,
-                comments=c,
-                shares=s,
-                engagement_rate=round(((l + c) / v) * 100, 2) if v > 0 else 0.0,
-            )
-            db.add(p_analytics)
 
     db.commit()
     db.refresh(account)
