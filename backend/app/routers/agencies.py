@@ -106,7 +106,7 @@ def get_agency_overview(user: User = Depends(require_roles(AGENCY)), db: Session
         })
 
     tot_plat_followers = sum(platform_counts.values()) or 1
-    platform_colors = {"Youtube": "#ef4444", "Instagram": "#d946a8", "Tiktok": "#111827", "Linkedin": "#2563eb"}
+    platform_colors = {"Youtube": "#ef4444", "Instagram": "#d946a8", "Linkedin": "#2563eb"}
     platform_dist = [
         {"name": p, "value": round((cnt / tot_plat_followers) * 100), "color": platform_colors.get(p, "#6d4ae8")}
         for p, cnt in platform_counts.items()

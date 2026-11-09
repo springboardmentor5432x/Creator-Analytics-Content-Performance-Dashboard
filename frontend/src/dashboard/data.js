@@ -9,13 +9,13 @@ export const KPIS = [
 ];
 
 export const GROWTH = [
-  { d: "Aug 17", YouTube: 32000, Instagram: 22000, TikTok: 12000, LinkedIn: 4000 },
-  { d: "Aug 22", YouTube: 52000, Instagram: 36000, TikTok: 20000, LinkedIn: 7000 },
-  { d: "Aug 27", YouTube: 74000, Instagram: 50000, TikTok: 28000, LinkedIn: 10000 },
-  { d: "Sep 1", YouTube: 98000, Instagram: 66000, TikTok: 38000, LinkedIn: 13000 },
-  { d: "Sep 6", YouTube: 118000, Instagram: 80000, TikTok: 47000, LinkedIn: 17000 },
-  { d: "Sep 11", YouTube: 148000, Instagram: 100000, TikTok: 58000, LinkedIn: 21000 },
-  { d: "Sep 16", YouTube: 176000, Instagram: 124000, TikTok: 78000, LinkedIn: 27000 },
+  { d: "Aug 17", YouTube: 32000, Instagram: 22000, LinkedIn: 4000 },
+  { d: "Aug 22", YouTube: 52000, Instagram: 36000, LinkedIn: 7000 },
+  { d: "Aug 27", YouTube: 74000, Instagram: 50000, LinkedIn: 10000 },
+  { d: "Sep 1", YouTube: 98000, Instagram: 66000, LinkedIn: 13000 },
+  { d: "Sep 6", YouTube: 118000, Instagram: 80000, LinkedIn: 17000 },
+  { d: "Sep 11", YouTube: 148000, Instagram: 100000, LinkedIn: 21000 },
+  { d: "Sep 16", YouTube: 176000, Instagram: 124000, LinkedIn: 27000 },
 ];
 export const PLATFORM_COLORS = { YouTube: "#ef4444", Instagram: "#d946a8", LinkedIn: "#2563eb" };
 
@@ -31,7 +31,7 @@ export const PERFORMANCE = {
 export const POSTS = [
   { title: "5 AI Tools Every Student Sh...", type: "Video", platform: "YouTube", views: "125K", likes: "8.4K", comments: "620", eng: "7.9%", date: "Sep 12, 2026", grad: ["#334155", "#64748b"] },
   { title: "A Day in My Life at NIT Rour...", type: "Reel", platform: "Instagram", views: "98K", likes: "6.1K", comments: "340", eng: "6.8%", date: "Sep 10, 2026", grad: ["#0ea5e9", "#22c55e"] },
-  { title: "Healthy Meal Prep Ideas", type: "Video", platform: "TikTok", views: "76K", likes: "5.2K", comments: "410", eng: "7.4%", date: "Sep 8, 2026", grad: ["#f59e0b", "#ef4444"] },
+  { title: "Building Scalable Microservices", type: "Article", platform: "LinkedIn", views: "76K", likes: "5.2K", comments: "410", eng: "7.4%", date: "Sep 8, 2026", grad: ["#2563eb", "#3b82f6"] },
   { title: "My Study Setup 2026", type: "Image", platform: "Instagram", views: "62K", likes: "4.3K", comments: "290", eng: "6.1%", date: "Sep 5, 2026", grad: ["#475569", "#94a3b8"] },
   { title: "How I Manage College, Work...", type: "Video", platform: "YouTube", views: "58K", likes: "3.9K", comments: "210", eng: "5.8%", date: "Sep 2, 2026", grad: ["#7c3aed", "#ec4899"] },
 ];
@@ -87,13 +87,13 @@ export const AGENCY_PERF = [
   { d: "Sep 30", Views: 1420, Engagement: 152 },
 ];
 export const PLATFORM_DIST = [
-  { name: "YouTube", value: 38, color: "#ef4444" }, { name: "Instagram", value: 29, color: "#d946a8" },
-  { name: "TikTok", value: 21, color: "#111827" }, { name: "Others", value: 12, color: "#6d4ae8" },
+  { name: "YouTube", value: 52, color: "#ef4444" }, { name: "Instagram", value: 36, color: "#d946a8" },
+  { name: "LinkedIn", value: 12, color: "#2563eb" },
 ];
 export const AGENCY_CREATORS = [
   { name: "Ipsita Priyadarshini", platform: "YouTube", followers: "125.4K", views: "1.8M", eng: "6.8%", growth: "12.4%" },
   { name: "Rohan Mehta", platform: "Instagram", followers: "84.2K", views: "1.1M", eng: "5.9%", growth: "9.1%" },
-  { name: "Ananya Rao", platform: "TikTok", followers: "61.7K", views: "920K", eng: "7.4%", growth: "15.8%" },
+  { name: "Ananya Rao", platform: "LinkedIn", followers: "61.7K", views: "920K", eng: "7.4%", growth: "15.8%" },
   { name: "Vikram Singh", platform: "YouTube", followers: "38.9K", views: "540K", eng: "5.1%", growth: "6.3%" },
   { name: "Meera Nair", platform: "Instagram", followers: "29.3K", views: "410K", eng: "6.2%", growth: "8.7%" },
 ];
@@ -118,7 +118,7 @@ export const TOP_CAMPAIGNS = [
 export const RECENT_CAMPAIGNS = [
   { name: "Diwali Launch", platform: "Instagram", status: "Active", reach: "92K", eng: "7.2%", ends: "Oct 30, 2026" },
   { name: "Summer Sale", platform: "YouTube", status: "Completed", reach: "78K", eng: "6.5%", ends: "Aug 31, 2026" },
-  { name: "Brand Awareness", platform: "TikTok", status: "Active", reach: "64K", eng: "5.9%", ends: "Nov 15, 2026" },
+  { name: "Brand Awareness", platform: "LinkedIn", status: "Active", reach: "64K", eng: "5.9%", ends: "Nov 15, 2026" },
   { name: "Festive Offer", platform: "Instagram", status: "Scheduled", reach: "-", eng: "-", ends: "Nov 20, 2026" },
   { name: "Product Teaser", platform: "YouTube", status: "Completed", reach: "39K", eng: "5.2%", ends: "Sep 12, 2026" },
 ];
@@ -137,7 +137,7 @@ export const USER_GROWTH = [
   { d: "Sep 6", Users: 410 }, { d: "Sep 11", Users: 490 }, { d: "Sep 16", Users: 570 },
 ];
 export const PLATFORM_USAGE = [
-  { name: "YouTube", value: 82 }, { name: "Instagram", value: 74 }, { name: "TikTok", value: 61 },
+  { name: "YouTube", value: 82 }, { name: "Instagram", value: 74 },
   { name: "LinkedIn", value: 38 }, { name: "Facebook", value: 29 },
 ];
 export const SYSTEM_ACTIVITY = [
