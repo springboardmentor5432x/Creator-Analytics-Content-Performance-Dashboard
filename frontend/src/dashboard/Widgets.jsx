@@ -32,14 +32,15 @@ export function KpiRow({ overview, platform, days }) {
 
   const o = overview;
   const isIg = platform === "Instagram";
-  const sub = `${o.period_posts} ${isIg ? "posts/reels" : "videos"} in last ${days}d`;
+  const isLi = platform === "LinkedIn";
+  const sub = `${o.period_posts} ${isIg ? "posts/reels" : isLi ? "articles/posts" : "videos"} in last ${days}d`;
   const items = [
-    { key: "subs", icon: "users", tone: "violet", label: isIg ? "Followers" : "Subscribers", value: k(o.subscribers), sub: isIg ? "Lifetime • from Instagram" : "Lifetime • from YouTube" },
-    { key: "tv", icon: "eye", tone: "indigo", label: "Total Views", value: k(o.total_views), sub: isIg ? "Lifetime Reel / Post views" : "Lifetime channel views" },
-    { key: "vids", icon: "video", tone: "teal", label: isIg ? "Total Posts" : "Total Videos", value: Number(o.total_videos).toLocaleString("en-IN"), sub: isIg ? "Published on Instagram" : "Published on channel" },
+    { key: "subs", icon: "users", tone: "violet", label: isIg ? "Followers" : isLi ? "Connections / Followers" : "Subscribers", value: k(o.subscribers), sub: isIg ? "Lifetime • from Instagram" : isLi ? "Lifetime • from LinkedIn" : "Lifetime • from YouTube" },
+    { key: "tv", icon: "eye", tone: "indigo", label: "Total Views", value: k(o.total_views), sub: isIg ? "Lifetime Reel / Post views" : isLi ? "Lifetime Post Impressions" : "Lifetime channel views" },
+    { key: "vids", icon: "video", tone: "teal", label: isIg || isLi ? "Total Posts" : "Total Videos", value: Number(o.total_videos).toLocaleString("en-IN"), sub: isIg ? "Published on Instagram" : isLi ? "Published on LinkedIn" : "Published on channel" },
     { key: "pv", icon: "eye", tone: "blue", label: `Views (${days}d)`, value: k(o.period_views), sub },
     { key: "eng", icon: "heart", tone: "amber", label: `Avg Engagement (${days}d)`, value: `${o.avg_engagement_rate}%`, sub: "(likes + comments) / views" },
-    { key: "rev", icon: "rupee", tone: "green", label: `Est. Value (${days}d)`, value: money(o.est_revenue), sub: isIg ? "Est. Brand / Post Value" : "Estimate, not real AdSense" },
+    { key: "rev", icon: "rupee", tone: "green", label: `Est. Value (${days}d)`, value: money(o.est_revenue), sub: isIg ? "Est. Brand / Post Value" : isLi ? "Est. B2B / Consulting Value" : "Estimate, not real AdSense" },
   ];
 
   return (
@@ -77,9 +78,10 @@ export function FollowerGrowth({ platform, days }) {
   const { history, connected, live, loading } = state;
   const few = history.length < 3;
   const isIg = platform === "Instagram";
+  const isLi = platform === "LinkedIn";
   const isAll = platform === "All Platforms";
-  const themeColor = isIg ? (PLATFORM_COLORS.Instagram || "#d946a8") : isAll ? "#6d4ae8" : PLATFORM_COLORS.YouTube;
-  const legendLabel = isIg ? "Instagram followers" : isAll ? "Total Followers (All Platforms)" : "YouTube subscribers";
+  const themeColor = isIg ? (PLATFORM_COLORS.Instagram || "#d946a8") : isLi ? (PLATFORM_COLORS.LinkedIn || "#2563eb") : isAll ? "#6d4ae8" : PLATFORM_COLORS.YouTube;
+  const legendLabel = isIg ? "Instagram followers" : isLi ? "LinkedIn connections" : isAll ? "Total Followers (All Platforms)" : "YouTube subscribers";
 
   return (
     <article className="card">
@@ -106,7 +108,7 @@ export function FollowerGrowth({ platform, days }) {
                   <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={52} domain={["dataMin - 100", "dataMax + 100"]} allowDecimals={false} />
                   <Tooltip
                     cursor={{ stroke: themeColor, strokeWidth: 1.5, strokeDasharray: "4 4" }}
-                    formatter={(v) => [Number(v).toLocaleString() + (isIg ? " followers" : isAll ? " total followers" : " subscribers"), isIg ? "Instagram" : isAll ? "All Platforms" : "YouTube"]}
+                    formatter={(v) => [Number(v).toLocaleString() + (isIg ? " followers" : isLi ? " connections" : isAll ? " total followers" : " subscribers"), isIg ? "Instagram" : isLi ? "LinkedIn" : isAll ? "All Platforms" : "YouTube"]}
                     contentStyle={{ borderRadius: 12, border: "1px solid var(--line)", background: "var(--surface)", padding: "10px 14px", boxShadow: "0 4px 14px rgba(0,0,0,0.08)" }}
                   />
                   <Area type="monotone" dataKey="Subscribers" stroke={themeColor} strokeWidth={2.5}

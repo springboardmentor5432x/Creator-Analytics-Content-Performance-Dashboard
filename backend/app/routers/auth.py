@@ -91,17 +91,27 @@ def linkedin_callback(code: str, state: str, db: Session = Depends(get_db)):
 
     user_id = int(payload.get("sub", 0))
     user = db.get(User, user_id)
-    if not user or not user.creator:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Creator account required")
+    if not user:
+        return RedirectResponse("http://localhost:5173/dashboard?linkedin_error=User+not+found")
+
+    from ..models import Creator
+    creator = db.scalar(select(Creator).where(Creator.user_id == user.user_id))
+    if not creator:
+        creator = Creator(user_id=user.user_id, creator_name=user.name, bio="Digital content creator & storyteller.")
+        db.add(creator)
+        db.commit()
+        db.refresh(creator)
 
     try:
         token_data = exchange_code_for_token(code)
         access_token = token_data.get("access_token")
         expires_in = token_data.get("expires_in", 5184000)
         userinfo = fetch_linkedin_userinfo(access_token)
-        account = sync_linkedin_to_db(user.creator.creator_id, userinfo, access_token, expires_in, db)
-    except LinkedInAPIError as e:
-        raise HTTPException(e.status, detail=e.message)
+        account = sync_linkedin_to_db(creator.creator_id, userinfo, access_token, expires_in, db)
+    except Exception as e:
+        import urllib.parse
+        err_msg = urllib.parse.quote(str(e))
+        return RedirectResponse(f"http://localhost:5173/dashboard?linkedin_error={err_msg}")
 
     # Redirect to frontend dashboard with success flag
     return RedirectResponse("http://localhost:5173/dashboard?linkedin_synced=true")

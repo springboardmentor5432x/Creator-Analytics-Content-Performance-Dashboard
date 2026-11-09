@@ -46,6 +46,19 @@ function CreatorDashboard() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("linkedin_synced") === "true") {
+      setSyncMsg({ ok: true, text: "LinkedIn profile connected successfully!" });
+      setPlatform("LinkedIn");
+      window.history.replaceState({}, document.title, window.location.pathname);
+      load();
+    } else if (params.get("linkedin_error")) {
+      setSyncMsg({ ok: false, text: "LinkedIn: " + params.get("linkedin_error") });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [load]);
+
   const handleSync = async () => {
     const h = window.prompt("Enter YouTube channel handle (e.g. @chaiaurcode) or channel ID (UC...):", overview?.channel_name || "");
     if (!h) return;
@@ -105,6 +118,9 @@ function CreatorDashboard() {
         </button>
         <button className="chip ghost" onClick={handleInstagramSync} disabled={syncing} title="Connect / refresh an Instagram account">
           <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync Instagram"}
+        </button>
+        <button className="chip ghost" onClick={handleLinkedInConnect} disabled={syncing} title="Connect LinkedIn profile via official OAuth">
+          <PlatformBadge name="LinkedIn" size={14} /> Connect LinkedIn
         </button>
 
       </div>
