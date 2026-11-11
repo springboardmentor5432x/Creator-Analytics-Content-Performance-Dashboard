@@ -1,7 +1,7 @@
 {
   "name": "creatoriq-frontend",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,14 +16,9 @@
     "recharts": "^2.15.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
-    "vite": "^6.4.5"
-  },
-  "overrides": {
-    "vite": {
-      "rollup": "npm:@rollup/wasm-node"
-    }
+    "vite": "6.4.5"
   }
 }

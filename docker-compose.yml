@@ -17,9 +17,33 @@ services:
     build: ./backend
     environment:
       DATABASE_URL: postgresql+psycopg://creatoriq:creatoriq_local_only@db:5432/creatoriq
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-development-secret-change-before-deployment}
-      CORS_ORIGINS: http://localhost:4173,http://localhost:5173
-      SEED_DEMO_DATA: "true"
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY before starting the production stack}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:4173,http://localhost:5173}
+      SEED_DEMO_DATA: "false"
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:4173}
+      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID:-}
+      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET:-}
+      GOOGLE_OAUTH_REDIRECT_URI: ${GOOGLE_OAUTH_REDIRECT_URI:-http://localhost:8000/api/integrations/youtube/callback}
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+      META_OAUTH_CLIENT_ID: ${META_OAUTH_CLIENT_ID:-}
+      META_OAUTH_CLIENT_SECRET: ${META_OAUTH_CLIENT_SECRET:-}
+      META_GRAPH_API_VERSION: ${META_GRAPH_API_VERSION:-v26.0}
+      INSTAGRAM_CLIENT_ID: ${INSTAGRAM_CLIENT_ID:-}
+      INSTAGRAM_CLIENT_SECRET: ${INSTAGRAM_CLIENT_SECRET:-}
+      INSTAGRAM_CONFIG_ID: ${INSTAGRAM_CONFIG_ID:-}
+      INSTAGRAM_REDIRECT_URI: ${INSTAGRAM_REDIRECT_URI:-https://your-public-url/api/integrations/instagram/callback}
+      FACEBOOK_OAUTH_CONFIG_ID: ${FACEBOOK_OAUTH_CONFIG_ID:-}
+      FACEBOOK_OAUTH_REDIRECT_URI: ${FACEBOOK_OAUTH_REDIRECT_URI:-http://localhost:8000/api/integrations/facebook/callback}
+      X_CLIENT_ID: ${X_CLIENT_ID:-}
+      X_CLIENT_SECRET: ${X_CLIENT_SECRET:-}
+      X_REDIRECT_URI: ${X_REDIRECT_URI:-http://localhost:8000/api/integrations/x/callback}
+      LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID:-}
+      LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET:-}
+      LINKEDIN_REDIRECT_URI: ${LINKEDIN_REDIRECT_URI:-http://localhost:8000/api/integrations/linkedin/callback}
+      LINKEDIN_OAUTH_SCOPES: ${LINKEDIN_OAUTH_SCOPES:-openid profile email r_member_postAnalytics r_member_profileAnalytics r_member_social}
+      LINKEDIN_API_VERSION: ${LINKEDIN_API_VERSION:-202610}
+      OAUTH_TOKEN_ENCRYPTION_KEY: ${OAUTH_TOKEN_ENCRYPTION_KEY:-}
+      HTTP_TIMEOUT_SECONDS: ${HTTP_TIMEOUT_SECONDS:-20}
     ports:
       - "8000:8000"
     depends_on:

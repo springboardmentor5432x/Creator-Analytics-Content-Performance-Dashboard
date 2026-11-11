@@ -62,6 +62,38 @@ def seed_demo_data(db: Session) -> None:
 
     existing = db.query(User).filter(User.email == "demo@creatoriq.dev").first()
     if existing:
+        profile = db.query(CreatorProfile).filter_by(user_id=existing.id).first()
+        if profile:
+            demo_accounts = db.query(SocialAccount).filter_by(
+                creator_profile_id=profile.id,
+                is_connected=False,
+            ).all()
+            demo_account_ids = [account.id for account in demo_accounts]
+            demo_post_ids = [
+                post.id
+                for post in db.query(ContentPost).filter(
+                    ContentPost.social_account_id.in_(demo_account_ids)
+                ).all()
+            ] if demo_account_ids else []
+            demo_metrics = db.query(ContentMetric).filter(
+                ContentMetric.content_post_id.in_(demo_post_ids)
+            ).all() if demo_post_ids else []
+            for metric in demo_metrics:
+                if not metric.metrics_available:
+                    metric.metrics_available = [
+                        "views", "likes", "comments", "shares", "saves",
+                        "watch_time_seconds", "reach", "impressions",
+                    ]
+            demo_insights = db.query(AudienceInsight).filter(
+                AudienceInsight.social_account_id.in_(demo_account_ids)
+            ).all() if demo_account_ids else []
+            for insight in demo_insights:
+                if not insight.metrics_available:
+                    insight.metrics_available = [
+                        "age_distribution", "gender_distribution",
+                        "geographic_distribution", "device_distribution",
+                        "active_hours", "reach", "impressions",
+                    ]
         db.commit()
         return
 
@@ -86,7 +118,6 @@ def seed_demo_data(db: Session) -> None:
     account_specs = [
         ("YouTube", "@alexcreates", 28450, "https://youtube.com"),
         ("Instagram", "@alex.creates", 17820, "https://instagram.com"),
-        ("TikTok", "@alexcreates", 9760, "https://tiktok.com"),
     ]
     accounts = []
     for platform, handle, followers, url in account_specs:
@@ -105,7 +136,6 @@ def seed_demo_data(db: Session) -> None:
     post_titles = {
         "YouTube": ["5 Python Tools I Use Every Day", "Build a Portfolio That Gets Noticed", "React vs Vue: What to Choose"],
         "Instagram": ["A clean desk, a clear plan", "3 coding habits that actually help", "Behind the scenes: project day"],
-        "TikTok": ["One CSS trick in 20 seconds", "POV: your code finally works", "Git commands worth remembering"],
     }
     multipliers = [1.0, 0.73, 0.52]
     today = date.today()
@@ -121,7 +151,7 @@ def seed_demo_data(db: Session) -> None:
             )
             db.add(post)
             db.flush()
-            platform_factor = {"YouTube": 1.4, "Instagram": 1.0, "TikTok": 1.15}[account.platform]
+            platform_factor = {"YouTube": 1.4, "Instagram": 1.0}[account.platform]
             for day_offset in range(6, -1, -1):
                 recorded = today - timedelta(days=day_offset)
                 day_factor = 0.76 + (6 - day_offset) * 0.075
@@ -144,6 +174,10 @@ def seed_demo_data(db: Session) -> None:
                     reach=reach,
                     impressions=int(base_views * 1.22),
                     engagement_rate=engagement_rate,
+                    metrics_available=[
+                        "views", "likes", "comments", "shares", "saves",
+                        "watch_time_seconds", "reach", "impressions",
+                    ],
                 ))
 
     for account in accounts:
@@ -157,6 +191,11 @@ def seed_demo_data(db: Session) -> None:
             active_hours={"09": 18, "12": 27, "18": 41, "21": 14},
             impressions=18000,
             reach=14600,
+            metrics_available=[
+                "age_distribution", "gender_distribution",
+                "geographic_distribution", "device_distribution",
+                "active_hours", "reach", "impressions",
+            ],
         ))
 
     month_start = today.replace(day=1)
@@ -164,7 +203,7 @@ def seed_demo_data(db: Session) -> None:
         RevenueRecord(creator_profile_id=profile.id, source="Sponsorships", amount=Decimal("12500.00"), currency="INR", description="Demo brand collaboration", recorded_on=max(month_start, today - timedelta(days=9))),
         RevenueRecord(creator_profile_id=profile.id, source="Ad revenue", amount=Decimal("6840.00"), currency="INR", description="Demo platform earnings", recorded_on=max(month_start, today - timedelta(days=3))),
         Notification(creator_profile_id=profile.id, title="Weekly performance is ready", message="Your demo workspace has a fresh 7-day overview.", category="performance"),
-        Report(creator_profile_id=profile.id, report_type="weekly_analytics", title="Weekly Creator Performance", format="PDF", status="sample"),
+        Report(creator_profile_id=profile.id, report_type="weekly_analytics", title="Weekly Creator Performance", format="PDF", days=7, status="sample"),
     ])
     db.commit()
 

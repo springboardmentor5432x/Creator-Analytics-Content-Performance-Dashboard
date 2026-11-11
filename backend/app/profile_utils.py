@@ -71,18 +71,21 @@ def ensure_role_profile(
         if profile is None:
             profile = CreatorProfile(user_id=user.id, display_name=name, niche=focus, bio=bio)
             db.add(profile)
+            db.flush()
         return profile
     if user.role == "agency":
         profile = db.query(AgencyProfile).filter(AgencyProfile.user_id == user.id).first()
         if profile is None:
             profile = AgencyProfile(user_id=user.id, agency_name=name, service_focus=focus, bio=bio)
             db.add(profile)
+            db.flush()
         return profile
     if user.role == "marketing_team":
         profile = db.query(MarketingTeamProfile).filter(MarketingTeamProfile.user_id == user.id).first()
         if profile is None:
             profile = MarketingTeamProfile(user_id=user.id, team_name=name, focus_area=focus, bio=bio)
             db.add(profile)
+            db.flush()
         return profile
     raise ValueError(f"Unsupported user role: {user.role}")
 

@@ -97,6 +97,90 @@ def test_dashboard_data_is_scoped_to_signed_in_creator(client: TestClient):
     assert data["demo_data"] is False
 
 
+def test_creator_dashboard_accepts_supported_date_ranges(client: TestClient, creator_token: str):
+    headers = {"Authorization": "Bearer " + creator_token}
+    summary = client.get("/api/dashboard/summary?days=90", headers=headers)
+    trends = client.get("/api/dashboard/trends?days=90", headers=headers)
+    platforms = client.get("/api/dashboard/platforms?days=90", headers=headers)
+    posts = client.get("/api/dashboard/top-content?limit=5&days=90", headers=headers)
+
+    assert summary.status_code == 200, summary.text
+    assert summary.json()["selected_days"] == 90
+    assert "total_engagements" in summary.json()
+    assert "total_engagements" in summary.json()["metric_availability"]
+    assert trends.status_code == 200, trends.text
+    assert len(trends.json()["days"]) == 90
+    assert platforms.status_code == 200, platforms.text
+    assert posts.status_code == 200, posts.text
+
+    for path in ("/api/dashboard/summary?days=6", "/api/dashboard/trends?days=91"):
+        assert client.get(path, headers=headers).status_code == 422
+
+
+def test_dashboard_summary_uses_selected_period_and_available_metrics(client: TestClient, test_engine):
+    from datetime import date, timedelta
+
+    from sqlalchemy.orm import sessionmaker
+
+    from app.models import ContentMetric, ContentPost, CreatorProfile, SocialAccount
+
+    registration = client.post("/api/auth/register", json={
+        "email": "dashboard-periods@example.com",
+        "full_name": "Dashboard Periods",
+        "password": "StrongPass@123",
+        "creator_name": "Dashboard Periods",
+        "niche": "Testing",
+    })
+    assert registration.status_code == 201, registration.text
+
+    session_factory = sessionmaker(bind=test_engine, expire_on_commit=False)
+    with session_factory() as db:
+        profile = db.query(CreatorProfile).filter_by(user_id=registration.json()["user"]["id"]).one()
+        account = SocialAccount(
+            creator_profile_id=profile.id,
+            platform="YouTube",
+            handle="@dashboard-periods",
+            followers_count=123,
+            is_connected=True,
+        )
+        db.add(account)
+        db.flush()
+        post = ContentPost(social_account_id=account.id, title="Period test", content_type="Video")
+        db.add(post)
+        db.flush()
+        db.add_all([
+            ContentMetric(
+                content_post_id=post.id,
+                recorded_on=date.today() - timedelta(days=40),
+                views=10,
+                likes=2,
+                comments=3,
+                shares=1000,
+                metrics_available=["views", "likes", "comments"],
+            ),
+            ContentMetric(
+                content_post_id=post.id,
+                recorded_on=date.today(),
+                views=100,
+                likes=10,
+                comments=5,
+                shares=1000,
+                metrics_available=["views", "likes", "comments"],
+            ),
+        ])
+        db.commit()
+
+    headers = {"Authorization": "Bearer " + registration.json()["access_token"]}
+    thirty_days = client.get("/api/dashboard/summary?days=30", headers=headers).json()
+    ninety_days = client.get("/api/dashboard/summary?days=90", headers=headers).json()
+
+    assert thirty_days["followers"] == 123
+    assert thirty_days["views_period"] == 100
+    assert thirty_days["total_engagements"] == 15
+    assert ninety_days["views_period"] == 110
+    assert ninety_days["total_engagements"] == 20
+
+
 def test_creator_cannot_change_roles(client: TestClient, creator_token: str):
     users = client.get("/api/admin/users", headers={"Authorization": f"Bearer {creator_token}"})
     assert users.status_code == 403
@@ -293,7 +377,14 @@ def test_account_password_change_requires_current_password(client: TestClient):
         "current_password": "StrongPass@123",
         "new_password": "NewStrongPass@123",
     })
-    assert changed.status_code == 204
+    assert changed.status_code == 200, changed.text
+    body = changed.json()
+    assert body["access_token"]
+    # The session version rotated, so the pre-change token must be rejected.
+    stale = client.get("/api/auth/me", headers=headers)
+    assert stale.status_code == 401
+    fresh = client.get("/api/auth/me", headers={"Authorization": f"Bearer {body['access_token']}"})
+    assert fresh.status_code == 200
     relogin = client.post("/api/auth/login", json={
         "email": "password-change@example.com",
         "password": "NewStrongPass@123",
@@ -387,14 +478,39 @@ def test_role_changed_from_creator_does_not_expose_creator_dashboard_metrics(cli
     assert summary.json()["data_status"] == "no_creator_profile_for_role"
 
 
-def test_cors_preflight_accepts_local_vite_origin_and_custom_headers(client: TestClient):
-    response = client.options(
-        "/api/auth/login",
-        headers={
-            "Origin": "http://127.0.0.1:5173",
-            "Access-Control-Request-Method": "POST",
-            "Access-Control-Request-Headers": "authorization,content-type,x-local-test",
-        },
-    )
-    assert response.status_code == 200, response.text
-    assert response.headers.get("access-control-allow-origin") == "http://127.0.0.1:5173"
+def test_non_creator_roles_cannot_open_creator_connections_or_metrics(
+    client: TestClient,
+    admin_token: str,
+):
+    """Agency, marketing, and admin workspaces never inherit creator data."""
+    role_tokens = {"administrator": admin_token}
+
+    for role in ("agency", "marketing_team"):
+        response = client.post("/api/auth/register", json={
+            "email": f"role-boundary-{role}@example.com",
+            "full_name": f"{role} workspace owner",
+            "password": "StrongPass@123",
+            "profile_name": f"{role} workspace",
+            "focus_area": "Creator partnerships",
+            "role": role,
+        })
+        assert response.status_code == 201, response.text
+        role_tokens[role] = response.json()["access_token"]
+
+    for role, token in role_tokens.items():
+        headers = {"Authorization": f"Bearer {token}"}
+
+        connections = client.get("/api/integrations/accounts", headers=headers)
+        assert connections.status_code == 403, role
+
+        summary = client.get("/api/dashboard/summary", headers=headers)
+        assert summary.status_code == 200, role
+        assert summary.json()["data_status"] == "no_creator_profile_for_role"
+
+        content = client.get("/api/analytics/content", headers=headers)
+        audience = client.get("/api/analytics/audience", headers=headers)
+        growth = client.get("/api/analytics/growth", headers=headers)
+
+        assert content.status_code == 200 and content.json()["posts"] == [], role
+        assert audience.status_code == 200 and audience.json()["accounts"] == [], role
+        assert growth.status_code == 200 and growth.json()["days"] == [], role

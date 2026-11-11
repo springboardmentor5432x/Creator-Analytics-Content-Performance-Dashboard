@@ -9,10 +9,14 @@ from app.security import decode_access_token
 
 
 ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
-    "creator": ("dashboard:read", "analytics:read", "profile:read:own", "profile:write:own", "reports:read:own"),
-    "agency": ("dashboard:read", "analytics:read", "client_profiles:read", "reports:read"),
-    "marketing_team": ("dashboard:read", "analytics:read", "content_performance:read", "reports:read"),
-    "administrator": ("dashboard:read", "analytics:read", "users:read", "users:manage", "system:manage"),
+    "creator": (
+        "dashboard:read", "analytics:read", "profile:read:own", "profile:write:own",
+        "reports:read:own", "reports:generate:own", "revenue:read:own",
+        "revenue:write:own", "notifications:read:own",
+    ),
+    "agency": ("dashboard:read", "analytics:read", "client_profiles:read", "reports:read", "workspace:collaborate"),
+    "marketing_team": ("dashboard:read", "analytics:read", "content_performance:read", "reports:read", "workspace:collaborate"),
+    "administrator": ("dashboard:read", "analytics:read", "users:read", "users:manage", "system:manage", "workspace:govern"),
 }
 
 
@@ -37,10 +41,11 @@ def get_current_user(
     try:
         payload = decode_access_token(credentials.credentials)
         user_id = int(payload.get("sub", ""))
+        token_version = int(payload.get("ver", 0))
     except (JWTError, ValueError, TypeError):
         raise unauthorized
     user = db.query(User).filter(User.id == user_id, User.is_active.is_(True)).first()
-    if user is None:
+    if user is None or int(user.token_version or 0) != token_version:
         raise unauthorized
     return user
 

@@ -1,7 +1,7 @@
 # CreatorIQ — Milestone 1 Architecture & Workflow Plan
 
 ## Objective
-Provide creators with one workspace for account access, performance KPIs, a seven-day trend chart, platform comparison, and top-performing content. Current analytics are seeded demo records; social-platform OAuth/API ingestion is Milestone 2 work.
+This document describes the Milestone 1 foundation: account access, dashboard KPIs, trend charts, platform comparison, and top-performing content. Milestone 2 extends it with provider integrations and live content, audience, and growth analytics; see [milestone2-architecture.md](./milestone2-architecture.md) and [MILESTONE2_SETUP.md](./MILESTONE2_SETUP.md) for the current design and setup steps.
 
 ## Architecture
 
@@ -18,7 +18,7 @@ flowchart LR
 - **Backend:** FastAPI REST API, Pydantic request/response validation, password hashing, signed JWT access tokens.
 - **Data layer:** SQLAlchemy models; PostgreSQL is configured for Docker Compose, while SQLite is the local no-setup fallback.
 - **Authorization:** dashboard routes require a valid JWT and the `dashboard:read` + `analytics:read` permissions. Administrator user creation, listing, and role changes require the `administrator` role. Public registration allows `creator`, `agency`, and `marketing_team`; the `administrator` role is not offered on public signup.
-- **Demo scope:** seeded values are not live social-network data. The application must not claim that platform accounts are connected.
+- **Data scope:** seeded values are explicitly labeled demo data. Live data appears only after a provider account is authorized and synced; provider-unavailable metrics remain unavailable.
 
 ## Database entities
 
@@ -61,7 +61,17 @@ The authoritative runtime schema is defined by `backend/app/models.py`. `schema/
 - [x] SQLAlchemy database models and ER diagram.
 - [x] Architecture and workflows written down.
 - [x] Automated API test suite added for auth, protected access, role enforcement, and creator data isolation (execute `pytest` before review).
-- [ ] Real platform OAuth/API integration, advanced audience reporting, and live syncing — **Milestone 2**, per the project plan.
+- Milestone 2 delivery status is tracked separately below; live provider use still requires external credentials, scopes, account eligibility, and approval.
+
+## Milestone 2 acceptance checklist
+
+- [x] Content engagement analytics and audience insight pages with metric-availability metadata.
+- [x] OAuth and provider sync workflows for YouTube, Instagram, Facebook Pages, X, and LinkedIn, with mocked provider tests.
+- [x] Growth and trend endpoints and charts using stored provider observations.
+- [x] Multi-platform account management, ownership checks, encrypted OAuth tokens, and demo/live data separation.
+- [ ] Configure provider applications and verify live OAuth/sync for the accounts available to the operator; this environment-specific step cannot be completed without the provider's credentials and approvals.
+
+See the provider/API boundaries and local verification status in [MILESTONE2_SETUP.md](./MILESTONE2_SETUP.md).
 
 ## Demo accounts (local review only)
 
