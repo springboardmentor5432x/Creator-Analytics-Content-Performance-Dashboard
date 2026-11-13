@@ -154,10 +154,10 @@ export function ContentPerformance({ platform, days }) {
       {currentChartData.length === 0 ? <p className="muted" style={{ padding: 16 }}>No videos published in this date range.</p> : (
         <div className="chart" style={{ height: 210 }}>
           <ResponsiveContainer>
-            <BarChart data={currentChartData} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
+            <BarChart data={currentChartData} margin={{ top: 8, right: 12, left: 8, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="var(--line)" />
               <XAxis dataKey="day" tick={AXIS} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={28} />
-              <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={44} />
+              <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={k} width={50} />
               <Tooltip
                 cursor={{ fill: "rgba(109, 74, 232, 0.08)" }}
                 labelFormatter={(l, p) => {
@@ -297,13 +297,27 @@ export function TopPosts({ posts: parentPosts }) {
               <tr key={p.post_id || p.title}>
                 <td>
                   <div className="post">
-                    {p.thumbnail_url ? (
+                    {p.post_url ? (
+                      <a href={p.post_url} target="_blank" rel="noreferrer" title="Open video on YouTube">
+                        {p.thumbnail_url ? (
+                          <img src={p.thumbnail_url} alt="" className="thumb" style={{ objectFit: "cover", borderRadius: 8, width: 50, height: 38, cursor: "pointer" }} />
+                        ) : (
+                          <span className="thumb" style={{ background: `linear-gradient(135deg, ${p.grad ? p.grad[0] : '#6d4ae8'}, ${p.grad ? p.grad[1] : '#a79af2'})` }} />
+                        )}
+                      </a>
+                    ) : p.thumbnail_url ? (
                       <img src={p.thumbnail_url} alt="" className="thumb" style={{ objectFit: "cover", borderRadius: 8, width: 50, height: 38 }} />
                     ) : (
                       <span className="thumb" style={{ background: `linear-gradient(135deg, ${p.grad ? p.grad[0] : '#6d4ae8'}, ${p.grad ? p.grad[1] : '#a79af2'})` }} />
                     )}
                     <span>
-                      <strong title={p.title}>{p.title}</strong>
+                      {p.post_url ? (
+                        <a href={p.post_url} target="_blank" rel="noreferrer" style={{ color: "inherit", textDecoration: "none" }} title="Open video on YouTube">
+                          <strong title={p.title} style={{ color: "var(--violet)", cursor: "pointer" }}>{p.title} ↗</strong>
+                        </a>
+                      ) : (
+                        <strong title={p.title}>{p.title}</strong>
+                      )}
                       <small>{p.content_type || p.type || "Video"}</small>
                     </span>
                   </div>

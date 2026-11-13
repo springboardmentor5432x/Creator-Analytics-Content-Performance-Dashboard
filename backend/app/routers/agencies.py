@@ -86,13 +86,14 @@ def get_agency_overview(user: User = Depends(require_roles(AGENCY)), db: Session
     creators_list = []
 
     for c in creators:
-        c_followers = sum(a.followers for a in c.social_accounts)
-        c_views = sum(a.total_views for a in c.social_accounts)
+        c_followers = sum(a.followers for a in c.social_accounts if a.is_active)
+        c_views = sum(a.total_views for a in c.social_accounts if a.is_active)
         total_followers += c_followers
         total_views += c_views
 
-        main_plat = c.social_accounts[0].platform.capitalize() if c.social_accounts else "YouTube"
-        for a in c.social_accounts:
+        active_accounts = [a for a in c.social_accounts if a.is_active]
+        main_plat = active_accounts[0].platform.capitalize() if active_accounts else "YouTube"
+        for a in active_accounts:
             p = (a.platform or "other").capitalize()
             platform_counts[p] = platform_counts.get(p, 0) + a.followers
 

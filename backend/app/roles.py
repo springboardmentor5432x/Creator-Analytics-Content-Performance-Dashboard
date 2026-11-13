@@ -12,5 +12,5 @@ ROLE_LABELS = {
 }
 ALL_ROLES = tuple(ROLE_LABELS)
 
-# Roles a person may pick at signup (all 4 roles as required by specification)
-SIGNUP_ROLES = (CREATOR, AGENCY, MARKETING_TEAM, ADMIN)
+# Roles a person may pick at signup (creator and agency for public registration)
+SIGNUP_ROLES = (CREATOR, AGENCY)
