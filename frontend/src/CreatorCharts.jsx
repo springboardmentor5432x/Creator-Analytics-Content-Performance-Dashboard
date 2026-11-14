@@ -1,5 +1,5 @@
 ﻿
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -9,419 +9,617 @@ import {
   PieChart,
   Pie,
   Cell,
-  CartesianGrid,
   XAxis,
   YAxis,
+  CartesianGrid,
   Tooltip,
   Legend,
 } from "recharts";
 import "./CreatorCharts.css";
 
-const COLORS = ["#635bff", "#20b8a6", "#f59e0b", "#ec4899"];
+const API_URL = "http://127.0.0.1:8000";
 
-const OPTIONS = [
-  { label: "Last 7 Days", value: "7" },
-  { label: "Last 30 Days", value: "30" },
-  { label: "Last 90 Days", value: "90" },
-  { label: "This Year", value: "year" },
+const PLATFORM_COLORS = [
+  "#625bff",
+  "#16a085",
+  "#f59e0b",
+  "#ec4899",
+  "#06b6d4",
 ];
 
-const BASE = {
-  followers: 5200,
-  engagement: 6.8,
-  views: 27300,
-  posts: 48,
-  likes: 3740,
-  comments: 1280,
-  shares: 890,
-};
+const formatNumber = (value) =>
+  Number(value ?? 0).toLocaleString("en-IN");
 
-const platforms = [
-  { name: "YouTube", color: "#ff0000" },
-  { name: "Instagram", color: "#e1308a" },
-  { name: "TikTok", color: "#111827" },
-  { name: "LinkedIn", color: "#0a66c2" },
-];
+const formatPercent = (value) =>
+  `${Number(value ?? 0).toFixed(2)}%`;
 
-const posts = [
-  {
-    title: "Summer Fashion Reel",
-    platform: "Instagram",
-    views: 8400,
-    likes: 1240,
-    engagement: "8.4%",
-  },
-  {
-    title: "Creator Tips Video",
-    platform: "YouTube",
-    views: 6100,
-    likes: 820,
-    engagement: "6.2%",
-  },
-  {
-    title: "Daily Lifestyle Short",
-    platform: "TikTok",
-    views: 9400,
-    likes: 1680,
-    engagement: "9.1%",
-  },
-];
+function MetricCard({ title, value, subtitle, icon }) {
+  return (
+    <div className="creator-metric-card">
+      <div className="creator-metric-top">
+        <span className="creator-metric-title">{title}</span>
+        <span className="creator-metric-icon">{icon}</span>
+      </div>
 
-const PlatformIcon = ({ platform }) => {
-  const icons = {
-    Instagram: ["◎", "instagram"],
-    YouTube: ["▶", "youtube"],
-    TikTok: ["♪", "tiktok"],
-    Facebook: ["f", "facebook"],
-    LinkedIn: ["in", "linkedin"],
+      <div className="creator-metric-value">{value}</div>
+
+      {subtitle && (
+        <div className="creator-metric-subtitle">{subtitle}</div>
+      )}
+    </div>
+  );
+}
+
+/*
+ * Supports audience data in either format:
+ * 1. { date, platform, followers }
+ * 2. { date, Instagram, TikTok, YouTube }
+ */
+function normalizeAudienceGrowth(rows) {
+  const grouped = {};
+
+  rows.forEach((item) => {
+    const date = String(
+      item.date ??
+        item.snapshot_date ??
+        item.snapshotDate ??
+        ""
+    ).slice(0, 10);
+
+    if (!date) return;
+
+    if (!grouped[date]) {
+      grouped[date] = {
+        date,
+        Instagram: null,
+        TikTok: null,
+        YouTube: null,
+      };
+    }
+
+    ["Instagram", "TikTok", "YouTube"].forEach((name) => {
+      if (item[name] != null) {
+        grouped[date][name] = Number(item[name]);
+      }
+    });
+
+    const platform = String(item.platform ?? "")
+      .trim()
+      .toLowerCase();
+
+    const followers =
+      item.followers ?? item.total_followers;
+
+    if (followers == null) return;
+
+    if (platform.includes("instagram")) {
+      grouped[date].Instagram = Number(followers);
+    } else if (platform.includes("tiktok")) {
+      grouped[date].TikTok = Number(followers);
+    } else if (platform.includes("youtube")) {
+      grouped[date].YouTube = Number(followers);
+    }
+  });
+
+  return Object.values(grouped).sort((a, b) =>
+    a.date.localeCompare(b.date)
+  );
+}
+
+export default function CreatorCharts({ days = 7 }) {
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [demoMessage, setDemoMessage] = useState("");
+
+  const selectedDays =
+    String(days).toLowerCase() === "year"
+      ? "year"
+      : String(days);
+
+  const loadAnalytics = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const token = localStorage.getItem("access_token");
+
+      if (!token) {
+        throw new Error(
+          "Please log in again to view analytics."
+        );
+      }
+
+      const response = await fetch(
+        `${API_URL}/analytics/creator?days=${encodeURIComponent(
+          selectedDays
+        )}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+          cache: "no-store",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail || "Failed to load creator analytics."
+        );
+      }
+
+      setAnalytics(data);
+    } catch (err) {
+      setError(err.message || "Unable to load analytics.");
+      setAnalytics(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedDays]);
+
+  useEffect(() => {
+    loadAnalytics();
+  }, [loadAnalytics]);
+
+  const handleGenerateDemoData = async () => {
+    setDemoLoading(true);
+    setError("");
+    setDemoMessage("");
+
+    try {
+      const token = localStorage.getItem("access_token");
+
+      if (!token) {
+        throw new Error("Please log in again.");
+      }
+
+      const response = await fetch(
+        `${API_URL}/analytics/demo-data/extend`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail || "Failed to generate demo data."
+        );
+      }
+
+      setDemoMessage(
+        `${data.message || "Demo data generated."} ${
+          data.posts_added ?? 0
+        } posts and ${
+          data.snapshots_added ?? 0
+        } audience snapshots added.`
+      );
+
+      await loadAnalytics();
+    } catch (err) {
+      setError(
+        err.message || "Unable to generate demo data."
+      );
+    } finally {
+      setDemoLoading(false);
+    }
   };
 
-  const [symbol, className] = icons[platform] || ["●", "default"];
+  if (loading && !analytics) {
+    return (
+      <div className="creator-analytics-status">
+        <div className="creator-spinner" />
+        <p>Loading creator analytics...</p>
+      </div>
+    );
+  }
 
-  return (
-    <span className={`platform-icon ${className}`} title={platform}>
-      {symbol}
-    </span>
+  if (error && !analytics) {
+    return (
+      <div className="creator-analytics-error">
+        <h3>Unable to load analytics</h3>
+        <p>{error}</p>
+        <button type="button" onClick={loadAnalytics}>
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  const summary = analytics?.summary || {};
+  const dailyTrend = analytics?.daily_trend || [];
+  const platformBreakdown =
+    analytics?.platform_breakdown || [];
+
+  const audienceGrowth = normalizeAudienceGrowth(
+    analytics?.audience_growth || []
   );
-};
 
-const fmt = (value) => Math.round(value).toLocaleString("en-US");
+  const topPosts = analytics?.top_posts || [];
 
-const compact = (value) =>
-  value >= 1000000
-    ? `${(value / 1000000).toFixed(1)}M`
-    : value >= 1000
-      ? `${(value / 1000).toFixed(1)}K`
-      : fmt(value);
+  const totalViews =
+    summary.total_views ?? summary.views ?? 0;
 
-function getDays(value) {
-  if (value === "year") {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 1);
-    return Math.floor((now - start) / 86400000) + 1;
-  }
+  const totalLikes =
+    summary.total_likes ?? summary.likes ?? 0;
 
-  return Number(value);
-}
+  const totalComments =
+    summary.total_comments ?? summary.comments ?? 0;
 
-function makeDailyData(days) {
-  const count = Math.min(days, 30);
-  const today = new Date();
-  const result = [];
+  const totalShares =
+    summary.total_shares ?? summary.shares ?? 0;
 
-  for (let i = count - 1; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
+  const engagementRate =
+    summary.engagement_rate ?? summary.engagement ?? 0;
 
-    const index = count - 1 - i;
-    const multiplier =
-      0.55 + (index / Math.max(count - 1, 1)) * 0.9;
+  const totalFollowers =
+    summary.total_followers ?? summary.followers ?? 0;
 
-    result.push({
-      date: date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
-      YouTube: Math.round(1200 * multiplier),
-      Instagram: Math.round(1800 * multiplier),
-      LinkedIn: Math.round(650 * multiplier),
-      TikTok: Math.round(950 * multiplier),
-      views: Math.round((2200 + (index % 7) * 1100) * multiplier),
+  /*
+   * Select the most recent snapshot separately for each
+   * platform. This avoids incorrectly using one date row
+   * that may not contain all three platforms.
+   */
+  const latestByPlatform = {
+    Instagram: null,
+    YouTube: null,
+    TikTok: null,
+  };
+
+  audienceGrowth.forEach((row) => {
+    ["Instagram", "YouTube", "TikTok"].forEach((platform) => {
+      const value = row[platform];
+
+      if (value == null || !Number.isFinite(Number(value))) {
+        return;
+      }
+
+      const previous = latestByPlatform[platform];
+
+      if (!previous || row.date > previous.date) {
+        latestByPlatform[platform] = {
+          date: row.date,
+          followers: Number(value),
+        };
+      }
     });
-  }
+  });
 
-  return result;
-}
-
-export default function CreatorCharts({ range = "7" }) {
-  const [selectedPlatform, setSelectedPlatform] = useState("All Platforms");
-
-  const days = getDays(range);
-  const multiplier = days / 30;
-
-  const selectedLabel =
-    OPTIONS.find((option) => option.value === range)?.label ||
-    "Last 7 Days";
-
-  const dailyData = useMemo(() => makeDailyData(days), [days]);
-
-  const visiblePlatforms =
-    selectedPlatform === "All Platforms"
-      ? platforms
-      : platforms.filter((platform) => platform.name === selectedPlatform);
-
-  const metrics = [
+  const audienceByPlatform = [
     {
-      label: "Total Followers",
-      value: compact(BASE.followers * (0.8 + multiplier * 0.2)),
-      icon: "👥",
-      note: `For ${range === "year" ? "this year" : `last ${days} days`}`,
+      platform: "Instagram",
+      followers: latestByPlatform.Instagram?.followers ?? 0,
     },
     {
-      label: "Engagement Rate",
-      value: `${(
-        BASE.engagement *
-        (0.85 + multiplier * 0.15)
-      ).toFixed(1)}%`,
-      icon: "💜",
-      note: `For ${range === "year" ? "this year" : `last ${days} days`}`,
+      platform: "YouTube",
+      followers: latestByPlatform.YouTube?.followers ?? 0,
     },
     {
-      label: "Total Views",
-      value: compact(BASE.views * multiplier),
-      icon: "👁️",
-      note: `For ${range === "year" ? "this year" : `last ${days} days`}`,
-    },
-    {
-      label: "Published Posts",
-      value: fmt(BASE.posts * multiplier),
-      icon: "📝",
-      note: "Published content",
-    },
-    {
-      label: "Total Likes",
-      value: compact(BASE.likes * multiplier),
-      icon: "❤️",
-      note: "Content likes",
-    },
-    {
-      label: "Total Comments",
-      value: compact(BASE.comments * multiplier),
-      icon: "💬",
-      note: "Content comments",
-    },
-    {
-      label: "Total Shares",
-      value: compact(BASE.shares * multiplier),
-      icon: "🔁",
-      note: "Content shares",
+      platform: "TikTok",
+      followers: latestByPlatform.TikTok?.followers ?? 0,
     },
   ];
-
-  const engagementData = [
-    { type: "Likes", count: Math.round(BASE.likes * multiplier) },
-    { type: "Comments", count: Math.round(BASE.comments * multiplier) },
-    { type: "Shares", count: Math.round(BASE.shares * multiplier) },
-    { type: "Saves", count: Math.round(1640 * multiplier) },
-  ];
-
-  const audienceData = [
-    { name: "Instagram", value: 40 },
-    { name: "YouTube", value: 25 },
-    { name: "TikTok", value: 25 },
-    { name: "LinkedIn", value: 10 },
-  ];
-
-  const contentData = dailyData.map((item) => ({
-    day: item.date,
-    views: item.views,
-  }));
-
-  const tablePosts = posts.map((post) => ({
-    ...post,
-    views: Math.round(post.views * multiplier),
-    likes: Math.round(post.likes * multiplier),
-  }));
 
   return (
     <section className="creator-analytics">
-      <div className="analytics-heading">
+      {/* HEADER */}
+      <div className="creator-analytics-header">
         <div>
-          <h2>Creator Overview</h2>
-          <p>Understand your audience and content performance.</p>
+          <h2>Creator Analytics</h2>
+          <p>
+            Track your content performance and audience growth.
+          </p>
+
+          {analytics?.start_date && analytics?.end_date && (
+            <small className="creator-date-label">
+              {analytics.start_date} – {analytics.end_date}
+            </small>
+          )}
+        </div>
+
+        <div className="creator-analytics-actions">
+          <button
+            type="button"
+            className="creator-secondary-button"
+            onClick={loadAnalytics}
+            disabled={loading}
+          >
+            {loading ? "Refreshing..." : "Refresh"}
+          </button>
+
+          <button
+            type="button"
+            className="creator-primary-button"
+            onClick={handleGenerateDemoData}
+            disabled={demoLoading}
+          >
+            {demoLoading
+              ? "Generating..."
+              : "Generate Historical Demo Data"}
+          </button>
         </div>
       </div>
 
-      {/* Metric cards */}
-      <div className="creator-metrics">
-        {metrics.map((metric) => (
-          <article className="metric-card" key={metric.label}>
-            <span className="metric-label">
-              <span aria-hidden="true">{metric.icon}</span>{" "}
-              {metric.label}
-            </span>
-            <h3>{metric.value}</h3>
-            <p>{metric.note}</p>
-          </article>
-        ))}
+      {error && (
+        <div className="creator-inline-error" role="alert">
+          {error}
+        </div>
+      )}
+
+      {demoMessage && (
+        <div className="creator-inline-success" role="status">
+          {demoMessage}
+        </div>
+      )}
+
+      {analytics?.sample_data && (
+        <div className="creator-demo-notice">
+          You are viewing generated demo metrics, not live
+          social media data.
+        </div>
+      )}
+
+      {/* METRIC CARDS */}
+      <div className="creator-metrics-grid">
+        <MetricCard
+          title="Total Views"
+          value={formatNumber(totalViews)}
+          subtitle="Views in selected period"
+          icon="👁️"
+        />
+
+        <MetricCard
+          title="Total Likes"
+          value={formatNumber(totalLikes)}
+          subtitle="Likes in selected period"
+          icon="❤️"
+        />
+
+        <MetricCard
+          title="Comments"
+          value={formatNumber(totalComments)}
+          subtitle="Comments in selected period"
+          icon="💬"
+        />
+
+        <MetricCard
+          title="Shares"
+          value={formatNumber(totalShares)}
+          subtitle="Shares in selected period"
+          icon="🔁"
+        />
+
+        <MetricCard
+          title="Engagement Rate"
+          value={formatPercent(engagementRate)}
+          subtitle="Engagement performance"
+          icon="📈"
+        />
+
+        <MetricCard
+          title="Total Followers"
+          value={formatNumber(totalFollowers)}
+          subtitle="Audience snapshot"
+          icon="👥"
+        />
       </div>
 
-      <div className="creator-chart-grid">
-        {/* Follower Growth */}
-        <article className="chart-card">
-          <div className="creator-chart-heading creator-chart-heading-with-filters">
-            <div className="creator-chart-title">
-              <h3>Follower Growth</h3>
-              <p>Audience growth over time · {selectedLabel}</p>
-            </div>
-
-            <div
-              className="creator-platform-filters creator-platform-filters-inline"
-              role="group"
-              aria-label="Filter follower growth by platform"
-            >
-              {["All Platforms", "YouTube", "Instagram", "TikTok", "LinkedIn"].map(
-                (platform) => (
-                  <button
-                    key={platform}
-                    type="button"
-                    className={`creator-platform-filter ${
-                      selectedPlatform === platform ? "active" : ""
-                    }`}
-                    onClick={() => setSelectedPlatform(platform)}
-                    aria-pressed={selectedPlatform === platform}
-                  >
-                    {platform !== "All Platforms" && (
-                      <span
-                        className="creator-platform-dot"
-                        style={{
-                          backgroundColor:
-                            platforms.find((item) => item.name === platform)?.color,
-                        }}
-                      />
-                    )}
-                    {platform}
-                  </button>
-                )
-              )}
-            </div>
+      {/* DASHBOARD CHARTS: TWO COLUMNS */}
+      <div className="creator-charts-grid">
+        {/* TOP LEFT: CONTENT PERFORMANCE */}
+        <div className="creator-chart-card">
+          <div className="creator-chart-heading">
+            <h3>Content Performance</h3>
+            <p>Views, likes, and comments over time</p>
           </div>
 
-          <div className="chart-area">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dailyData}>
+          {dailyTrend.length === 0 ? (
+            <p className="creator-empty-state">
+              No content trend data is available for this period.
+            </p>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart
+                data={dailyTrend}
+                margin={{
+                  top: 10,
+                  right: 15,
+                  left: 0,
+                  bottom: 5,
+                }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" interval="preserveStartEnd" />
-                <YAxis tickFormatter={compact} />
-                <Tooltip formatter={(value) => fmt(value)} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip />
                 <Legend />
 
-                {visiblePlatforms.map((platform) => (
-                  <Line
-                    key={platform.name}
-                    type="monotone"
-                    dataKey={platform.name}
-                    stroke={platform.color}
-                    strokeWidth={3}
-                    dot={false}
-                    activeDot={{ r: 5 }}
-                  />
-                ))}
+                <Line
+                  type="monotone"
+                  dataKey="views"
+                  name="Views"
+                  stroke="#625bff"
+                  strokeWidth={3}
+                  dot={false}
+                />
+
+                <Line
+                  type="monotone"
+                  dataKey="likes"
+                  name="Likes"
+                  stroke="#16a085"
+                  strokeWidth={2}
+                  dot={false}
+                />
+
+                <Line
+                  type="monotone"
+                  dataKey="comments"
+                  name="Comments"
+                  stroke="#f59e0b"
+                  strokeWidth={2}
+                  dot={false}
+                />
               </LineChart>
             </ResponsiveContainer>
-          </div>
-        </article>
+          )}
+        </div>
 
-        {/* Content Performance */}
-        <article className="chart-card">
-          <h3>Content Performance</h3>
-          <p>Views · {selectedLabel}</p>
-          <div className="chart-area">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={contentData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" interval="preserveStartEnd" />
-                <YAxis tickFormatter={compact} />
-                <Tooltip formatter={(value) => [fmt(value), "Views"]} />
-                <Bar
-                  dataKey="views"
-                  fill="#20b8a6"
-                  radius={[6, 6, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+        {/* TOP RIGHT: VIEWS BY PLATFORM */}
+        <div className="creator-chart-card">
+          <div className="creator-chart-heading">
+            <h3>Views by Platform</h3>
+            <p>Compare content views across platforms</p>
           </div>
-        </article>
 
-        {/* Audience by Platform */}
-        <article className="chart-card">
-          <h3>Audience by Platform</h3>
-          <p>Audience distribution</p>
-          <div className="chart-area">
-            <ResponsiveContainer width="100%" height="100%">
+          {platformBreakdown.length === 0 ? (
+            <p className="creator-empty-state">
+              No platform data is available for this period.
+            </p>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie
-                  data={audienceData}
-                  dataKey="value"
-                  nameKey="name"
+                  data={platformBreakdown}
+                  dataKey="views"
+                  nameKey="platform"
                   cx="50%"
-                  cy="50%"
-                  outerRadius={95}
-                  label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
+                  cy="48%"
+                  outerRadius={85}
+                  label={({ name, value }) =>
+                    `${name}: ${formatNumber(value)}`
                   }
                 >
-                  {audienceData.map((entry, index) => (
+                  {platformBreakdown.map((item, index) => (
                     <Cell
-                      key={entry.name}
-                      fill={COLORS[index % COLORS.length]}
+                      key={`${item.platform}-${index}`}
+                      fill={
+                        PLATFORM_COLORS[
+                          index % PLATFORM_COLORS.length
+                        ]
+                      }
                     />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => `${value}%`} />
+
+                <Tooltip
+                  formatter={(value) => formatNumber(value)}
+                />
+
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-          </div>
-        </article>
+          )}
+        </div>
 
-        {/* Engagement Breakdown */}
-        <article className="chart-card">
-          <h3>Engagement Breakdown</h3>
-          <p>Interactions · {selectedLabel}</p>
-          <div className="chart-area">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={engagementData}>
+        {/* BOTTOM LEFT: AUDIENCE BY PLATFORM */}
+        <div className="creator-chart-card">
+          <div className="creator-chart-heading">
+            <h3>Audience by Platform</h3>
+            <p>Latest available follower count per platform</p>
+          </div>
+
+          {audienceGrowth.length === 0 ? (
+            <p className="creator-empty-state">
+              No audience growth data is available for this period.
+            </p>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart
+                key={selectedDays}
+                data={audienceByPlatform}
+                margin={{
+                  top: 15,
+                  right: 15,
+                  left: 10,
+                  bottom: 5,
+                }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="type" />
-                <YAxis tickFormatter={compact} />
-                <Tooltip formatter={(value) => fmt(value)} />
+
+                <XAxis
+                  dataKey="platform"
+                  tick={{ fontSize: 11 }}
+                />
+
+                <YAxis
+                  domain={[0, "auto"]}
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={formatNumber}
+                />
+
+                <Tooltip
+                  formatter={(value) => [
+                    formatNumber(value),
+                    "Followers",
+                  ]}
+                />
+
                 <Bar
-                  dataKey="count"
-                  fill="#f59e0b"
-                  radius={[6, 6, 0, 0]}
+                  dataKey="followers"
+                  name="Followers"
+                  fill="#625bff"
+                  radius={[5, 5, 0, 0]}
+                  isAnimationActive={false}
                 />
               </BarChart>
             </ResponsiveContainer>
-          </div>
-        </article>
-      </div>
-
-      {/* Recent Content */}
-      <article className="chart-card recent-content">
-        <h3>Recent Content Performance</h3>
-        <p>Performance values for {selectedLabel}</p>
-
-        <div className="content-table-wrap">
-          <table className="content-table">
-            <thead>
-              <tr>
-                <th>Content</th>
-                <th>Platform</th>
-                <th>Views</th>
-                <th>Likes</th>
-                <th>Engagement</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tablePosts.map((post) => (
-                <tr key={post.title}>
-                  <td>{post.title}</td>
-                  <td>
-                    <div className="platform-cell">
-                      <PlatformIcon platform={post.platform} />
-                      <span>{post.platform}</span>
-                    </div>
-                  </td>
-                  <td>{fmt(post.views)}</td>
-                  <td>{fmt(post.likes)}</td>
-                  <td>{post.engagement}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          )}
         </div>
-      </article>
+
+        {/* BOTTOM RIGHT: TOP-PERFORMING CONTENT */}
+        <div className="creator-chart-card">
+          <div className="creator-chart-heading">
+            <h3>Top-Performing Content</h3>
+            <p>Posts ranked by views</p>
+          </div>
+
+          {topPosts.length === 0 ? (
+            <p className="creator-empty-state">
+              No posts are available for this period.
+            </p>
+          ) : (
+            <div className="creator-table-wrapper">
+              <table className="creator-posts-table">
+                <thead>
+                  <tr>
+                    <th>Post</th>
+                    <th>Platform</th>
+                    <th>Views</th>
+                    <th>Likes</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {topPosts.map((post, index) => (
+                    <tr
+                      key={post.id ?? `${post.title}-${index}`}
+                    >
+                      <td>{post.title || "Untitled Post"}</td>
+                      <td>{post.platform || "—"}</td>
+                      <td>{formatNumber(post.views)}</td>
+                      <td>{formatNumber(post.likes)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
     </section>
   );
 }

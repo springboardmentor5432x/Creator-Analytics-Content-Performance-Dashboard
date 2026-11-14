@@ -149,9 +149,14 @@ export default function Dashboard() {
   }
 
   const creatorCharts = (
-    <CreatorCharts range={creatorDateRange} />
-  );
-
+  <CreatorCharts
+    days={
+      creatorDateRange === "year"
+        ? "year"
+        : Number(creatorDateRange)
+    }
+  />
+);
   return (
     <div className="ciq-layout">
       {/* LEFT SIDEBAR */}
