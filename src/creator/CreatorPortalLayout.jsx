@@ -19,6 +19,7 @@ import CreatorAnalyticsView from "./views/CreatorAnalyticsView";
 import CreatorProfileView from "./views/CreatorProfileView";
 import CreatorSettingsView from "./views/CreatorSettingsView";
 import NotificationBell from "../marketing/components/NotificationBell";
+import AnnouncementBanner from "../components/AnnouncementBanner";
 import {
   getCreatorInvitations,
   getCreatorDeliverables,
@@ -160,6 +161,9 @@ export default function CreatorPortalLayout({
           </div>
         </header>
 
+        {/* Platform Announcement Banner */}
+        <AnnouncementBanner userRole="Creator" />
+
         {/* Scrollable Main Views Area */}
         <main style={styles.contentArea}>
           {activeTab === "dashboard" && (
@@ -224,11 +228,17 @@ export default function CreatorPortalLayout({
               userProfile={currentProfile}
               theme={theme}
               onNavigate={(tab) => setActiveTab(tab)}
+              invitations={invitations}
             />
           )}
 
           {activeTab === "analytics" && (
-            <CreatorAnalyticsView theme={theme} />
+            <CreatorAnalyticsView
+              theme={theme}
+              user={user}
+              userProfile={currentProfile}
+              invitations={invitations}
+            />
           )}
 
           {activeTab === "profile" && (

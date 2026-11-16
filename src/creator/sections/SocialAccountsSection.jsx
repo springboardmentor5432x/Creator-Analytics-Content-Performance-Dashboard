@@ -6,24 +6,18 @@ import {
   AlertCircle,
   ExternalLink,
   ShieldCheck,
-  Plus,
   Video,
-  Image,
-  Briefcase,
   Layers,
   Lock,
-  TrendingUp,
   X,
 } from "lucide-react";
-import { SOCIAL_CHANNELS } from "../mockData";
 
-export default function SocialAccountsSection({ initialAccounts }) {
-  const [accounts, setAccounts] = useState(initialAccounts || SOCIAL_CHANNELS);
-  const [syncingId, setSyncingId] = useState(null);
+export default function SocialAccountsSection({
+  connectedYouTubeChannel = null,
+  isYouTubeConnected = false,
+}) {
+  const [selectedModalPlatform, setSelectedModalPlatform] = useState(null);
   const [feedbackToast, setFeedbackToast] = useState(null);
-  const [showConnectModal, setShowConnectModal] = useState(false);
-  const [newPlatform, setNewPlatform] = useState("Twitter / X");
-  const [newHandle, setNewHandle] = useState("");
 
   const showToast = (msg) => {
     setFeedbackToast(msg);
@@ -32,52 +26,88 @@ export default function SocialAccountsSection({ initialAccounts }) {
     }, 3000);
   };
 
-  const handleSyncAccount = (id, name) => {
-    setSyncingId(id);
-    setTimeout(() => {
-      setSyncingId(null);
-      setAccounts((prev) =>
-        prev.map((acc) =>
-          acc.id === id ? { ...acc, lastSynced: "Just now" } : acc
-        )
-      );
-      showToast(`Successfully refreshed live metrics for ${name}!`);
-    }, 900);
-  };
-
-  const handleAddChannel = (e) => {
-    e.preventDefault();
-    if (!newHandle.trim()) return;
-
-    const newChannelObj = {
-      id: `acc-${Date.now()}`,
-      platform: newPlatform,
-      handle: newHandle.startsWith("@") ? newHandle : `@${newHandle}`,
-      badgeColor: "#0284c7",
-      badgeBg: "#e0f2fe",
-      followers: "12,400",
-      followersCount: 12400,
-      reach: "38,500",
-      reachCount: 38500,
-      engagement: "5.8%",
-      revenue: "$450",
-      growth: "+8.0%",
-      status: "OAuth Verified",
-      healthScore: 94,
-      primaryFormat: "Feed Posts & Threads",
-      syncStatus: "Connected & Live",
-      lastSynced: "Just now",
-    };
-
-    setAccounts([newChannelObj, ...accounts]);
-    setNewHandle("");
-    setShowConnectModal(false);
-    showToast(`Connected ${newPlatform} account ${newChannelObj.handle}!`);
-  };
+  const platforms = [
+    {
+      id: "youtube",
+      platform: "YouTube",
+      handle: isYouTubeConnected && connectedYouTubeChannel
+        ? connectedYouTubeChannel.customUrl || `@${connectedYouTubeChannel.title?.replace(/\s+/g, "")}`
+        : "Not connected",
+      badgeColor: "#dc2626",
+      badgeBg: "#fee2e2",
+      followers: isYouTubeConnected && connectedYouTubeChannel
+        ? Number(connectedYouTubeChannel.subscriberCount || 0).toLocaleString()
+        : "—",
+      followersLabel: "Subscribers",
+      reach: isYouTubeConnected && connectedYouTubeChannel
+        ? Number(connectedYouTubeChannel.viewCount || 0).toLocaleString()
+        : "—",
+      reachLabel: "Channel Views",
+      uploads: isYouTubeConnected && connectedYouTubeChannel
+        ? `${connectedYouTubeChannel.videoCount || 0} videos`
+        : "—",
+      status: isYouTubeConnected ? "OAuth 2.0 Verified" : "Not Connected",
+      syncStatus: isYouTubeConnected ? "Connected & Live" : "Available",
+      isConnected: isYouTubeConnected,
+      primaryFormat: "Longform & Shorts",
+      actionText: isYouTubeConnected ? "Live Connected" : "Connect via Google OAuth",
+    },
+    {
+      id: "instagram",
+      platform: "Instagram",
+      handle: "Not connected",
+      badgeColor: "#e1306c",
+      badgeBg: "#fce7f3",
+      followers: "—",
+      followersLabel: "Followers",
+      reach: "—",
+      reachLabel: "Impressions",
+      uploads: "—",
+      status: "Not Connected",
+      syncStatus: "Available",
+      isConnected: false,
+      primaryFormat: "Reels & Carousels",
+      actionText: "Connect Account",
+    },
+    {
+      id: "tiktok",
+      platform: "TikTok",
+      handle: "Not connected",
+      badgeColor: "#0f172a",
+      badgeBg: "#f1f5f9",
+      followers: "—",
+      followersLabel: "Followers",
+      reach: "—",
+      reachLabel: "Video Views",
+      uploads: "—",
+      status: "Not Connected",
+      syncStatus: "Available",
+      isConnected: false,
+      primaryFormat: "Shortform Video",
+      actionText: "Connect Account",
+    },
+    {
+      id: "twitch",
+      platform: "Twitch",
+      handle: "Not connected",
+      badgeColor: "#9333ea",
+      badgeBg: "#f3e8ff",
+      followers: "—",
+      followersLabel: "Followers",
+      reach: "—",
+      reachLabel: "Stream Hours",
+      uploads: "—",
+      status: "Not Connected",
+      syncStatus: "Available",
+      isConnected: false,
+      primaryFormat: "Livestreams",
+      actionText: "Connect Account",
+    },
+  ];
 
   return (
     <div style={styles.card}>
-      {/* Toast */}
+      {/* Toast Feedback */}
       {feedbackToast && (
         <div style={styles.toast}>
           <CheckCircle2 size={16} color="#15803d" />
@@ -86,180 +116,117 @@ export default function SocialAccountsSection({ initialAccounts }) {
       )}
 
       {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.headerLeft}>
-          <div style={styles.iconBadge}>
-            <Share2 size={20} color="#2563eb" />
+      <div style={styles.cardHeader}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <h3 style={styles.title}>Social Media Channel Integrations</h3>
+            <span style={styles.activePill}>
+              {isYouTubeConnected ? "1 Connected Channel" : "0 Channels Connected"}
+            </span>
           </div>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <h3 style={styles.title}>Multi-Channel Analytics & Accounts</h3>
-              <span style={styles.activePill}>{accounts.length} Connected</span>
-            </div>
-            <p style={styles.subtitle}>
-              Manage synced social networks, data ingestion status, and health scores
-            </p>
-          </div>
+          <p style={styles.subtitle}>
+            Authorized social platforms streaming verified real-time audience metrics and engagement data
+          </p>
         </div>
-
-        <button
-          onClick={() => setShowConnectModal(true)}
-          style={styles.connectBtn}
-        >
-          <Plus size={15} style={{ marginRight: 6 }} />
-          Connect Social Channel
-        </button>
       </div>
 
-      {/* Channel Grid */}
+      {/* Accounts Grid */}
       <div style={styles.grid}>
-        {accounts.map((acc) => {
-          const isSyncing = syncingId === acc.id;
-          return (
-            <div key={acc.id} style={styles.channelCard}>
-              <div style={styles.channelTop}>
-                <div style={styles.channelIdentity}>
-                  <span
-                    style={{
-                      ...styles.platformBadge,
-                      backgroundColor: acc.badgeBg,
-                      color: acc.badgeColor,
-                    }}
-                  >
-                    {acc.platform}
-                  </span>
-                  <span style={styles.handleText}>{acc.handle}</span>
-                </div>
-
-                <button
-                  onClick={() => handleSyncAccount(acc.id, acc.platform)}
-                  disabled={isSyncing}
-                  style={styles.syncBtn}
-                  title="Force re-sync platform metrics"
+        {platforms.map((acc) => (
+          <div
+            key={acc.id}
+            style={{
+              ...styles.accountCard,
+              borderColor: acc.isConnected ? "#bfdbfe" : "#e2e8f0",
+              backgroundColor: acc.isConnected ? "#ffffff" : "#f8fafc",
+            }}
+          >
+            <div style={styles.accountTop}>
+              <div style={styles.platformBadgeWrap}>
+                <span
+                  style={{
+                    ...styles.platformBadge,
+                    backgroundColor: acc.badgeBg,
+                    color: acc.badgeColor,
+                  }}
                 >
-                  <RefreshCw
-                    size={14}
-                    style={{
-                      animation: isSyncing ? "spin 0.8s linear infinite" : "none",
-                    }}
-                    color="#64748b"
-                  />
-                  <span>{isSyncing ? "Syncing..." : "Sync"}</span>
-                </button>
+                  {acc.platform}
+                </span>
+                <span style={styles.handleText}>{acc.handle}</span>
               </div>
 
-              {/* Stats Box */}
-              <div style={styles.metricsBox}>
-                <div style={styles.metricItem}>
-                  <span style={styles.metricLabel}>Followers / Subs</span>
-                  <span style={styles.metricVal}>{acc.followers}</span>
-                </div>
-                <div style={styles.metricItem}>
-                  <span style={styles.metricLabel}>Avg 30D Reach</span>
-                  <span style={styles.metricVal}>{acc.reach}</span>
-                </div>
-                <div style={styles.metricItem}>
-                  <span style={styles.metricLabel}>Engagement</span>
-                  <span style={{ ...styles.metricVal, color: "#15803d" }}>
-                    {acc.engagement}
-                  </span>
-                </div>
-                <div style={styles.metricItem}>
-                  <span style={styles.metricLabel}>Revenue</span>
-                  <span style={styles.metricVal}>{acc.revenue}</span>
-                </div>
+              {acc.isConnected ? (
+                <span style={styles.connectedBadge}>
+                  <ShieldCheck size={12} style={{ marginRight: 4 }} />
+                  Live API
+                </span>
+              ) : (
+                <span style={styles.notConnectedBadge}>Not Connected</span>
+              )}
+            </div>
+
+            {/* Metrics Row */}
+            <div style={styles.metricsRow}>
+              <div style={styles.metricItem}>
+                <span style={styles.metricLabel}>{acc.followersLabel}</span>
+                <span style={styles.metricVal}>{acc.followers}</span>
               </div>
 
-              {/* Health Score & Sync Meta */}
-              <div style={styles.channelFooter}>
-                <div style={styles.healthWrap}>
-                  <span style={styles.healthLabel}>API Health:</span>
-                  <div style={styles.healthBarTrack}>
-                    <div
-                      style={{
-                        ...styles.healthBarFill,
-                        width: `${acc.healthScore}%`,
-                      }}
-                    />
-                  </div>
-                  <span style={styles.healthVal}>{acc.healthScore}%</span>
-                </div>
+              <div style={styles.metricItem}>
+                <span style={styles.metricLabel}>{acc.reachLabel}</span>
+                <span style={styles.metricVal}>{acc.reach}</span>
+              </div>
 
-                <div style={styles.syncMeta}>
-                  <span style={styles.syncedDot}></span>
-                  <span>Synced {acc.lastSynced}</span>
-                </div>
+              <div style={styles.metricItem}>
+                <span style={styles.metricLabel}>Content</span>
+                <span style={styles.metricVal}>{acc.uploads}</span>
               </div>
             </div>
-          );
-        })}
+
+            {/* Action Bar */}
+            <div style={styles.cardFooter}>
+              {acc.isConnected ? (
+                <div style={styles.syncStatusWrap}>
+                  <span style={styles.liveDot} />
+                  <span style={styles.syncStatusText}>OAuth 2.0 Live Synced</span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setSelectedModalPlatform(acc.platform)}
+                  style={styles.connectBtn}
+                >
+                  {acc.actionText}
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Connect Modal */}
-      {showConnectModal && (
+      {/* Connect Info Modal */}
+      {selectedModalPlatform && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalCard}>
             <div style={styles.modalHeader}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Share2 size={18} color="#2563eb" />
-                <h4 style={styles.modalTitle}>Connect New Social Network</h4>
-              </div>
+              <h4 style={styles.modalTitle}>Connect {selectedModalPlatform}</h4>
               <button
-                onClick={() => setShowConnectModal(false)}
+                onClick={() => setSelectedModalPlatform(null)}
                 style={styles.closeBtn}
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
-
-            <form onSubmit={handleAddChannel} style={styles.modalForm}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Platform</label>
-                <select
-                  value={newPlatform}
-                  onChange={(e) => setNewPlatform(e.target.value)}
-                  style={styles.select}
-                >
-                  <option value="Twitter / X">Twitter / X</option>
-                  <option value="LinkedIn Creator">LinkedIn Creator</option>
-                  <option value="Substack Newsletter">Substack Newsletter</option>
-                  <option value="Discord Community">Discord Community</option>
-                  <option value="Spotify Podcast">Spotify Podcast</option>
-                </select>
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Creator Handle / Username</label>
-                <input
-                  type="text"
-                  placeholder="@yourhandle"
-                  value={newHandle}
-                  onChange={(e) => setNewHandle(e.target.value)}
-                  required
-                  style={styles.input}
-                />
-              </div>
-
-              <div style={styles.modalInfoNotice}>
-                <ShieldCheck size={16} color="#15803d" />
-                <span>
-                  Uses read-only OAuth 2.0 telemetry with encryption. No posting permissions required.
-                </span>
-              </div>
-
-              <div style={styles.modalActions}>
-                <button
-                  type="button"
-                  onClick={() => setShowConnectModal(false)}
-                  style={styles.cancelBtn}
-                >
-                  Cancel
-                </button>
-                <button type="submit" style={styles.submitBtn}>
-                  Verify & Authorize
-                </button>
-              </div>
-            </form>
+            <p style={styles.modalDesc}>
+              {selectedModalPlatform === "YouTube"
+                ? "YouTube integration is fully active via Google OAuth 2.0. Use the 'Connect YouTube' card at the top of the Analytics page to authenticate your channel."
+                : `Official ${selectedModalPlatform} OAuth API integration is currently in rollout. YouTube is currently our live, verified platform integration with Google Cloud.`}
+            </p>
+            <button
+              onClick={() => setSelectedModalPlatform(null)}
+              style={styles.modalPrimaryBtn}
+            >
+              Understood
+            </button>
           </div>
         </div>
       )}
@@ -270,21 +237,162 @@ export default function SocialAccountsSection({ initialAccounts }) {
 const styles = {
   card: {
     backgroundColor: "#ffffff",
-    borderRadius: "14px",
     border: "1px solid #e2e8f0",
+    borderRadius: "14px",
     padding: "24px",
-    boxShadow: "0 2px 10px rgba(15, 23, 42, 0.04)",
-    marginBottom: "24px",
+    boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
     position: "relative",
+  },
+  cardHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
+  },
+  title: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: "#0f172a",
+    margin: 0,
+  },
+  subtitle: {
+    fontSize: "12.5px",
+    color: "#64748b",
+    marginTop: "4px",
+    marginBottom: 0,
+  },
+  activePill: {
+    backgroundColor: "#eff6ff",
+    color: "#2563eb",
+    border: "1px solid #bfdbfe",
+    fontSize: "11px",
+    fontWeight: "700",
+    padding: "2px 8px",
+    borderRadius: "6px",
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gap: "16px",
+  },
+  accountCard: {
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    padding: "16px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    transition: "border-color 0.15s ease",
+  },
+  accountTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: "14px",
+  },
+  platformBadgeWrap: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  platformBadge: {
+    display: "inline-block",
+    fontSize: "11px",
+    fontWeight: "700",
+    padding: "2px 8px",
+    borderRadius: "6px",
+    width: "fit-content",
+  },
+  handleText: {
+    fontSize: "12px",
+    color: "#475569",
+    fontWeight: "600",
+  },
+  connectedBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    fontSize: "11px",
+    fontWeight: "700",
+    color: "#15803d",
+    backgroundColor: "#f0fdf4",
+    border: "1px solid #bbf7d0",
+    padding: "2px 8px",
+    borderRadius: "6px",
+  },
+  notConnectedBadge: {
+    fontSize: "10.5px",
+    fontWeight: "600",
+    color: "#94a3b8",
+    backgroundColor: "#f1f5f9",
+    padding: "2px 6px",
+    borderRadius: "4px",
+  },
+  metricsRow: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "8px",
+    padding: "10px 0",
+    borderTop: "1px solid #f1f5f9",
+    borderBottom: "1px solid #f1f5f9",
+    marginBottom: "14px",
+  },
+  metricItem: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  metricLabel: {
+    fontSize: "10.5px",
+    color: "#94a3b8",
+    fontWeight: "600",
+  },
+  metricVal: {
+    fontSize: "13px",
+    fontWeight: "700",
+    color: "#0f172a",
+    marginTop: "2px",
+  },
+  cardFooter: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  syncStatusWrap: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  liveDot: {
+    width: "6px",
+    height: "6px",
+    borderRadius: "50%",
+    backgroundColor: "#15803d",
+  },
+  syncStatusText: {
+    fontSize: "11.5px",
+    color: "#15803d",
+    fontWeight: "600",
+  },
+  connectBtn: {
+    padding: "6px 12px",
+    borderRadius: "6px",
+    border: "1px solid #cbd5e1",
+    backgroundColor: "#ffffff",
+    color: "#475569",
+    fontSize: "11.5px",
+    fontWeight: "600",
+    cursor: "pointer",
+    width: "100%",
+    textAlign: "center",
+    transition: "background 0.15s",
   },
   toast: {
     position: "absolute",
     top: "16px",
-    right: "24px",
-    backgroundColor: "#f0fdf4",
+    right: "16px",
+    backgroundColor: "#ffffff",
     border: "1px solid #bbf7d0",
     color: "#15803d",
-    fontSize: "12.5px",
+    fontSize: "12px",
     fontWeight: "600",
     padding: "8px 14px",
     borderRadius: "8px",
@@ -292,285 +400,60 @@ const styles = {
     alignItems: "center",
     gap: "8px",
     boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-    zIndex: 10,
-    animation: "fadeIn 0.2s ease",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: "14px",
-    marginBottom: "20px",
-  },
-  headerLeft: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-  iconBadge: {
-    width: "40px",
-    height: "40px",
-    borderRadius: "10px",
-    backgroundColor: "#eff6ff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: "16px",
-    fontWeight: "700",
-    color: "#0f172a",
-  },
-  activePill: {
-    fontSize: "11px",
-    fontWeight: "700",
-    color: "#2563eb",
-    backgroundColor: "#eff6ff",
-    padding: "2px 8px",
-    borderRadius: "6px",
-    border: "1px solid #bfdbfe",
-  },
-  subtitle: {
-    fontSize: "12px",
-    color: "#64748b",
-    marginTop: "2px",
-  },
-  connectBtn: {
-    backgroundColor: "#2563eb",
-    color: "#ffffff",
-    border: "none",
-    padding: "8px 16px",
-    borderRadius: "8px",
-    fontSize: "12.5px",
-    fontWeight: "600",
-    display: "flex",
-    alignItems: "center",
-    cursor: "pointer",
-    transition: "background-color 0.15s ease",
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-    gap: "16px",
-  },
-  channelCard: {
-    backgroundColor: "#f8fafc",
-    borderRadius: "10px",
-    border: "1px solid #e2e8f0",
-    padding: "16px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "14px",
-    transition: "box-shadow 0.15s ease",
-  },
-  channelTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  channelIdentity: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-  },
-  platformBadge: {
-    fontSize: "11px",
-    fontWeight: "700",
-    padding: "3px 8px",
-    borderRadius: "6px",
-  },
-  handleText: {
-    fontSize: "13.5px",
-    fontWeight: "700",
-    color: "#0f172a",
-  },
-  syncBtn: {
-    backgroundColor: "#ffffff",
-    border: "1px solid #e2e8f0",
-    borderRadius: "6px",
-    padding: "4px 8px",
-    fontSize: "11.5px",
-    color: "#475569",
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-    cursor: "pointer",
-    transition: "all 0.15s ease",
-  },
-  metricsBox: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "8px",
-    backgroundColor: "#ffffff",
-    padding: "10px",
-    borderRadius: "8px",
-    border: "1px solid #edf2f7",
-  },
-  metricItem: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "2px",
-  },
-  metricLabel: {
-    fontSize: "10.5px",
-    fontWeight: "600",
-    color: "#64748b",
-  },
-  metricVal: {
-    fontSize: "13px",
-    fontWeight: "700",
-    color: "#0f172a",
-  },
-  channelFooter: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    fontSize: "11.5px",
-    color: "#64748b",
-    paddingTop: "4px",
-  },
-  healthWrap: {
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
-  },
-  healthLabel: {
-    fontSize: "11px",
-    color: "#64748b",
-  },
-  healthBarTrack: {
-    width: "45px",
-    height: "5px",
-    backgroundColor: "#e2e8f0",
-    borderRadius: "3px",
-    overflow: "hidden",
-  },
-  healthBarFill: {
-    height: "100%",
-    backgroundColor: "#15803d",
-    borderRadius: "3px",
-  },
-  healthVal: {
-    fontSize: "11px",
-    fontWeight: "700",
-    color: "#15803d",
-  },
-  syncMeta: {
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
-    fontSize: "11px",
-  },
-  syncedDot: {
-    width: "6px",
-    height: "6px",
-    borderRadius: "50%",
-    backgroundColor: "#22c55e",
   },
   modalOverlay: {
     position: "fixed",
     top: 0,
     left: 0,
-    width: "100vw",
-    height: "100vh",
-    backgroundColor: "rgba(15, 23, 42, 0.5)",
-    backdropFilter: "blur(4px)",
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(15, 23, 42, 0.45)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 100,
+    zIndex: 9999,
   },
   modalCard: {
     backgroundColor: "#ffffff",
     borderRadius: "14px",
-    width: "100%",
-    maxWidth: "440px",
     padding: "24px",
+    width: "90%",
+    maxWidth: "420px",
     boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)",
   },
   modalHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "16px",
+    marginBottom: "12px",
   },
   modalTitle: {
     fontSize: "16px",
     fontWeight: "700",
     color: "#0f172a",
+    margin: 0,
   },
   closeBtn: {
-    background: "transparent",
+    background: "none",
     border: "none",
     cursor: "pointer",
     color: "#64748b",
   },
-  modalForm: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "14px",
-  },
-  formGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "6px",
-  },
-  label: {
-    fontSize: "12px",
-    fontWeight: "600",
-    color: "#334155",
-  },
-  select: {
-    padding: "9px 12px",
-    borderRadius: "8px",
-    border: "1px solid #cbd5e1",
+  modalDesc: {
     fontSize: "13px",
-    backgroundColor: "#ffffff",
-    color: "#0f172a",
+    color: "#475569",
+    lineHeight: "1.5",
+    marginBottom: "20px",
   },
-  input: {
-    padding: "9px 12px",
-    borderRadius: "8px",
-    border: "1px solid #cbd5e1",
-    fontSize: "13px",
-  },
-  modalInfoNotice: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "8px",
-    backgroundColor: "#f0fdf4",
+  modalPrimaryBtn: {
+    width: "100%",
     padding: "10px",
     borderRadius: "8px",
-    border: "1px solid #bbf7d0",
-    fontSize: "11.5px",
-    color: "#166534",
-    lineHeight: "1.4",
-  },
-  modalActions: {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: "10px",
-    marginTop: "8px",
-  },
-  cancelBtn: {
-    padding: "8px 14px",
-    fontSize: "12.5px",
-    fontWeight: "600",
-    backgroundColor: "#f1f5f9",
-    color: "#475569",
     border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-  },
-  submitBtn: {
-    padding: "8px 16px",
-    fontSize: "12.5px",
-    fontWeight: "600",
-    backgroundColor: "#2563eb",
+    backgroundColor: "#0f172a",
     color: "#ffffff",
-    border: "none",
-    borderRadius: "6px",
+    fontSize: "13px",
+    fontWeight: "600",
     cursor: "pointer",
   },
 };

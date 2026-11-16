@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, limit } from "firebase/firestore";
-import { db } from "./firebase";
+import { db } from "./firebase.js";
 import { Sparkles, Building2, TrendingUp, ShieldCheck } from "lucide-react";
 
 export const ROLE_CONFIGS = [
@@ -89,11 +89,32 @@ export const DEFAULT_DEMO_ACCOUNTS = {
     provider: "email",
     status: "active",
     createdAt: "2026-01-10T08:00:00.000Z",
+    bio: "Full-service creator representation, high-tier contract negotiation, and enterprise SaaS brand sponsorships.",
+    niches: ["Tech & Software Engineering", "Developer Productivity", "Gaming"],
+    location: "San Francisco, CA & New York, NY",
     metrics: {
       totalReach: "18.4M",
       engagementRate: "7.8%",
       contentScore: 94,
       activeCampaigns: 24,
+    },
+  },
+  "arunannadurai2011@gmail.com": {
+    uid: "usr_agency_arunannadurai",
+    email: "arunannadurai2011@gmail.com",
+    fullName: "Arun Annadurai",
+    role: "Agency",
+    provider: "email",
+    status: "active",
+    createdAt: "2026-02-01T08:00:00.000Z",
+    bio: "Full-service talent representation, creator brand sponsorships, and multi-platform campaign management.",
+    niches: ["Tech & Software Engineering", "Creator Growth", "Digital Media"],
+    location: "Global",
+    metrics: {
+      totalReach: "4.5M",
+      engagementRate: "6.8%",
+      contentScore: 92,
+      activeCampaigns: 6,
     },
   },
   "marketing@creatoriq.io": {
@@ -129,6 +150,14 @@ export const DEFAULT_DEMO_ACCOUNTS = {
 };
 
 const LOCAL_STORAGE_KEY = "creatoriq_registered_users";
+const MOCK_AGENCIES_TO_PRUNE = [
+  "caa.digital@creatoriq.io",
+  "night.talent@creatoriq.io",
+  "uta.creators@creatoriq.io",
+  "viralnation@creatoriq.io",
+  "range.creators@creatoriq.io",
+  "apex.management@creatoriq.io",
+];
 
 export function initLocalRegistry() {
   try {
@@ -136,9 +165,18 @@ export function initLocalRegistry() {
     if (!existing) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(DEFAULT_DEMO_ACCOUNTS));
     } else {
-      // Ensure default accounts are present
       const parsed = JSON.parse(existing);
       let updated = false;
+
+      // Clean out removed mock agencies from previous runs
+      MOCK_AGENCIES_TO_PRUNE.forEach((k) => {
+        if (parsed[k]) {
+          delete parsed[k];
+          updated = true;
+        }
+      });
+
+      // Ensure default accounts are present
       for (const [key, val] of Object.entries(DEFAULT_DEMO_ACCOUNTS)) {
         if (!parsed[key]) {
           parsed[key] = val;
@@ -158,7 +196,13 @@ export function getLocalRegisteredUsers() {
   try {
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (data) {
-      return JSON.parse(data);
+      const parsed = JSON.parse(data);
+      // Ensure mock agencies are not returned
+      MOCK_AGENCIES_TO_PRUNE.forEach((k) => delete parsed[k]);
+      return {
+        ...DEFAULT_DEMO_ACCOUNTS,
+        ...parsed,
+      };
     }
   } catch (err) {
     console.warn("Error reading local registry:", err);
@@ -235,7 +279,11 @@ export function getRoleMetrics(role) {
  */
 export async function registerUserProfile(userObj, assignedRole, isGoogle = false) {
   const normalizedEmail = (userObj.email || "").trim().toLowerCase();
-  const resolvedRole = assignedRole || "Creator";
+  let resolvedRole = assignedRole || "Creator";
+  if (resolvedRole === "Admin" && normalizedEmail !== "admin@creatoriq.io") {
+    console.warn(`[Security Alert] Denied attempt to register as Admin for email: ${normalizedEmail}. Defaulting to Creator role.`);
+    resolvedRole = "Creator";
+  }
   const resolvedName =
     userObj.displayName ||
     userObj.fullName ||
@@ -330,8 +378,29 @@ export async function verifyUserEmailAndRole(email, expectedRole = null, uid = n
           email: emailData.email || normalizedEmail,
           role: emailData.role,
           provider: emailData.provider || "email",
-          status: "active",
+          status: emailData.status || "active",
+          statusReason: emailData.statusReason || null,
         };
+
+        // If UID exists, inspect main user doc for latest status
+        if (emailData.uid) {
+          try {
+            const uDoc = await getDoc(doc(db, "users", emailData.uid));
+            if (uDoc.exists()) {
+              const uData = uDoc.data();
+              foundProfile = {
+                ...foundProfile,
+                ...uData,
+                uid: emailData.uid,
+                role: uData.role || foundProfile.role,
+                status: uData.status || foundProfile.status || "active",
+                statusReason: uData.statusReason || foundProfile.statusReason || null,
+              };
+            }
+          } catch (uErr) {
+            // fallback gracefully
+          }
+        }
       }
     } catch (err) {
       console.warn("Tier 2 email check warning:", err);

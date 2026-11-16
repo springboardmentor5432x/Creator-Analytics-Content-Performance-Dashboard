@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { ROLE_CONFIGS, registerUserProfile } from "./authService";
 
+const PUBLIC_SIGNUP_ROLES = ROLE_CONFIGS.filter((r) => r.id !== "Admin");
+
 export default function SignUp({
   onSwitchToLogin,
   onDemoSignUp,
@@ -35,7 +37,8 @@ export default function SignUp({
   selectedRole = "Creator",
   onSelectRole,
 }) {
-  const [role, setRole] = useState(selectedRole);
+  const initialRole = selectedRole === "Admin" ? "Creator" : selectedRole;
+  const [role, setRole] = useState(initialRole);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -81,6 +84,11 @@ export default function SignUp({
     e.preventDefault();
     setError("");
     setSuccessMessage("");
+
+    if (role === "Admin") {
+      setError("Administrator accounts cannot be self-registered. Please contact system support.");
+      return;
+    }
 
     if (!fullName.trim()) {
       setError("Please enter your full name.");
@@ -348,7 +356,7 @@ export default function SignUp({
             </div>
 
             <div style={styles.roleTabsGrid}>
-              {ROLE_CONFIGS.map((r) => {
+              {PUBLIC_SIGNUP_ROLES.map((r) => {
                 const IconComponent = r.icon;
                 const isActive = role === r.id;
                 return (

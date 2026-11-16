@@ -11,6 +11,7 @@ import DeliverableFormModal from "./components/DeliverableFormModal";
 import MarketingAnalytics from "./components/MarketingAnalytics";
 import MarketingReports from "./components/MarketingReports";
 import MarketingAgencies from "./components/MarketingAgencies";
+import AnnouncementBanner from "../components/AnnouncementBanner";
 import {
   getLocalCampaigns,
   getLocalInvitations,
@@ -276,6 +277,9 @@ export default function MarketingSection({ user, userProfile, theme }) {
 
   return (
     <div style={styles.container}>
+      {/* Platform Announcement Banner */}
+      <AnnouncementBanner userRole="Marketing Team" />
+
       {/* 7-Section Navigation Header */}
       <MarketingNav
         activeSection={activeSection}
@@ -386,6 +390,7 @@ export default function MarketingSection({ user, userProfile, theme }) {
               onSendInvitation={handleSendInvitation}
               preselectedCampaign={selectedCampaign}
               theme={theme}
+              currentUser={userProfile || user}
             />
           )}
 

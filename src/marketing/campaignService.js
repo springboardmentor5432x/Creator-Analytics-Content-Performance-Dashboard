@@ -4,8 +4,8 @@ import {
   updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { db } from "../firebase";
-import { getLocalRegisteredUsers } from "../authService";
+import { db } from "../firebase.js";
+import { getLocalRegisteredUsers } from "../authService.js";
 
 // Local storage cache keys
 const STORAGE_KEYS = {
@@ -26,11 +26,13 @@ export function emitDataChange(entityType, payload) {
       detail: { entityType, payload, timestamp: Date.now() },
     });
     EVENT_BUS.dispatchEvent(event);
-    window.dispatchEvent(
-      new CustomEvent(NOTIFY_UPDATE_EVENT, {
-        detail: { entityType, payload, timestamp: Date.now() },
-      })
-    );
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent(NOTIFY_UPDATE_EVENT, {
+          detail: { entityType, payload, timestamp: Date.now() },
+        })
+      );
+    }
   } catch (e) {
     console.warn("Event bus dispatch note:", e);
   }

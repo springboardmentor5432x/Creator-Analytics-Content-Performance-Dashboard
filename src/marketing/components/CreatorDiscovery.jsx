@@ -8,8 +8,10 @@ import {
   X,
   RefreshCw,
   UserX,
+  Flag,
 } from "lucide-react";
 import { fetchRegisteredCreators } from "../firestoreService";
+import ReportModal from "../../components/ReportModal";
 
 export default function CreatorDiscovery({
   campaigns = [],
@@ -17,8 +19,10 @@ export default function CreatorDiscovery({
   onSendInvitation,
   preselectedCampaign = null,
   theme,
+  currentUser,
 }) {
   const accent = theme?.accent || "#0284c7";
+  const [reportingCreator, setReportingCreator] = useState(null);
 
   // Async creator data state
   const [creators, setCreators] = useState([]);
@@ -393,19 +397,37 @@ export default function CreatorDiscovery({
                 {/* Action Button */}
                 <div style={styles.cardActionRow}>
                   <span style={styles.registeredBadge}>✓ Registered</span>
-                  <button
-                    onClick={() => handleOpenInvite(creator)}
-                    disabled={campaigns.length === 0}
-                    title={campaigns.length === 0 ? "Create a campaign first" : ""}
-                    style={{
-                      ...styles.inviteBtn,
-                      backgroundColor: campaigns.length === 0 ? "#94a3b8" : accent,
-                      cursor: campaigns.length === 0 ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    <Send size={13} style={{ marginRight: 6 }} />
-                    Invite to Campaign
-                  </button>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <button
+                      onClick={() => setReportingCreator(creator)}
+                      title="Report suspicious or impersonating account"
+                      style={{
+                        padding: "6px 10px",
+                        borderRadius: "6px",
+                        border: "1px solid #e2e8f0",
+                        backgroundColor: "#ffffff",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Flag size={12} color="#94a3b8" />
+                    </button>
+                    <button
+                      onClick={() => handleOpenInvite(creator)}
+                      disabled={campaigns.length === 0}
+                      title={campaigns.length === 0 ? "Create a campaign first" : ""}
+                      style={{
+                        ...styles.inviteBtn,
+                        backgroundColor: campaigns.length === 0 ? "#94a3b8" : accent,
+                        cursor: campaigns.length === 0 ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <Send size={13} style={{ marginRight: 6 }} />
+                      Invite to Campaign
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -518,6 +540,16 @@ export default function CreatorDiscovery({
           </div>
         </div>
       )}
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={Boolean(reportingCreator)}
+        onClose={() => setReportingCreator(null)}
+        targetType="user"
+        targetId={reportingCreator?.uid || ""}
+        targetTitle={reportingCreator?.fullName || reportingCreator?.email || ""}
+        currentUser={currentUser || { role: "Marketing Team", email: "marketing@creatoriq.io" }}
+      />
     </div>
   );
 }

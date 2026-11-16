@@ -30,7 +30,7 @@ let googleProvider;
 try {
   app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
   auth = getAuth(app);
-  db = getFirestore(app);
+  db = (typeof process !== "undefined" && process.env?.CREATORIQ_TEST_OFFLINE === "1") ? null : getFirestore(app);
   googleProvider = new GoogleAuthProvider();
   googleProvider.setCustomParameters({ prompt: "select_account" });
 } catch (error) {

@@ -18,6 +18,7 @@ import {
 
 export const AGENCY_NAV_ITEMS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "representation", label: "Creator Representation", icon: Users, hasBadge: "requests" },
   { id: "brands", label: "Brand Clients", icon: Building2 },
   { id: "campaigns", label: "Assigned Campaigns", icon: Layers, hasBadge: "campaigns" },
   { id: "roster", label: "Creator Roster", icon: Users },

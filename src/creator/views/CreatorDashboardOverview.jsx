@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   TrendingUp,
   Users,
@@ -9,12 +9,20 @@ import {
   ArrowRight,
   Send,
   CheckSquare,
-  Clock,
-  Calendar,
+  Eye,
+  Video,
+  ExternalLink,
+  RefreshCw,
+  Building2,
+  Handshake,
 } from "lucide-react";
 import InteractiveLineChart from "../components/InteractiveLineChart";
-import RevenueDonutChart from "../components/RevenueDonutChart";
-import AudienceDemographics from "../components/AudienceDemographics";
+import {
+  getYouTubeChannelStatus,
+  getYouTubeAnalytics,
+  onYouTubeConnectionChange,
+} from "../youtubeService";
+import { getAgencyCreatorRelationships } from "../../agency/agencyService";
 
 export default function CreatorDashboardOverview({
   user,
@@ -27,6 +35,8 @@ export default function CreatorDashboardOverview({
 }) {
   const accent = theme?.accent || "#2563eb";
   const accentLight = theme?.accentLight || "#eff6ff";
+
+  const currentUser = userProfile?.uid ? userProfile : user;
 
   const displayName =
     userProfile?.fullName?.trim() ||
@@ -41,6 +51,74 @@ export default function CreatorDashboardOverview({
   const actionRequiredDeliverables = deliverables.filter(
     (d) => d.status === "revision_requested" || d.status === "pending"
   );
+
+  // Real YouTube Data States
+  const [ytChannel, setYtChannel] = useState(null);
+  const [ytSummary, setYtSummary] = useState(null);
+  const [ytTimeSeries, setYtTimeSeries] = useState([]);
+  const [ytTopVideos, setYtTopVideos] = useState([]);
+  const [isYtConnected, setIsYtConnected] = useState(false);
+  const [loadingYt, setLoadingYt] = useState(true);
+
+  // Real Agency Status
+  const [activeAgencyRel, setActiveAgencyRel] = useState(null);
+
+  useEffect(() => {
+    async function loadAgencyStatus() {
+      try {
+        const creatorId = currentUser?.uid || "usr_creator_demo";
+        const creatorEmail = currentUser?.email || "creator@creatoriq.io";
+        const rels = await getAgencyCreatorRelationships({ creatorId, creatorEmail });
+        const active = (rels || []).find((r) => r.status === "active");
+        setActiveAgencyRel(active || null);
+      } catch (err) {
+        console.warn("Agency relationship load note:", err);
+      }
+    }
+    loadAgencyStatus();
+  }, [currentUser]);
+
+  const fetchLiveYouTube = useCallback(async () => {
+    if (!currentUser) return;
+    try {
+      const statusRes = await getYouTubeChannelStatus(currentUser);
+      if (statusRes.connected && statusRes.channel) {
+        setIsYtConnected(true);
+        setYtChannel(statusRes.channel);
+
+        const analyticsRes = await getYouTubeAnalytics(currentUser, "28d");
+        if (analyticsRes.connected) {
+          if (analyticsRes.channel) setYtChannel(analyticsRes.channel);
+          setYtSummary(analyticsRes.summary || null);
+          setYtTimeSeries(analyticsRes.timeSeries || []);
+          setYtTopVideos(analyticsRes.topVideos || []);
+        }
+      } else {
+        setIsYtConnected(false);
+        setYtChannel(null);
+        setYtSummary(null);
+        setYtTimeSeries([]);
+        setYtTopVideos([]);
+      }
+    } catch (err) {
+      console.warn("[CreatorDashboard] YouTube data fetch note:", err.message);
+    } finally {
+      setLoadingYt(false);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    fetchLiveYouTube();
+    const unsubscribe = onYouTubeConnectionChange(() => {
+      fetchLiveYouTube();
+    });
+    return () => unsubscribe();
+  }, [fetchLiveYouTube]);
+
+  const subscriberCount = Number(ytChannel?.subscriberCount) || Number(ytSummary?.subscribers) || 0;
+  const viewCount = Number(ytChannel?.viewCount) || Number(ytSummary?.totalViews) || 0;
+  const videoCount = Number(ytChannel?.videoCount) || Number(ytSummary?.totalVideos) || 0;
+  const engagementRate = ytSummary?.engagementRate || "0.0%";
 
   return (
     <div style={styles.container}>
@@ -78,42 +156,63 @@ export default function CreatorDashboardOverview({
               Role Verified: Creator
             </span>
 
-            <span
-              style={{
-                ...styles.roleBadge,
-                backgroundColor: "#f0fdf4",
-                color: "#15803d",
-                border: "1px solid #bbf7d0",
-              }}
-            >
-              <Database size={12} style={{ marginRight: 4 }} />
-              Firestore Synced
-            </span>
-
-            {isDemoMode && (
+            {isYtConnected ? (
               <span
                 style={{
                   ...styles.roleBadge,
-                  backgroundColor: "#fef3c7",
-                  color: "#b45309",
-                  border: "1px solid #fde68a",
+                  backgroundColor: "#fee2e2",
+                  color: "#dc2626",
+                  border: "1px solid #fecaca",
                 }}
               >
-                Interactive Preview
+                <Video size={12} style={{ marginRight: 4 }} />
+                YouTube API Live: {ytChannel?.title || "Connected"}
+              </span>
+            ) : (
+              <span
+                style={{
+                  ...styles.roleBadge,
+                  backgroundColor: "#f1f5f9",
+                  color: "#64748b",
+                  border: "1px solid #e2e8f0",
+                }}
+              >
+                YouTube: Not Connected
               </span>
             )}
+
+            <button
+              onClick={() => onNavigate && onNavigate("agency")}
+              style={{
+                ...styles.roleBadge,
+                backgroundColor: activeAgencyRel ? "#f0fdfa" : "#f5f3ff",
+                color: activeAgencyRel ? "#0f766e" : "#6d28d9",
+                border: `1px solid ${activeAgencyRel ? "#ccfbf1" : "#ddd6fe"}`,
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                fontWeight: "700",
+              }}
+              title="Agency Collaboration"
+            >
+              <Building2 size={12} style={{ marginRight: 4 }} />
+              {activeAgencyRel ? `Agency: ${activeAgencyRel.agencyName}` : "Agency Collaboration"}
+              <ArrowRight size={11} style={{ marginLeft: 4 }} />
+            </button>
           </div>
 
           <h1 style={styles.heroTitle}>Welcome back, {displayName}!</h1>
           <p style={styles.heroDesc}>
-            Multi-channel growth, verified audience retention & brand sponsorships pipeline.
+            Real-time channel performance, verified audience velocity & active brand partnerships.
           </p>
         </div>
 
         <div style={styles.heroRight}>
           <div style={{ ...styles.verifiedCard, backgroundColor: accentLight, borderColor: "#bfdbfe" }}>
-            <span style={styles.verifiedLabel}>AUTHENTICATED ROLE</span>
-            <span style={{ ...styles.verifiedVal, color: accent }}>Creator</span>
+            <span style={styles.verifiedLabel}>AUTHENTICATED CREATOR</span>
+            <span style={{ ...styles.verifiedVal, color: accent }}>
+              {isYtConnected ? (ytChannel?.title || "Creator") : displayName}
+            </span>
             <span style={styles.verifiedSub}>
               {user?.email || "creator@creatoriq.io"}
             </span>
@@ -168,36 +267,134 @@ export default function CreatorDashboardOverview({
         </div>
       )}
 
-      {/* 4 Core KPI Cards */}
+      {/* Agency Collaboration & Representation Banner */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          backgroundColor: activeAgencyRel ? "#f0fdfa" : "#faf5ff",
+          border: `1px solid ${activeAgencyRel ? "#a7f3d0" : "#e9d5ff"}`,
+          borderRadius: "14px",
+          padding: "16px 22px",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          <div
+            style={{
+              width: "42px",
+              height: "42px",
+              borderRadius: "10px",
+              backgroundColor: activeAgencyRel ? "#ccfbf1" : "#ede9fe",
+              color: activeAgencyRel ? "#0d9488" : "#7c3aed",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            {activeAgencyRel ? <Building2 size={20} /> : <Handshake size={20} />}
+          </div>
+          <div>
+            <div style={{ fontSize: "14px", fontWeight: "700", color: "#0f172a", display: "flex", alignItems: "center", gap: "8px" }}>
+              {activeAgencyRel ? (
+                <>
+                  <span>Represented by {activeAgencyRel.agencyName}</span>
+                  <span style={{ fontSize: "11px", fontWeight: "700", color: "#065f46", backgroundColor: "#d1fae5", padding: "2px 8px", borderRadius: "10px" }}>
+                    Active Agency
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span>Choose an Agency for Collaboration</span>
+                  <span style={{ fontSize: "11px", fontWeight: "700", color: "#6d28d9", backgroundColor: "#ede9fe", padding: "2px 8px", borderRadius: "10px" }}>
+                    Independent Creator
+                  </span>
+                </>
+              )}
+            </div>
+            <div style={{ fontSize: "12.5px", color: "#64748b", marginTop: "2px" }}>
+              {activeAgencyRel
+                ? `Contracted representation via ${activeAgencyRel.agencyEmail}. View agency-assigned brand campaigns & deal terms.`
+                : "Partner with an accredited talent agency on CreatorIQ to secure exclusive brand sponsorships, contract negotiation, and campaign assignments."}
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => onNavigate && onNavigate("agency")}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "9px 16px",
+            borderRadius: "8px",
+            backgroundColor: activeAgencyRel ? "#0d9488" : "#7c3aed",
+            color: "#ffffff",
+            border: "none",
+            fontWeight: "700",
+            fontSize: "13px",
+            cursor: "pointer",
+            flexShrink: 0,
+          }}
+        >
+          {activeAgencyRel ? "Agency Workspace" : "Choose an Agency"}
+          <ArrowRight size={14} />
+        </button>
+      </div>
+
+      {/* 4 Core KPI Cards — 100% Real Time Data */}
       <div style={styles.kpiGrid}>
+        {/* KPI 1: YouTube Subscribers */}
         <div style={styles.kpiCard}>
           <div style={styles.kpiHeader}>
-            <span style={styles.kpiLabel}>Total Audience Reach</span>
-            <div style={{ ...styles.kpiIconBox, backgroundColor: "#eff6ff" }}>
-              <Users size={18} color="#2563eb" />
+            <span style={styles.kpiLabel}>YouTube Subscribers</span>
+            <div style={{ ...styles.kpiIconBox, backgroundColor: "#fee2e2" }}>
+              <Users size={18} color="#dc2626" />
             </div>
           </div>
-          <div style={styles.kpiValue}>1,428,500</div>
-          <div style={styles.kpiTrendPositive}>
-            <TrendingUp size={14} style={{ marginRight: 4 }} />
-            <span>+14.2% subscriber growth this month</span>
+          <div style={styles.kpiValue}>
+            {isYtConnected ? subscriberCount.toLocaleString() : "—"}
+          </div>
+          <div style={isYtConnected ? styles.kpiTrendPositive : styles.kpiTrendNeutral}>
+            {isYtConnected ? (
+              <>
+                <ShieldCheck size={14} style={{ marginRight: 4 }} />
+                <span>Live Google OAuth sync</span>
+              </>
+            ) : (
+              <span
+                style={{ cursor: "pointer", color: accent, textDecoration: "underline" }}
+                onClick={() => onNavigate("analytics")}
+              >
+                Connect YouTube in Analytics →
+              </span>
+            )}
           </div>
         </div>
 
+        {/* KPI 2: Total Channel Views */}
         <div style={styles.kpiCard}>
           <div style={styles.kpiHeader}>
-            <span style={styles.kpiLabel}>Average Engagement Rate</span>
+            <span style={styles.kpiLabel}>Total Channel Views</span>
             <div style={{ ...styles.kpiIconBox, backgroundColor: "#eff6ff" }}>
-              <Sparkles size={18} color="#2563eb" />
+              <Eye size={18} color="#2563eb" />
             </div>
           </div>
-          <div style={styles.kpiValue}>6.42%</div>
-          <div style={styles.kpiTrendPositive}>
-            <TrendingUp size={14} style={{ marginRight: 4 }} />
-            <span>2.1% above creator industry benchmark</span>
+          <div style={styles.kpiValue}>
+            {isYtConnected ? viewCount.toLocaleString() : "—"}
+          </div>
+          <div style={isYtConnected ? styles.kpiTrendPositive : styles.kpiTrendNeutral}>
+            {isYtConnected ? (
+              <span>{videoCount} total uploaded videos</span>
+            ) : (
+              <span>Awaiting channel connection</span>
+            )}
           </div>
         </div>
 
+        {/* KPI 3: Active Brand Campaigns (Strictly dynamic from accepted invitations) */}
         <div style={styles.kpiCard}>
           <div style={styles.kpiHeader}>
             <span style={styles.kpiLabel}>Active Brand Deals</span>
@@ -205,36 +402,226 @@ export default function CreatorDashboardOverview({
               <DollarSign size={18} color="#15803d" />
             </div>
           </div>
-          <div style={styles.kpiValue}>{acceptedInvites.length || 3}</div>
+          <div style={styles.kpiValue}>{acceptedInvites.length}</div>
           <div style={{ ...styles.kpiTrendPositive, color: "#15803d" }}>
-            <span>Contracted partnerships in progress</span>
+            <span>
+              {acceptedInvites.length === 1
+                ? "1 contracted partnership"
+                : `${acceptedInvites.length} contracted partnerships`}
+            </span>
           </div>
         </div>
 
+        {/* KPI 4: Content Deliverables Status (Strictly dynamic from deliverables) */}
         <div style={styles.kpiCard}>
           <div style={styles.kpiHeader}>
-            <span style={styles.kpiLabel}>Content Quality Score</span>
+            <span style={styles.kpiLabel}>Total Deliverables</span>
             <div style={{ ...styles.kpiIconBox, backgroundColor: "#f5f3ff" }}>
-              <Sparkles size={18} color="#7c3aed" />
+              <CheckSquare size={18} color="#7c3aed" />
             </div>
           </div>
-          <div style={styles.kpiValue}>96 / 100</div>
+          <div style={styles.kpiValue}>{deliverables.length}</div>
           <div style={{ ...styles.kpiTrendPositive, color: "#7c3aed" }}>
-            <span>Top 3% percentile in CreatorIQ roster</span>
+            <span>
+              {awaitingReviewDeliverables.length} submitted • {actionRequiredDeliverables.length} pending
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Main Interactive Chart */}
-      <InteractiveLineChart themeColor={accent} />
+      {/* Main Interactive Velocity Chart — Real YouTube API Telemetry */}
+      <InteractiveLineChart
+        themeColor={accent}
+        liveTimeSeries={ytTimeSeries}
+        isLiveConnected={isYtConnected}
+        channelTitle={ytChannel?.title}
+      />
 
-      {/* 2-Column Summary Cards */}
+      {/* Real YouTube Channel Overview & Recent Uploads (Replacing fake mock cards) */}
       <div style={styles.twoColGrid}>
-        <RevenueDonutChart />
-        <AudienceDemographics />
+        {/* Left Card: Connected YouTube Channel Profile */}
+        <div style={styles.sectionCard}>
+          <div style={styles.sectionHeader}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ ...styles.sectionIconWrap, backgroundColor: "#fee2e2" }}>
+                <Video size={16} color="#dc2626" />
+              </div>
+              <div>
+                <h3 style={styles.sectionTitle}>Connected YouTube Channel</h3>
+                <p style={styles.sectionSubtitle}>
+                  {isYtConnected
+                    ? "Official Google Data API v3 live telemetry"
+                    : "No social channel currently linked"}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => onNavigate("analytics")}
+              style={{ ...styles.sectionLinkBtn, color: accent }}
+            >
+              {isYtConnected ? "Channel Settings →" : "Connect Channel →"}
+            </button>
+          </div>
+
+          {isYtConnected && ytChannel ? (
+            <div style={styles.ytChannelContent}>
+              <div style={styles.ytChannelHead}>
+                {ytChannel.thumbnail ? (
+                  <img src={ytChannel.thumbnail} alt={ytChannel.title} style={styles.ytAvatar} />
+                ) : (
+                  <div style={styles.ytAvatarPlaceholder}>
+                    {ytChannel.title?.charAt(0) || "Y"}
+                  </div>
+                )}
+                <div>
+                  <h4 style={styles.ytChannelName}>{ytChannel.title}</h4>
+                  <span style={styles.ytChannelHandle}>
+                    {ytChannel.customUrl || `@${ytChannel.title?.replace(/\s+/g, "")}`}
+                  </span>
+                  <div style={styles.liveTagRow}>
+                    <span style={styles.liveTagBadge}>
+                      <ShieldCheck size={11} style={{ marginRight: 3 }} />
+                      OAuth 2.0 Live
+                    </span>
+                    {ytChannel.lastSynced && (
+                      <span style={styles.lastSyncText}>
+                        Synced: {new Date(ytChannel.lastSynced).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 3-Stat Mini Bar */}
+              <div style={styles.miniStatsBar}>
+                <div style={styles.miniStat}>
+                  <span style={styles.miniStatLabel}>Subscribers</span>
+                  <span style={styles.miniStatVal}>{subscriberCount.toLocaleString()}</span>
+                </div>
+                <div style={styles.miniStat}>
+                  <span style={styles.miniStatLabel}>Views</span>
+                  <span style={styles.miniStatVal}>{viewCount.toLocaleString()}</span>
+                </div>
+                <div style={styles.miniStat}>
+                  <span style={styles.miniStatLabel}>Videos</span>
+                  <span style={styles.miniStatVal}>{videoCount.toLocaleString()}</span>
+                </div>
+                <div style={styles.miniStat}>
+                  <span style={styles.miniStatLabel}>Engagement</span>
+                  <span style={styles.miniStatVal}>{engagementRate}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={styles.emptyCardBox}>
+              <Video size={28} color="#94a3b8" />
+              <p style={styles.emptyCardText}>No YouTube channel connected.</p>
+              <button
+                onClick={() => onNavigate("analytics")}
+                style={{ ...styles.smallBtn, backgroundColor: accent }}
+              >
+                Connect YouTube Channel
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Right Card: Recent YouTube Uploads */}
+        <div style={styles.sectionCard}>
+          <div style={styles.sectionHeader}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ ...styles.sectionIconWrap, backgroundColor: "#eff6ff" }}>
+                <Eye size={16} color="#2563eb" />
+              </div>
+              <div>
+                <h3 style={styles.sectionTitle}>Recent YouTube Uploads</h3>
+                <p style={styles.sectionSubtitle}>
+                  {ytTopVideos.length} recent public videos tracked
+                </p>
+              </div>
+            </div>
+
+            {ytTopVideos.length > 0 && (
+              <button
+                onClick={() => onNavigate("analytics")}
+                style={{ ...styles.sectionLinkBtn, color: accent }}
+              >
+                View Analytics →
+              </button>
+            )}
+          </div>
+
+          {ytTopVideos.length > 0 ? (
+            <div style={styles.miniList}>
+              {ytTopVideos.slice(0, 3).map((v) => (
+                <div key={v.id} style={styles.miniItem}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    {v.thumbnail && (
+                      <img
+                        src={v.thumbnail}
+                        alt={v.title}
+                        style={{
+                          width: "48px",
+                          height: "32px",
+                          borderRadius: "4px",
+                          objectFit: "cover",
+                        }}
+                      />
+                    )}
+                    <div>
+                      {v.url ? (
+                        <a
+                          href={v.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            ...styles.miniItemTitle,
+                            textDecoration: "none",
+                            color: "#0f172a",
+                            display: "inline-block",
+                            maxWidth: "240px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {v.title}
+                          <ExternalLink size={10} style={{ marginLeft: 4, display: "inline" }} />
+                        </a>
+                      ) : (
+                        <span style={styles.miniItemTitle}>{v.title}</span>
+                      )}
+                      <span style={styles.miniItemBrand}>
+                        {Number(v.views || 0).toLocaleString()} views • {v.publishedDate || "Recent"}
+                      </span>
+                    </div>
+                  </div>
+                  <span style={styles.engagementMiniBadge}>
+                    {v.engagement || "0.0%"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={styles.emptyCardBox}>
+              <Video size={28} color="#94a3b8" />
+              <p style={styles.emptyCardText}>
+                {isYtConnected
+                  ? "No video uploads found on connected channel."
+                  : "Connect YouTube to view real-time uploads."}
+              </p>
+              <span style={{ fontSize: "11.5px", color: "#94a3b8" }}>
+                {isYtConnected
+                  ? "Publish content to YouTube to stream real-time view counts."
+                  : "Syncs directly with Google YouTube Data API v3."}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Quick Summary Section: Invitations & Deliverables previews */}
+      {/* Dynamic Campaign Invitations & Deliverables Sections */}
       <div style={styles.twoColGrid}>
         {/* Recent Invitations Card */}
         <div style={styles.sectionCard}>
@@ -399,63 +786,63 @@ const styles = {
   },
   pillRow: {
     display: "flex",
-    alignItems: "center",
     gap: "8px",
     flexWrap: "wrap",
-    marginBottom: "10px",
+    marginBottom: "12px",
   },
   roleBadge: {
     display: "inline-flex",
     alignItems: "center",
-    padding: "3px 9px",
-    borderRadius: "20px",
     fontSize: "11px",
-    fontWeight: "600",
+    fontWeight: "700",
+    padding: "3px 10px",
+    borderRadius: "6px",
   },
   heroTitle: {
     fontSize: "22px",
     fontWeight: "800",
     color: "#0f172a",
-    letterSpacing: "-0.4px",
+    margin: "0 0 6px 0",
   },
   heroDesc: {
     fontSize: "13px",
     color: "#64748b",
-    marginTop: "4px",
+    margin: 0,
+    maxWidth: "540px",
+    lineHeight: "1.4",
   },
   heroRight: {
-    textAlign: "right",
+    display: "flex",
+    alignItems: "center",
   },
   verifiedCard: {
-    padding: "10px 16px",
+    padding: "12px 18px",
     borderRadius: "10px",
     border: "1px solid",
-    display: "inline-block",
-    textAlign: "left",
+    display: "flex",
+    flexDirection: "column",
+    textAlign: "right",
   },
   verifiedLabel: {
     fontSize: "10px",
-    fontWeight: "700",
     color: "#64748b",
-    textTransform: "uppercase",
+    fontWeight: "700",
     letterSpacing: "0.5px",
-    display: "block",
   },
   verifiedVal: {
     fontSize: "16px",
     fontWeight: "800",
-    display: "block",
+    marginTop: "2px",
   },
   verifiedSub: {
     fontSize: "11px",
     color: "#64748b",
-    display: "block",
   },
   actionAlertBanner: {
     backgroundColor: "#fffbeb",
-    border: "1px solid #fde68a",
-    borderRadius: "12px",
-    padding: "14px 18px",
+    border: "1px solid #fef3c7",
+    borderRadius: "10px",
+    padding: "12px 18px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -466,60 +853,60 @@ const styles = {
     width: "32px",
     height: "32px",
     borderRadius: "8px",
-    backgroundColor: "#ffffff",
-    border: "1px solid #fde68a",
+    backgroundColor: "#fef3c7",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
   alertTitle: {
     fontSize: "13px",
     fontWeight: "700",
     color: "#92400e",
+    marginRight: "4px",
   },
   alertText: {
     fontSize: "13px",
-    color: "#78350f",
+    color: "#b45309",
   },
   alertBtn: {
-    padding: "7px 14px",
-    borderRadius: "8px",
-    color: "#ffffff",
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "6px 12px",
+    borderRadius: "6px",
     border: "none",
+    color: "#ffffff",
     fontSize: "12px",
     fontWeight: "600",
     cursor: "pointer",
-    display: "inline-flex",
-    alignItems: "center",
   },
   kpiGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: "16px",
   },
   kpiCard: {
     backgroundColor: "#ffffff",
-    borderRadius: "12px",
     border: "1px solid #e2e8f0",
-    padding: "18px 20px",
-    boxShadow: "0 1px 3px rgba(15, 23, 42, 0.03)",
+    borderRadius: "12px",
+    padding: "20px",
+    boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
   },
   kpiHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: "10px",
   },
   kpiLabel: {
-    fontSize: "11.5px",
-    fontWeight: "700",
+    fontSize: "12.5px",
     color: "#64748b",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
+    fontWeight: "600",
   },
   kpiIconBox: {
-    width: "36px",
-    height: "36px",
-    borderRadius: "9px",
+    width: "34px",
+    height: "34px",
+    borderRadius: "8px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -528,16 +915,21 @@ const styles = {
     fontSize: "26px",
     fontWeight: "800",
     color: "#0f172a",
-    marginTop: "8px",
-    letterSpacing: "-0.5px",
+    marginBottom: "8px",
   },
   kpiTrendPositive: {
     display: "flex",
     alignItems: "center",
     fontSize: "11.5px",
+    color: "#15803d",
     fontWeight: "600",
-    color: "#16a34a",
-    marginTop: "6px",
+  },
+  kpiTrendNeutral: {
+    display: "flex",
+    alignItems: "center",
+    fontSize: "11.5px",
+    color: "#64748b",
+    fontWeight: "500",
   },
   twoColGrid: {
     display: "grid",
@@ -548,56 +940,192 @@ const styles = {
     backgroundColor: "#ffffff",
     border: "1px solid #e2e8f0",
     borderRadius: "14px",
-    padding: "20px 24px",
-    boxShadow: "0 1px 3px rgba(15, 23, 42, 0.03)",
+    padding: "22px",
+    boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
   },
   sectionHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "16px",
-    flexWrap: "wrap",
-    gap: "10px",
   },
   sectionIconWrap: {
-    width: "32px",
-    height: "32px",
+    width: "34px",
+    height: "34px",
     borderRadius: "8px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
   sectionTitle: {
     fontSize: "15px",
     fontWeight: "700",
     color: "#0f172a",
+    margin: 0,
   },
   sectionSubtitle: {
     fontSize: "12px",
     color: "#64748b",
+    marginTop: "2px",
+    marginBottom: 0,
   },
   sectionLinkBtn: {
     background: "none",
     border: "none",
+    fontSize: "12px",
     fontWeight: "600",
-    fontSize: "12.5px",
     cursor: "pointer",
-    padding: "4px 8px",
   },
-  emptyCardBox: {
-    textAlign: "center",
-    padding: "30px 16px",
+  ytChannelContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "14px",
+  },
+  ytChannelHead: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "12px 14px",
     backgroundColor: "#f8fafc",
     borderRadius: "10px",
+    border: "1px solid #f1f5f9",
+  },
+  ytAvatar: {
+    width: "48px",
+    height: "48px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "2px solid #fee2e2",
+  },
+  ytAvatarPlaceholder: {
+    width: "48px",
+    height: "48px",
+    borderRadius: "50%",
+    backgroundColor: "#dc2626",
+    color: "#ffffff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "20px",
+    fontWeight: "800",
+  },
+  ytChannelName: {
+    fontSize: "14.5px",
+    fontWeight: "700",
+    color: "#0f172a",
+    margin: "0 0 2px 0",
+  },
+  ytChannelHandle: {
+    fontSize: "12px",
+    color: "#64748b",
+    display: "block",
+  },
+  liveTagRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    marginTop: "4px",
+  },
+  liveTagBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    fontSize: "10.5px",
+    fontWeight: "700",
+    color: "#15803d",
+    backgroundColor: "#f0fdf4",
+    border: "1px solid #bbf7d0",
+    padding: "1px 6px",
+    borderRadius: "4px",
+  },
+  lastSyncText: {
+    fontSize: "10.5px",
+    color: "#94a3b8",
+  },
+  miniStatsBar: {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, 1fr)",
+    gap: "8px",
+    padding: "10px",
+    backgroundColor: "#f8fafc",
+    borderRadius: "10px",
+    textAlign: "center",
+  },
+  miniStat: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  miniStatLabel: {
+    fontSize: "10px",
+    color: "#64748b",
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  miniStatVal: {
+    fontSize: "14px",
+    fontWeight: "800",
+    color: "#0f172a",
+    marginTop: "2px",
+  },
+  miniList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  },
+  miniItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "10px 14px",
+    borderRadius: "8px",
+    backgroundColor: "#f8fafc",
+    border: "1px solid #f1f5f9",
+  },
+  miniItemTitle: {
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#0f172a",
+    display: "block",
+  },
+  miniItemBrand: {
+    fontSize: "11px",
+    color: "#64748b",
+    display: "block",
+    marginTop: "2px",
+  },
+  engagementMiniBadge: {
+    fontSize: "11px",
+    fontWeight: "700",
+    color: "#2563eb",
+    backgroundColor: "#eff6ff",
+    padding: "3px 8px",
+    borderRadius: "6px",
+  },
+  statusTag: {
+    fontSize: "10.5px",
+    fontWeight: "700",
+    padding: "3px 8px",
+    borderRadius: "6px",
+  },
+  emptyCardBox: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "32px 16px",
+    textAlign: "center",
+    backgroundColor: "#f8fafc",
+    borderRadius: "8px",
     border: "1px dashed #cbd5e1",
+    gap: "6px",
   },
   emptyCardText: {
-    fontSize: "13px",
+    fontSize: "12.5px",
     color: "#64748b",
-    marginTop: "8px",
+    margin: "4px 0",
   },
   smallBtn: {
-    marginTop: "12px",
+    marginTop: "6px",
     padding: "6px 14px",
     borderRadius: "6px",
     border: "none",
@@ -605,38 +1133,5 @@ const styles = {
     fontSize: "12px",
     fontWeight: "600",
     cursor: "pointer",
-  },
-  miniList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-  miniItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "10px 12px",
-    borderRadius: "8px",
-    backgroundColor: "#f8fafc",
-    border: "1px solid #f1f5f9",
-  },
-  miniItemTitle: {
-    fontSize: "13px",
-    fontWeight: "700",
-    color: "#0f172a",
-    display: "block",
-  },
-  miniItemBrand: {
-    fontSize: "11.5px",
-    color: "#64748b",
-    display: "block",
-    marginTop: "2px",
-  },
-  statusTag: {
-    fontSize: "10.5px",
-    fontWeight: "700",
-    padding: "3px 8px",
-    borderRadius: "6px",
-    letterSpacing: "0.4px",
   },
 };

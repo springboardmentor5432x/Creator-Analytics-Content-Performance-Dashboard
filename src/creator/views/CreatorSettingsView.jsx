@@ -9,7 +9,10 @@ import {
   CheckCircle2,
   Database,
   ExternalLink,
+  ShieldAlert,
+  Flag,
 } from "lucide-react";
+import ReportModal from "../../components/ReportModal";
 
 export default function CreatorSettingsView({ user, userProfile, theme, onSignOut }) {
   const accent = theme?.accent || "#2563eb";
@@ -18,6 +21,7 @@ export default function CreatorSettingsView({ user, userProfile, theme, onSignOu
   const [notifReviews, setNotifReviews] = useState(true);
   const [notifDigest, setNotifDigest] = useState(false);
   const [savedNotice, setSavedNotice] = useState("");
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const email = user?.email || userProfile?.email || "creator@creatoriq.io";
   const provider = userProfile?.provider || (user?.providerData?.[0]?.providerId === "google.com" ? "Google OAuth" : "Email / Password");
@@ -164,6 +168,42 @@ export default function CreatorSettingsView({ user, userProfile, theme, onSignOu
         </div>
       </div>
 
+      {/* Trust & Safety Reporting */}
+      <div style={styles.card}>
+        <div style={styles.cardHeader}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ ...styles.iconBox, backgroundColor: "#fee2e2", color: "#dc2626" }}>
+              <ShieldAlert size={18} />
+            </div>
+            <div>
+              <h3 style={styles.cardTitle}>Trust & Safety Reporting</h3>
+              <p style={styles.cardSubtitle}>
+                Report a suspicious marketer, impersonating profile, or fraudulent campaign directly to Platform Moderation.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowReportModal(true)}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              border: "1px solid #fecaca",
+              backgroundColor: "#fef2f2",
+              color: "#dc2626",
+              fontSize: "13px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            <Flag size={14} />
+            <span>File Safety Report</span>
+          </button>
+        </div>
+      </div>
+
       {/* Security & Sign Out */}
       <div style={styles.dangerCard}>
         <div>
@@ -178,6 +218,16 @@ export default function CreatorSettingsView({ user, userProfile, theme, onSignOu
           Sign Out of CreatorIQ
         </button>
       </div>
+
+      {/* Safety Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        targetType="campaign"
+        targetId="cmp-2026-001"
+        targetTitle="CreatorIQ 2026 Spring Launch Campaign"
+        currentUser={userProfile || user}
+      />
     </div>
   );
 }

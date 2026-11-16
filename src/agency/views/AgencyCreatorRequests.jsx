@@ -22,10 +22,8 @@ export default function AgencyCreatorRequests({ user, userProfile, theme, relati
     try {
       await respondToRepresentationRelationship(
         rel.id,
-        action,
-        user?.uid || "usr_agency_demo",
-        "Agency",
-        responseMsg || (action === "accepted" ? "Welcome to Vanguard Talent Agency!" : "Thank you for your interest.")
+        action === "accepted" ? "active" : action,
+        user || { uid: "usr_agency_demo", role: "Agency" }
       );
       setResponseMsg("");
       onRefresh();

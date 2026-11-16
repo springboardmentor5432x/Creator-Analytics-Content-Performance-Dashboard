@@ -28,6 +28,8 @@ import CreatorPortalLayout from "./creator/CreatorPortalLayout";
 import MarketingSection from "./marketing/MarketingSection";
 import NotificationBell from "./marketing/components/NotificationBell";
 import AgencyPortalLayout from "./agency/AgencyPortalLayout";
+import AdminPortalLayout from "./admin/AdminPortalLayout";
+import AccountSuspendedScreen from "./AccountSuspendedScreen";
 
 // 4 Distinct Role Theme Palettes & Configurations
 export const ROLE_THEMES = {
@@ -168,6 +170,29 @@ export default function Dashboard({
     }
     return String(rawDate);
   };
+
+  // ── Suspended Account Check → Block suspended accounts with security screen ──
+  if (userProfile?.status === "suspended") {
+    return (
+      <AccountSuspendedScreen
+        userProfile={userProfile}
+        onSignOut={onSignOut}
+      />
+    );
+  }
+
+  // ── Admin Role → hand off to Admin Portal layout ──
+  if (activeRole === "Admin") {
+    return (
+      <AdminPortalLayout
+        user={user}
+        userProfile={userProfile}
+        onSignOut={onSignOut}
+        theme={theme}
+        isDemoMode={isDemoMode}
+      />
+    );
+  }
 
   // ── Creator Role → hand off entirely to the sidebar portal layout ──
   if (activeRole === "Creator") {

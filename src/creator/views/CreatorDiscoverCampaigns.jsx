@@ -12,8 +12,11 @@ import {
   X,
   Target,
   ExternalLink,
+  Flag,
+  ShieldAlert,
 } from "lucide-react";
 import { getDiscoverableCampaigns } from "../creatorService";
+import ReportModal from "../../components/ReportModal";
 
 export default function CreatorDiscoverCampaigns({ theme, user, userProfile }) {
   const accent = theme?.accent || "#2563eb";
@@ -23,6 +26,7 @@ export default function CreatorDiscoverCampaigns({ theme, user, userProfile }) {
   const [nicheFilter, setNicheFilter] = useState("all");
   const [selectedBriefCampaign, setSelectedBriefCampaign] = useState(null);
   const [pitchSuccess, setPitchSuccess] = useState("");
+  const [reportingCampaign, setReportingCampaign] = useState(null);
 
   useEffect(() => {
     async function loadCampaigns() {
@@ -189,6 +193,22 @@ export default function CreatorDiscoverCampaigns({ theme, user, userProfile }) {
                     View Brief
                   </button>
                   <button
+                    onClick={() => setReportingCampaign(c)}
+                    title="Report suspicious or misleading campaign"
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: "6px",
+                      border: "1px solid #e2e8f0",
+                      backgroundColor: "#ffffff",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Flag size={12} color="#94a3b8" />
+                  </button>
+                  <button
                     onClick={() => handleApply(c)}
                     style={{ ...styles.primaryBtn, backgroundColor: accent }}
                   >
@@ -256,6 +276,30 @@ export default function CreatorDiscoverCampaigns({ theme, user, userProfile }) {
 
             <div style={styles.modalFooter}>
               <button
+                onClick={() => {
+                  const camp = selectedBriefCampaign;
+                  setSelectedBriefCampaign(null);
+                  setReportingCampaign(camp);
+                }}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  padding: "7px 12px",
+                  borderRadius: "8px",
+                  border: "1px solid #fee2e2",
+                  backgroundColor: "#fff5f5",
+                  color: "#dc2626",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  marginRight: "auto",
+                }}
+              >
+                <Flag size={12} />
+                <span>Report Campaign</span>
+              </button>
+              <button
                 onClick={() => setSelectedBriefCampaign(null)}
                 style={styles.secondaryBtn}
               >
@@ -272,6 +316,16 @@ export default function CreatorDiscoverCampaigns({ theme, user, userProfile }) {
           </div>
         </div>
       )}
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={Boolean(reportingCampaign)}
+        onClose={() => setReportingCampaign(null)}
+        targetType="campaign"
+        targetId={reportingCampaign?.id || ""}
+        targetTitle={reportingCampaign?.name || ""}
+        currentUser={userProfile || user}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Menu, ChevronRight, RefreshCw, Bell } from "lucide-react";
 import AgencySidebar, { AGENCY_NAV_ITEMS } from "./components/AgencySidebar";
 import NotificationBell from "../marketing/components/NotificationBell";
+import AnnouncementBanner from "../components/AnnouncementBanner";
 import {
   initAgencyStore,
   getAgencyBrandAssignments,
@@ -13,6 +14,7 @@ import {
 import AgencyOverview from "./views/AgencyOverview";
 import AgencyBrandClients from "./views/AgencyBrandClients";
 import AgencyAssignedCampaigns from "./views/AgencyAssignedCampaigns";
+import AgencyRepresentationView from "./views/AgencyRepresentationView";
 import AgencyCreatorRoster from "./views/AgencyCreatorRoster";
 import AgencyCreatorRequests from "./views/AgencyCreatorRequests";
 import AgencyBrandOpportunities from "./views/AgencyBrandOpportunities";
@@ -137,6 +139,9 @@ export default function AgencyPortalLayout({
           </div>
         </header>
 
+        {/* Platform Announcement Banner */}
+        <AnnouncementBanner userRole="Agency" />
+
         <main style={styles.contentArea}>
           {activeTab === "overview" && (
             <AgencyOverview
@@ -150,6 +155,14 @@ export default function AgencyPortalLayout({
               loading={loading}
               onNavigate={(tab) => setActiveTab(tab)}
               onRefresh={loadData}
+            />
+          )}
+          {activeTab === "representation" && (
+            <AgencyRepresentationView
+              user={user}
+              userProfile={userProfile}
+              theme={theme}
+              onNavigate={(tab) => setActiveTab(tab)}
             />
           )}
           {activeTab === "brands" && (

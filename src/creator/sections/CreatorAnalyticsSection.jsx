@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Sparkles,
   TrendingUp,
@@ -22,24 +22,124 @@ import TopContentSection from "../components/TopContentSection";
 import SponsorshipPipeline from "../components/SponsorshipPipeline";
 import SocialAccountsSection from "./SocialAccountsSection";
 import CreatorCampaignsModule from "../components/CreatorCampaignsModule";
-import { CREATOR_OVERVIEW } from "../mockData";
+import YouTubeConnectionCard from "../components/YouTubeConnectionCard";
+import {
+  getYouTubeChannelStatus,
+  getYouTubeAnalytics,
+  initiateYouTubeConnection,
+  refreshYouTubeChannel,
+  disconnectYouTubeChannel,
+  onYouTubeConnectionChange,
+} from "../youtubeService";
+
 
 export default function CreatorAnalyticsSection({ theme, userHandle, currentUser, userProfile }) {
-  const [activeTab, setActiveTab] = useState("all"); // 'all' | 'charts' | 'content' | 'revenue' | 'accounts' | 'campaigns'
+  const [activeTab, setActiveTab] = useState("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [notification, setNotification] = useState(null);
 
+  // YouTube OAuth State
+  const [ytChannel, setYtChannel] = useState(null);
+  const [ytSummary, setYtSummary] = useState(null);
+  const [ytTimeSeries, setYtTimeSeries] = useState([]);
+  const [ytTopVideos, setYtTopVideos] = useState([]);
+  const [isYtConnected, setIsYtConnected] = useState(false);
+  const [isYtConfigured, setIsYtConfigured] = useState(true);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [ytError, setYtError] = useState(null);
+  const [dateRange, setDateRange] = useState("28d");
+
+  const effectiveUser = userProfile?.uid ? userProfile : currentUser;
+
   const showNotice = (msg) => {
     setNotification(msg);
-    setTimeout(() => setNotification(null), 3000);
+    setTimeout(() => setNotification(null), 3500);
   };
 
-  const handleRefresh = () => {
+  const loadYouTubeData = useCallback(async () => {
+    if (!effectiveUser) return;
+    try {
+      const statusRes = await getYouTubeChannelStatus(effectiveUser);
+      setIsYtConfigured(statusRes.configured !== false);
+
+      if (statusRes.connected && statusRes.channel) {
+        setIsYtConnected(true);
+        setYtChannel(statusRes.channel);
+
+        const analyticsRes = await getYouTubeAnalytics(effectiveUser, dateRange);
+        if (analyticsRes.connected) {
+          if (analyticsRes.channel) setYtChannel(analyticsRes.channel);
+          setYtSummary(analyticsRes.summary || null);
+          setYtTimeSeries(analyticsRes.timeSeries || []);
+          setYtTopVideos(analyticsRes.topVideos || []);
+          setYtError(null);
+        }
+      } else {
+        setIsYtConnected(false);
+        setYtChannel(null);
+        setYtSummary(null);
+        setYtTimeSeries([]);
+        setYtTopVideos([]);
+      }
+    } catch (err) {
+      console.warn("[CreatorAnalyticsSection] YT error:", err);
+    }
+  }, [effectiveUser, dateRange]);
+
+  useEffect(() => {
+    loadYouTubeData();
+    const unsub = onYouTubeConnectionChange(() => {
+      loadYouTubeData();
+    });
+    return () => unsub();
+  }, [loadYouTubeData]);
+
+  const handleConnectYouTube = async () => {
+    setIsConnecting(true);
+    setYtError(null);
+    try {
+      const res = await initiateYouTubeConnection(effectiveUser);
+      if (res.success) {
+        showNotice(`YouTube channel ${res.channel?.title || "connected"} authorized!`);
+        await loadYouTubeData();
+      } else if (res.message && !res.message.includes("closed")) {
+        setYtError(res.message);
+      }
+    } catch (e) {
+      setYtError(e.message);
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const handleDisconnectYouTube = async () => {
+    try {
+      const res = await disconnectYouTubeChannel(effectiveUser);
+      if (res.success) {
+        setIsYtConnected(false);
+        setYtChannel(null);
+        setYtSummary(null);
+        setYtTimeSeries([]);
+        setYtTopVideos([]);
+        showNotice("YouTube channel disconnected.");
+      }
+    } catch (e) {
+      showNotice(e.message);
+    }
+  };
+
+  const handleRefresh = async () => {
     setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-      showNotice("Real-time telemetry and API benchmarks updated!");
-    }, 700);
+    if (isYtConnected) {
+      await refreshYouTubeChannel(effectiveUser);
+      await loadYouTubeData();
+      showNotice("Real-time YouTube Data API & Analytics metrics refreshed!");
+    } else {
+      setTimeout(() => {
+        showNotice("Real-time telemetry and API benchmarks updated!");
+      }, 600);
+    }
+    setIsRefreshing(false);
   };
 
   const handleExport = () => {
@@ -55,6 +155,22 @@ export default function CreatorAnalyticsSection({ theme, userHandle, currentUser
           <span>{notification}</span>
         </div>
       )}
+
+      {/* YouTube Connection Card */}
+      <YouTubeConnectionCard
+        channel={ytChannel}
+        summary={ytSummary}
+        isConnected={isYtConnected}
+        isConfigured={isYtConfigured}
+        isLoading={isConnecting}
+        isSyncing={isRefreshing}
+        error={ytError}
+        onConnect={handleConnectYouTube}
+        onDisconnect={handleDisconnectYouTube}
+        onRefresh={handleRefresh}
+        dateRange={dateRange}
+        onChangeDateRange={(r) => setDateRange(r)}
+      />
 
       {/* Control Bar & Sub-Navigation */}
       <div style={styles.actionBar}>
@@ -120,18 +236,34 @@ export default function CreatorAnalyticsSection({ theme, userHandle, currentUser
       {(activeTab === "all" || activeTab === "charts") && (
         <>
           {/* Main Interactive Area & Line Chart */}
-          <InteractiveLineChart themeColor={theme?.accent || "#2563eb"} />
+          <InteractiveLineChart
+            themeColor={theme?.accent || "#2563eb"}
+            liveTimeSeries={ytTimeSeries}
+            isLiveConnected={isYtConnected}
+            channelTitle={ytChannel?.title}
+          />
 
           {/* 2-Column Visualization Grid */}
           <div style={styles.twoColGrid}>
-            <RevenueDonutChart />
-            <AudienceDemographics />
+            <RevenueDonutChart
+              channel={ytChannel}
+              summary={ytSummary}
+            />
+            <AudienceDemographics
+              channel={ytChannel}
+              summary={ytSummary}
+              isLiveConnected={isYtConnected}
+            />
           </div>
         </>
       )}
 
       {(activeTab === "all" || activeTab === "content") && (
-        <TopContentSection />
+        <TopContentSection
+          liveVideos={ytTopVideos}
+          isLiveConnected={isYtConnected}
+          channelTitle={ytChannel?.title}
+        />
       )}
 
       {(activeTab === "all" || activeTab === "campaigns" || activeTab === "revenue") && (
@@ -147,7 +279,10 @@ export default function CreatorAnalyticsSection({ theme, userHandle, currentUser
       )}
 
       {(activeTab === "all" || activeTab === "accounts") && (
-        <SocialAccountsSection />
+        <SocialAccountsSection
+          connectedYouTubeChannel={ytChannel}
+          isYouTubeConnected={isYtConnected}
+        />
       )}
     </div>
   );
