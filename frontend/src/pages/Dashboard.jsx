@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import api from "../api";
+import { useCallback, useEffect, useState } from "react";
+import api, { errorMessage } from "../api";
 import { useAuth } from "../AuthContext.jsx";
 import AppLayout from "../components/AppLayout.jsx";
+import { useDateRange } from "../dashboard/DateRangeContext.jsx";
 import { Icon, PlatformBadge } from "../dashboard/Icons.jsx";
 import { AdminDashboard, AgencyDashboard, MarketingDashboard } from "../dashboard/RoleDashboards.jsx";
 import {
@@ -13,7 +14,7 @@ import {
   TopPosts,
 } from "../dashboard/Widgets.jsx";
 
-const PLATFORMS = ["All Platforms", "YouTube", "Instagram", "TikTok"];
+const PLATFORMS = ["All Platforms", "YouTube", "Instagram", "LinkedIn"];
 
 const SUBTITLE = {
   creator: "Here's an overview of your content performance across all platforms.",
@@ -23,33 +24,83 @@ const SUBTITLE = {
 };
 
 function CreatorDashboard() {
+  const { days } = useDateRange();
   const [platform, setPlatform] = useState("All Platforms");
   const [posts, setPosts] = useState([]);
+  const [overview, setOverview] = useState(null);
+  const [loadErr, setLoadErr] = useState("");
   const [syncing, setSyncing] = useState(false);
-  const [syncMsg, setSyncMsg] = useState("");
+  const [syncMsg, setSyncMsg] = useState({ ok: true, text: "" });
 
-  const loadPosts = () => {
-    api.get("/api/analytics/posts?sort_by=views&order=desc")
+  const plat = platform === "All Platforms" ? "all" : platform.toLowerCase();
+
+  const load = useCallback(() => {
+    setLoadErr("");
+    api.get(`/api/analytics/overview?platform=${plat}&days=${days}`)
+      .then((res) => setOverview(res.data))
+      .catch((e) => setLoadErr(errorMessage(e)));
+    api.get(`/api/analytics/posts?sort_by=views&order=desc&platform=${plat}&days=${days}`)
       .then((res) => setPosts(res.data))
-      .catch((e) => console.error(e));
-  };
+      .catch((e) => { setPosts([]); setLoadErr(errorMessage(e)); });
+  }, [plat, days]);
+
+  useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    loadPosts();
-  }, []);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("linkedin_synced") === "true") {
+      setSyncMsg({ ok: true, text: "LinkedIn profile connected successfully!" });
+      setPlatform("LinkedIn");
+      window.history.replaceState({}, document.title, window.location.pathname);
+      load();
+    } else if (params.get("linkedin_error")) {
+      setSyncMsg({ ok: false, text: "LinkedIn: " + params.get("linkedin_error") });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [load]);
 
   const handleSync = async () => {
+    const h = window.prompt("Enter YouTube channel handle (e.g. @chaiaurcode) or channel ID (UC...):", overview?.channel_name || "");
+    if (!h) return;
     setSyncing(true);
-    setSyncMsg("");
     try {
-      const res = await api.post("/api/analytics/youtube/sync", { channel_handle: "@techcreator" });
-      setSyncMsg(res.data.message || "Channel synced successfully!");
-      loadPosts();
+      const res = await api.post("/api/analytics/youtube/sync", { channel_handle: h.trim() });
+      setSyncMsg({ ok: true, text: res.data.message });
+      load();
     } catch (err) {
-      setSyncMsg("Sync failed. Check connection.");
+      setSyncMsg({ ok: false, text: errorMessage(err) });
     } finally {
       setSyncing(false);
-      setTimeout(() => setSyncMsg(""), 4000);
+      setTimeout(() => setSyncMsg({ ok: true, text: "" }), 8000);
+    }
+  };
+
+  const handleInstagramSync = async () => {
+    const u = window.prompt("Enter Instagram username (e.g. hiteshchoudharyofficial):", "hiteshchoudharyofficial");
+    if (!u) return;
+    setSyncing(true);
+    try {
+      const res = await api.post("/api/analytics/instagram/sync", { username: u.trim() });
+      setSyncMsg({ ok: true, text: res.data.message });
+      load();
+    } catch (err) {
+      setSyncMsg({ ok: false, text: errorMessage(err) });
+    } finally {
+      setSyncing(false);
+      setTimeout(() => setSyncMsg({ ok: true, text: "" }), 8000);
+    }
+  };
+
+  const handleLinkedInConnect = async () => {
+    const token = localStorage.getItem("creatoriq_token");
+    if (!token) return;
+    try {
+      const res = await api.get(`/api/auth/linkedin/login?token=${token}`);
+      if (res.data?.auth_url) {
+        window.location.href = res.data.auth_url;
+      }
+    } catch (err) {
+      setSyncMsg({ ok: false, text: errorMessage(err) });
     }
   };
 
@@ -62,31 +113,45 @@ function CreatorDashboard() {
             {p}
           </button>
         ))}
-        <button className="chip ghost" onClick={handleSync} disabled={syncing} title="Sync YouTube Channel from database or API">
+        <button className="chip ghost" onClick={handleSync} disabled={syncing} title="Connect / refresh a YouTube channel">
           <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync YouTube"}
         </button>
+        <button className="chip ghost" onClick={handleInstagramSync} disabled={syncing} title="Connect / refresh an Instagram account">
+          <Icon name="plus" size={14} /> {syncing ? "Syncing..." : "Sync Instagram"}
+        </button>
+        <button className="chip ghost" onClick={handleLinkedInConnect} disabled={syncing} title="Connect LinkedIn profile via official OAuth">
+          <PlatformBadge name="LinkedIn" size={14} /> Connect LinkedIn
+        </button>
+
       </div>
 
       <p className="sample-note">
-        <span className="sample-pill live">Live</span> Connected to YouTube Channel: <strong>@techcreator</strong> (PostgreSQL + Analytics API)
-        {syncMsg && <span className="sample-pill live">✓ {syncMsg}</span>}
+        {overview?.connected ? (
+          <>
+            <span className={"sample-pill " + (overview.is_live ? "live" : "")}>{overview.is_live ? "Live" : "Synced"}</span>
+            Channel: <strong>{overview.channel_name}</strong>
+            {overview.last_synced_at && <> • last synced {new Date(overview.last_synced_at + "Z").toLocaleString("en-IN")}</>}
+            {" • "}showing last {days} days
+          </>
+        ) : (
+          <>No account connected for this view. Click <strong>Sync YouTube or Instagram</strong> to connect one.</>
+        )}
+        {syncMsg.text && <span className={"sample-pill " + (syncMsg.ok ? "live" : "")} style={syncMsg.ok ? {} : { background: "#fee2e2", color: "#b91c1c" }}>{syncMsg.ok ? "✓ " : "⚠ "}{syncMsg.text}</span>}
+        {loadErr && <span className="sample-pill" style={{ background: "#fee2e2", color: "#b91c1c" }}>⚠ {loadErr}</span>}
       </p>
 
-      {/* Primary KPI Metrics */}
-      <KpiRow />
+      <KpiRow overview={overview} platform={platform} days={days} />
 
-      {/* Charts Row */}
       <div className="row row-a">
-        <FollowerGrowth platform={platform} />
-        <ContentPerformance />
+        <FollowerGrowth platform={platform} days={days} />
+        <ContentPerformance platform={platform} days={days} />
       </div>
 
-      {/* Top Posts & Demographics */}
       <div className="row row-b">
         <TopPosts posts={posts} />
         <div className="stack">
-          <Audience />
-          <Revenue />
+          <Audience followers={overview?.subscribers} platform={platform} />
+          <Revenue overview={overview} days={days} />
         </div>
       </div>
     </>

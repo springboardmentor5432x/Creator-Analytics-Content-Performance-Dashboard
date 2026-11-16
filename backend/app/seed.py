@@ -8,10 +8,10 @@ from .security import hash_password
 
 DEMO_PASSWORD = "Demo@1234"
 DEMO_USERS = [
-    ("Demo Creator", "creator@creatoriq.com", CREATOR),
-    ("Demo Agency", "agency@creatoriq.com", AGENCY),
-    ("Demo Marketing", "marketing@creatoriq.com", MARKETING_TEAM),
-    ("Demo Admin", "admin@creatoriq.com", ADMIN),
+    ("Kunal Deshmukh", "creator@creatoriq.com", CREATOR),
+    ("Apex Talent Agency", "agency@creatoriq.com", AGENCY),
+    ("Growth Marketing", "marketing@creatoriq.com", MARKETING_TEAM),
+    ("Super Admin", "admin@creatoriq.com", ADMIN),
 ]
 
 
@@ -23,7 +23,7 @@ def seed_demo_users(db: Session) -> None:
         if role == CREATOR:
             user.creator = Creator(creator_name=name, location="India")
         elif role == AGENCY:
-            user.agency = Agency(agency_name="Demo Agency Co.", location="India")
+            user.agency = Agency(agency_name="Apex Talent Agency", location="India")
         db.add(user)
     db.commit()
 
