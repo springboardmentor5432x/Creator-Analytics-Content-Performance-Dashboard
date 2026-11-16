@@ -16,7 +16,25 @@ import {
   AlertTriangle,
   CheckCircle2,
   Sparkles,
+  Eye,
+  Heart,
+  Radio,
+  Percent,
+  Clock,
+  Trophy,
+  BarChart3,
+  Layers,
 } from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import api, { parseError } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -26,8 +44,19 @@ import {
   StatCard,
   Alert,
   Field,
+  ChartCard,
+  DemoBadge,
 } from "../components/ui";
-import { ROLE_LABEL, ROLE_BADGE_STYLE, num, shortDate } from "../utils/format";
+import {
+  ROLE_LABEL,
+  ROLE_BADGE_STYLE,
+  PLATFORM_LABEL,
+  PLATFORM_COLOR,
+  num,
+  compact,
+  pct,
+  shortDate,
+} from "../utils/format";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -231,6 +260,140 @@ export default function AdminDashboard() {
               icon={Server}
               hint="Across all roles"
             />
+          </div>
+
+          {/* AUTHORIZED SYSTEM-WIDE CONTENT ANALYTICS (MODULE 2) */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded bg-signal/20 px-2 py-0.5 text-xs font-bold text-signal-dark">
+                    Module 2: Content Analytics Overview
+                  </span>
+                </div>
+                <h2 className="mt-1 font-display text-lg font-bold text-ink-950">
+                  Platform-Wide Content Analytics
+                </h2>
+                <p className="text-xs text-ink-500">
+                  Authorized overview of total viewership, unique audience reach, and creator engagement across CreatorIQ
+                </p>
+              </div>
+            </div>
+
+            {/* Content Analytics Cards */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              <StatCard
+                label="System Views"
+                value={compact(overview.data?.content_analytics?.total_views || 0)}
+                icon={Eye}
+                hint="Total creator views"
+              />
+              <StatCard
+                label="Total Reach"
+                value={compact(overview.data?.content_analytics?.total_reach || 0)}
+                icon={Radio}
+                hint="Total audience touched"
+              />
+              <StatCard
+                label="System Likes"
+                value={compact(overview.data?.content_analytics?.total_likes || 0)}
+                icon={Heart}
+                hint="Total interactions"
+              />
+              <StatCard
+                label="System Shares"
+                value={compact(overview.data?.content_analytics?.total_shares || 0)}
+                icon={Layers}
+                hint="Viral amplification"
+              />
+              <StatCard
+                label="Avg Engagement Rate"
+                value={pct(overview.data?.content_analytics?.average_engagement_rate || 0)}
+                icon={Percent}
+                hint="Weighted avg rate"
+              />
+              <StatCard
+                label="Total Watch Time"
+                value={`${compact(overview.data?.content_analytics?.total_watch_time || 0)} min`}
+                icon={Clock}
+                hint="Across all creators"
+              />
+            </div>
+
+            {/* Platform Performance & System-Wide Top Content */}
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                <ChartCard
+                  title="Cross-Platform Content Distribution"
+                  subtitle="Total views vs. total engagement by social platform"
+                >
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart
+                      data={(overview.data?.content_analytics?.platform_breakdown || []).map((p) => ({
+                        ...p,
+                        name: PLATFORM_LABEL[p.platform] || p.platform,
+                      }))}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E3ECEE" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                      <YAxis tickFormatter={compact} tick={{ fontSize: 12 }} />
+                      <Tooltip formatter={(v) => num(v)} />
+                      <Legend />
+                      <Bar dataKey="views" name="Views" fill="#143A41" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="engagement" name="Engagement" fill="#E8A317" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </div>
+
+              {/* System-Wide Top Content */}
+              <div className="card flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between pb-2 border-b border-ink-100">
+                    <h3 className="font-display text-base font-bold text-ink-950">
+                      Top Content on Platform
+                    </h3>
+                    <Trophy className="h-4 w-4 text-amber-500" />
+                  </div>
+                  <p className="mt-1 text-xs text-ink-500">Highest engagement rate posts</p>
+
+                  <div className="mt-3 space-y-3">
+                    {(overview.data?.content_analytics?.top_posts || []).slice(0, 4).map((p, idx) => (
+                      <div
+                        key={p.id}
+                        className="rounded-xl border border-ink-100 p-2.5 text-xs transition hover:bg-ink-50"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span
+                            className="rounded px-1.5 py-0.5 text-[10px] font-bold"
+                            style={{
+                              backgroundColor: `${PLATFORM_COLOR[p.platform]}15`,
+                              color: PLATFORM_COLOR[p.platform],
+                            }}
+                          >
+                            {PLATFORM_LABEL[p.platform]}
+                          </span>
+                          <span className="font-bold text-teal-700 tabular-nums">
+                            {pct(p.engagement_rate)}
+                          </span>
+                        </div>
+                        <p className="mt-1.5 font-semibold text-ink-900 truncate" title={p.title}>
+                          {p.title}
+                        </p>
+                        <div className="mt-1 flex justify-between text-[11px] text-ink-400">
+                          <span>Views: {compact(p.views)}</span>
+                          <span>{shortDate(p.published_at)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4 border-t border-ink-100 pt-2.5 text-center text-xs text-ink-400">
+                  Total Platform Posts: <b>{num(overview.data?.content_analytics?.total_posts || 0)}</b>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* User Management Section */}

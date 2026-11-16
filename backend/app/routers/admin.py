@@ -4,10 +4,11 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from ..database import get_db, engine
 from ..deps import require_roles
-from ..models import User, ContentRecord, FollowerGrowth, Activity, Campaign
+from ..models import (User, ContentRecord, FollowerGrowth, Activity, Campaign,
+                     RevenueRecord, HashtagMetric, Notification)
 from ..schemas import UserOut, AdminUserUpdate, AdminCreateUserIn
 from ..security import hash_password
-from ..services import log
+from ..services import log, content_to_dict, engagement_rate
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
@@ -30,6 +31,42 @@ def admin_overview(_: User = Depends(require_roles("admin")), db: Session = Depe
 
     recent_activities = db.query(Activity).order_by(Activity.created_at.desc()).limit(15).all()
 
+    # System-wide Content Analytics calculation
+    all_content = db.query(ContentRecord).all()
+    all_views = sum(c.views for c in all_content)
+    all_likes = sum(c.likes for c in all_content)
+    all_comments = sum(c.comments for c in all_content)
+    all_shares = sum(c.shares for c in all_content)
+    all_saves = sum(c.saves for c in all_content)
+    all_reach = sum(c.reach for c in all_content)
+    all_watch_time = sum(c.watch_time_minutes for c in all_content)
+    all_engagement = all_likes + all_comments + all_shares + all_saves
+    all_eng_rate = engagement_rate(all_likes, all_comments, all_shares, all_saves, all_reach)
+
+    # Platform distribution across entire system
+    plat_stats = {}
+    for c in all_content:
+        p = plat_stats.setdefault(c.platform, {"platform": c.platform, "posts": 0, "views": 0, "engagement": 0, "reach": 0})
+        p["posts"] += 1
+        p["views"] += c.views
+        p["engagement"] += c.likes + c.comments + c.shares + c.saves
+        p["reach"] += c.reach
+    for p in plat_stats.values():
+        p["engagement_rate"] = engagement_rate(
+            sum(c.likes for c in all_content if c.platform == p["platform"]),
+            sum(c.comments for c in all_content if c.platform == p["platform"]),
+            sum(c.shares for c in all_content if c.platform == p["platform"]),
+            sum(c.saves for c in all_content if c.platform == p["platform"]),
+            p["reach"]
+        )
+
+    # Top platform-wide posts
+    top_system_posts = sorted(
+        [content_to_dict(c) for c in all_content],
+        key=lambda x: (x["engagement_rate"], x["views"]),
+        reverse=True
+    )[:5]
+
     return {
         "cards": {
             "total_users": total_users,
@@ -43,6 +80,20 @@ def admin_overview(_: User = Depends(require_roles("admin")), db: Session = Depe
             "total_growth_records": total_growth,
             "total_activities": total_activities,
             "total_campaigns": total_campaigns,
+        },
+        "content_analytics": {
+            "total_posts": len(all_content),
+            "total_views": all_views,
+            "total_reach": all_reach,
+            "total_likes": all_likes,
+            "total_comments": all_comments,
+            "total_shares": all_shares,
+            "total_saves": all_saves,
+            "total_engagement": all_engagement,
+            "total_watch_time": round(all_watch_time, 1),
+            "average_engagement_rate": all_eng_rate,
+            "platform_breakdown": sorted(plat_stats.values(), key=lambda x: x["views"], reverse=True),
+            "top_posts": top_system_posts,
         },
         "system": {
             "database": engine.dialect.name,
@@ -183,6 +234,9 @@ def system_diagnostics(_: User = Depends(require_roles("admin")), db: Session = 
             "follower_growth": db.query(func.count(FollowerGrowth.id)).scalar(),
             "campaigns": db.query(func.count(Campaign.id)).scalar(),
             "activities": db.query(func.count(Activity.id)).scalar(),
+            "revenue_records": db.query(func.count(RevenueRecord.id)).scalar(),
+            "hashtag_metrics": db.query(func.count(HashtagMetric.id)).scalar(),
+            "notifications": db.query(func.count(Notification.id)).scalar(),
         },
         "status": "operational",
     }

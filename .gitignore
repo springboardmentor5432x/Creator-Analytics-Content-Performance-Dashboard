@@ -1,11 +1,25 @@
+# Frontend
 node_modules/
 dist/
+
+# Python virtual environments
 venv/
 .venv/
+venv*/
+backend/.venv/
+backend/venv311/
+
+# Python cache
 __pycache__/
 *.pyc
+.pytest_cache/
+
+# Environment variables
 .env
 .env.*
 !.env.example
+
+# Database files
 *.db
-.pytest_cache/
+*.db-journal
+backend/creatoriq.db.bak

@@ -1,0 +1,136 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: creatoriq-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-sqlite:////app/data/creatoriq.db}
+      - SECRET_KEY=${SECRET_KEY:-production_secret_key_should_be_overridden_via_env}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://localhost,http://127.0.0.1:5173}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - ALLOW_DEV_ADMIN_REGISTRATION=${ALLOW_DEV_ADMIN_REGISTRATION:-false}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - MONGODB_URL=${MONGODB_URL:-mongodb://mongo:27017}
+      - MONGODB_DB_NAME=${MONGODB_DB_NAME:-creatoriq_raw}
+      - META_GRAPH_API_VERSION=${META_GRAPH_API_VERSION:-v26.0}
+      - YOUTUBE_CLIENT_ID=${YOUTUBE_CLIENT_ID:-}
+      - YOUTUBE_CLIENT_SECRET=${YOUTUBE_CLIENT_SECRET:-}
+      - INSTAGRAM_CLIENT_ID=${INSTAGRAM_CLIENT_ID:-}
+      - INSTAGRAM_CLIENT_SECRET=${INSTAGRAM_CLIENT_SECRET:-}
+      - TIKTOK_CLIENT_KEY=${TIKTOK_CLIENT_KEY:-}
+      - TIKTOK_CLIENT_SECRET=${TIKTOK_CLIENT_SECRET:-}
+      - FACEBOOK_APP_ID=${FACEBOOK_APP_ID:-}
+      - FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET:-}
+      - TWITTER_CONSUMER_KEY=${TWITTER_CONSUMER_KEY:-}
+      - TWITTER_CONSUMER_SECRET=${TWITTER_CONSUMER_SECRET:-}
+      - LINKEDIN_CLIENT_ID=${LINKEDIN_CLIENT_ID:-}
+      - LINKEDIN_CLIENT_SECRET=${LINKEDIN_CLIENT_SECRET:-}
+    volumes:
+      - creatoriq_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+    container_name: creatoriq-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # Optional PostgreSQL service for multi-container production deployment
+  db:
+    image: postgres:16-alpine
+    container_name: creatoriq-db
+    restart: unless-stopped
+    profiles:
+      - full-stack
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-creatoriq}
+      - POSTGRES_USER=${POSTGRES_USER:-creatoriq_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-creatoriq_secure_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - creatoriq_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-creatoriq_user} -d ${POSTGRES_DB:-creatoriq}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis service for caching and Celery message broker (Module 10)
+  redis:
+    image: redis:7-alpine
+    container_name: creatoriq-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - creatoriq_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # MongoDB service for raw social posts and analytics archival (Module 10)
+  mongo:
+    image: mongo:7.0
+    container_name: creatoriq-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - creatoriq_mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # Celery asynchronous task worker (Module 6 & 10)
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: creatoriq-celery-worker
+    restart: unless-stopped
+    profiles:
+      - full-stack
+    depends_on:
+      - redis
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-sqlite:////app/data/creatoriq.db}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - MONGODB_URL=${MONGODB_URL:-mongodb://mongo:27017}
+    command: ["celery", "-A", "app.celery_app.celery_app", "worker", "--loglevel=info"]
+
+volumes:
+  creatoriq_data:
+  creatoriq_pgdata:
+  creatoriq_redisdata:
+  creatoriq_mongodata:

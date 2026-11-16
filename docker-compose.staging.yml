@@ -1,0 +1,167 @@
+version: "3.8"
+
+services:
+  # 1. PostgreSQL 16 Staging Database
+  db:
+    image: postgres:16-alpine
+    container_name: creatoriq-staging-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-creatoriq_staging}
+      - POSTGRES_USER=${POSTGRES_USER:-creatoriq_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-creatoriq_staging_secret}
+    ports:
+      - "5432:5432"
+    volumes:
+      - creatoriq_staging_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-creatoriq_user} -d ${POSTGRES_DB:-creatoriq_staging}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - creatoriq-staging-net
+
+  # 2. Redis 7 Staging Caching & Celery Message Broker
+  redis:
+    image: redis:7-alpine
+    container_name: creatoriq-staging-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - creatoriq_staging_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - creatoriq-staging-net
+
+  # 3. MongoDB 7 Staging Document Store
+  mongo:
+    image: mongo:7.0
+    container_name: creatoriq-staging-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - creatoriq_staging_mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - creatoriq-staging-net
+
+  # 4. Dedicated One-Off Alembic Migration Service
+  # Runs 'alembic upgrade head' once db is healthy. Backend will not start if migration fails.
+  # Guarantees zero race conditions across multiple backend replicas.
+  migration:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: creatoriq-staging-migration
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-creatoriq_user}:${POSTGRES_PASSWORD:-creatoriq_staging_secret}@db:5432/${POSTGRES_DB:-creatoriq_staging}
+    command: ["alembic", "upgrade", "head"]
+    networks:
+      - creatoriq-staging-net
+
+  # 5. FastAPI Staging Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: creatoriq-staging-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-creatoriq_user}:${POSTGRES_PASSWORD:-creatoriq_staging_secret}@db:5432/${POSTGRES_DB:-creatoriq_staging}
+      - REDIS_URL=redis://redis:6379/0
+      - MONGODB_URL=mongodb://mongo:27017
+      - MONGODB_DB_NAME=creatoriq_staging_raw
+      - AUTO_INIT_DB=false
+      - ENVIRONMENT=staging
+      - ALLOW_DEV_ADMIN_REGISTRATION=false
+      - SECRET_KEY=${SECRET_KEY:-staging_jwt_secret_key_change_me_in_vault}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://localhost:80,http://localhost,http://staging.creatoriq.com}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DB_POOL_SIZE=${DB_POOL_SIZE:-10}
+      - DB_MAX_OVERFLOW=${DB_MAX_OVERFLOW:-20}
+      - META_GRAPH_API_VERSION=${META_GRAPH_API_VERSION:-v26.0}
+      - YOUTUBE_CLIENT_ID=${YOUTUBE_CLIENT_ID:-}
+      - YOUTUBE_CLIENT_SECRET=${YOUTUBE_CLIENT_SECRET:-}
+      - INSTAGRAM_CLIENT_ID=${INSTAGRAM_CLIENT_ID:-}
+      - INSTAGRAM_CLIENT_SECRET=${INSTAGRAM_CLIENT_SECRET:-}
+      - TIKTOK_CLIENT_KEY=${TIKTOK_CLIENT_KEY:-}
+      - TIKTOK_CLIENT_SECRET=${TIKTOK_CLIENT_SECRET:-}
+      - FACEBOOK_APP_ID=${FACEBOOK_APP_ID:-}
+      - FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET:-}
+      - TWITTER_CONSUMER_KEY=${TWITTER_CONSUMER_KEY:-}
+      - TWITTER_CONSUMER_SECRET=${TWITTER_CONSUMER_SECRET:-}
+      - LINKEDIN_CLIENT_ID=${LINKEDIN_CLIENT_ID:-}
+      - LINKEDIN_CLIENT_SECRET=${LINKEDIN_CLIENT_SECRET:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - creatoriq-staging-net
+
+  # 6. React + Nginx Staging Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Empty string defaults to same-origin relative /api/ reverse proxied by nginx.conf
+        - VITE_API_URL=${VITE_API_URL:-}
+    container_name: creatoriq-staging-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - creatoriq-staging-net
+
+volumes:
+  creatoriq_staging_pgdata:
+    name: creatoriq_staging_pgdata
+  creatoriq_staging_redisdata:
+    name: creatoriq_staging_redisdata
+  creatoriq_staging_mongodata:
+    name: creatoriq_staging_mongodata
+
+networks:
+  creatoriq-staging-net:
+    driver: bridge

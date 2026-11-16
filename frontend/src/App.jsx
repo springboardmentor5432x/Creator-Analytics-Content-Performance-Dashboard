@@ -10,7 +10,11 @@ import MarketingDashboard from "./pages/MarketingDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ContentAnalytics from "./pages/ContentAnalytics";
 import AudienceAnalytics from "./pages/AudienceAnalytics";
+import RevenueAnalytics from "./pages/RevenueAnalytics";
+import GrowthAnalytics from "./pages/GrowthAnalytics";
+import Notifications from "./pages/Notifications";
 import Connections from "./pages/Connections";
+import CampaignROI from "./pages/CampaignROI";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import { getRoleDashboardPath, normalizeRole } from "./utils/format";
@@ -105,8 +109,24 @@ export default function App() {
         <Route
           path="/audience"
           element={
-            <RoleGuard allowedRoles={["creator", "admin"]}>
+            <RoleGuard allowedRoles={["creator", "agency", "marketing", "admin"]}>
               <AudienceAnalytics />
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="/revenue"
+          element={
+            <RoleGuard allowedRoles={["creator", "agency", "marketing", "admin"]}>
+              <RevenueAnalytics />
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="/growth"
+          element={
+            <RoleGuard allowedRoles={["creator", "agency", "marketing", "admin"]}>
+              <GrowthAnalytics />
             </RoleGuard>
           }
         />
@@ -115,6 +135,22 @@ export default function App() {
           element={
             <RoleGuard allowedRoles={["creator", "admin"]}>
               <Connections />
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <RoleGuard allowedRoles={["creator", "agency", "marketing", "admin"]}>
+              <Notifications />
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="/campaign-roi"
+          element={
+            <RoleGuard allowedRoles={["creator", "agency", "marketing", "admin"]}>
+              <CampaignROI />
             </RoleGuard>
           }
         />

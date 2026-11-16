@@ -1,13 +1,28 @@
+import logging
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from .config import settings
-from .database import Base, engine
-from .routers import auth, content, audience, dashboard, connections, demo, agency, marketing, admin
+from .database import Base, engine, init_db
+from .routers import (auth, content, audience, dashboard, connections, demo,
+                      agency, marketing, admin, revenue, trends, notifications,
+                      brands, sponsorships, campaign_creators, campaign_roi, reports,
+                      websocket)
 
-Base.metadata.create_all(bind=engine)
+logging.basicConfig(
+    level=getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("creatoriq")
+
+# Auto-initialize database schema ONLY when configured and using SQLite (local development).
+# In PostgreSQL staging and production environments, migrations are managed exclusively
+# via Alembic CLI/jobs before worker startup to eliminate concurrent DDL lock contention.
+if settings.AUTO_INIT_DB and settings.DATABASE_URL.startswith("sqlite"):
+    init_db(engine)
 
 app = FastAPI(
     title="CreatorIQ API",
@@ -38,10 +53,21 @@ async def unhandled(_: Request, exc: Exception):
     return JSONResponse(status_code=500, content={"success": False, "message": "Something went wrong on our side.", "errors": []})
 
 
-for r in (auth, content, audience, dashboard, connections, demo, agency, marketing, admin):
+for r in (auth, content, audience, dashboard, connections, demo, agency, marketing,
+          admin, revenue, trends, notifications, brands, sponsorships, campaign_creators, campaign_roi, reports,
+          websocket):
     app.include_router(r.router)
 
 
 @app.get("/api/health", tags=["Health"])
 def health():
-    return {"status": "ok", "database": engine.dialect.name}
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return {"status": "ok", "database": engine.dialect.name}
+    except Exception as exc:
+        logger.error(f"Healthcheck database ping failed: {exc}")
+        return JSONResponse(
+            status_code=503,
+            content={"status": "degraded", "database": engine.dialect.name, "error": str(exc)},
+        )
