@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" class="profile-document">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CreatorIQ sample profile interface.">
+    <title>My Profile | CreatorIQ</title>
+    <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="css/dashboard.css">
+    <script src="js/profile.js" defer></script>
+</head>
+<body class="liq-page liq-profile-page">
+    <main class="page-shell">
+        <header class="site-header">
+            <a href="index.html" class="brand-logo" aria-label="CreatorIQ home">
+                <span class="logo-mark" aria-hidden="true">C</span>
+                <span>Creator<span class="brand-accent">IQ</span></span>
+            </a>
+
+            <nav class="site-nav" aria-label="Main navigation">
+                <a href="dashboard.html" class="liq-button liq-button-secondary">← Back to dashboard</a>
+                <button type="button" id="profile-notifications" class="liq-icon-button" aria-label="Notifications">♧</button>
+            </nav>
+        </header>
+
+        <section class="page-card liq-profile-card liq-panel" aria-labelledby="profile-title">
+            <span class="eyebrow">ACCOUNT SETTINGS</span>
+            <h1 class="page-title" id="profile-title">My profile</h1>
+            <p class="page-description">
+                Manage your account details and preferences.
+            </p>
+
+            <div class="prototype-notice" role="note">
+                <span aria-hidden="true">ⓘ</span>
+                <span>
+                    Authenticated profile data is loaded from the local backend.
+                </span>
+            </div>
+
+            <div class="profile-header">
+                <div class="avatar" id="profile-avatar" aria-hidden="true">SC</div>
+                <div>
+                    <h2 id="profile-heading">Sai Creator</h2>
+                    <p class="helper-text">CreatorIQ member · Sample account</p>
+                </div>
+            </div>
+
+            <form id="profile-form" novalidate>
+                <div class="profile-actions">
+                    <button type="button" id="edit-profile"
+                            class="btn btn-primary">
+                        Edit profile
+                    </button>
+
+                    <button type="button" id="change-password"
+                            class="btn btn-secondary">
+                        Change password
+                    </button>
+
+                    <button type="button" id="sign-out"
+                            class="btn btn-danger">
+                        Sign Out
+                    </button>
+                </div>
+
+                <div id="profile-status"
+                     class="form-status"
+                     role="status"
+                     aria-live="polite"></div>
+
+                <div class="profile-details">
+                    <div class="profile-item">
+                        <label for="profile-name">Full name</label>
+                        <input id="profile-name"
+                               value="Sai Creator"
+                               maxlength="100"
+                               disabled>
+                    </div>
+
+                    <div class="profile-item">
+                        <label for="profile-email">Email address</label>
+                        <input id="profile-email"
+                               type="email"
+                               value="sample@example.com"
+                               disabled>
+                    </div>
+
+                    <div class="profile-item">
+                        <label for="profile-role">Assigned role</label>
+                        <select id="profile-role" disabled aria-describedby="profile-role-note">
+                            <option value="creator">Creator</option>
+                            <option value="agency">Agency</option>
+                            <option value="marketing">Marketing Team</option>
+                        </select>
+                        <small id="profile-role-note" class="helper-text" hidden>Administrator access cannot be changed from a profile.</small>
+                    </div>
+
+                    <div class="profile-item">
+                        <span>Account status</span>
+                        <strong>Authenticated</strong>
+                    </div>
+                </div>
+
+            </form>
+
+            <form id="password-form" class="password-form" hidden novalidate>
+                <h2 class="password-form-title">Change password</h2>
+                <p class="helper-text">
+                    Update your password for the current authenticated account.
+                </p>
+
+                <div class="form-group">
+                    <label for="new-password">New password</label>
+                    <input type="password" id="new-password"
+                           autocomplete="new-password"
+                           aria-describedby="new-password-error">
+                    <small id="new-password-error"
+                           class="field-error"
+                           aria-live="polite"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="new-password-confirm">Confirm new password</label>
+                    <input type="password" id="new-password-confirm"
+                           autocomplete="new-password"
+                           aria-describedby="new-password-confirm-error">
+                    <small id="new-password-confirm-error"
+                           class="field-error"
+                           aria-live="polite"></small>
+                </div>
+
+                <div class="profile-actions">
+                    <button type="submit" class="btn btn-primary">
+                        Validate password
+                    </button>
+                    <button type="button" id="cancel-password"
+                            class="btn btn-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="CreatorIQ analyzer for comparing content performance and campaign impact."
+    />
+    <title>Analyzer | CreatorIQ</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <script src="js/analyzer.js" defer></script>
+  </head>
+  <body class="dashboard-body liq-page liq-analyzer-page">
+    <div class="dashboard-shell analyzer-shell">
+      <aside class="dashboard-sidebar" aria-label="Sidebar navigation">
+        <div class="sidebar-brand">
+          <a href="home.html" class="brand-logo" aria-label="CreatorIQ home">
+            <span class="logo-mark" aria-hidden="true">C</span>
+            <span>Creator<span class="brand-accent">IQ</span></span>
+          </a>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Dashboard navigation">
+          <a href="dashboard.html" class="nav-item">Overview</a>
+          <a href="analyzer.html" class="nav-item active">Analyzer</a>
+          <a href="profile.html" class="nav-item">Profile</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="sidebar-label">Forecast</span>
+          <strong>+14.3%</strong>
+          <small>Projected audience lift</small>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="dashboard-topbar">
+          <div>
+            <p class="eyebrow"><span class="status-dot"></span> CONTENT ANALYZER</p>
+            <h1>Campaign testing</h1>
+          </div>
+          <div class="dashboard-actions">
+            <a href="dashboard.html" class="liq-button liq-button-secondary">← Back to dashboard</a>
+            <button type="button" id="analyzer-notifications" class="liq-icon-button" aria-label="Notifications">♧</button>
+            <button type="button" id="analyzer-filter" class="liq-button liq-button-secondary" aria-expanded="false">Filter</button>
+            <button type="button" id="analyzer-launch" class="liq-button liq-button-primary">Launch test</button>
+          </div>
+        </header>
+
+        <div class="analyzer-filter-row" id="analyzer-filter-row" hidden>
+          <label for="analyzer-platform-filter">Platform</label>
+          <select id="analyzer-platform-filter" class="liq-glass-control">
+            <option value="All">All platforms</option>
+            <option value="Instagram">Instagram</option>
+            <option value="YouTube">YouTube</option>
+            <option value="TikTok">TikTok</option>
+            <option value="LinkedIn">LinkedIn</option>
+          </select>
+        </div>
+
+        <section class="analysis-summary" aria-label="Analyzer summary">
+          <div class="summary-box">
+            <span>Win rate</span>
+            <strong>68%</strong>
+          </div>
+          <div class="summary-box">
+            <span>Avg. watch time</span>
+            <strong>4m 12s</strong>
+          </div>
+          <div class="summary-box">
+            <span>CTR</span>
+            <strong>5.8%</strong>
+          </div>
+        </section>
+
+        <section class="panel analyzer-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Signals</p>
+              <h2>Content performance by format</h2>
+            </div>
+            <div class="segmented-control" role="group" aria-label="Analyzer views">
+              <button type="button" class="segment active" data-view="engagement" aria-pressed="true">Engagement</button>
+              <button type="button" class="segment" data-view="reach" aria-pressed="false">Reach</button>
+              <button type="button" class="segment" data-view="conversion" aria-pressed="false">Conversion</button>
+            </div>
+          </div>
+
+          <table class="analysis-table">
+            <thead id="analyzer-table-head"></thead>
+            <tbody id="analyzer-table-body"></tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+    <div class="liq-toast" id="analyzer-toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
