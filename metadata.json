@@ -1,8 +1,6 @@
 {
-  "name": "Remix Remix CreatorIQ – Creator Analytics \u0026 Content Performance Dashboard",
-  "description": "Professional creator analytics and content performance dashboard with role-based user management, JWT authentication, and creator profiles.",
+  "name": "CreatorIQ - Social Media Analytics Platform",
+  "description": "Enterprise-grade social media intelligence and analytics platform for creators, agencies, marketing teams, and administrators with Indian numbering and INR currency support.",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

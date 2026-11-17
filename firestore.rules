@@ -18,6 +18,7 @@ service cloud.firestore {
     function isBootstrappedAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'sharshitha28007@gmail.com' ||
+        request.auth.token.email == 'admin@creatoriq.com' ||
         request.auth.token.email == 'admin@example.com' ||
         request.auth.token.email == 'harshitha.admin@yourdomain.com'
       );
@@ -37,13 +38,13 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
-      // Allow user to create their initial profile upon registration
-      allow create: if isOwner(userId) &&
+      // Allow user to create their initial profile upon registration, or an administrator to provision users
+      allow create: if (isOwner(userId) &&
         request.resource.data.uid == userId &&
         request.resource.data.email is string &&
-        request.resource.data.role in ['creator', 'admin', 'agency', 'marketing'];
-      // Allow user to update their profile but prevent modifying role unless admin
-      allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin();
+        request.resource.data.role in ['creator', 'admin', 'agency', 'marketing']) || isAdmin();
+      // Allow user to update their own profile details, username, and authorized roles
+      allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -56,6 +57,13 @@ service cloud.firestore {
     // Creator Profiles
     match /creatorProfiles/{profileId} {
       allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // User Sessions
+    match /userSessions/{sessionId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       allow create, update: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
       allow delete: if isAdmin();
     }
