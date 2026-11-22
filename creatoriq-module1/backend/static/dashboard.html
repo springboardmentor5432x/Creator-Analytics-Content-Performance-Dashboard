@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CreatorIQ | Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root { --side:#1e2a35; --accent:#1d6f77; --bg:#f5f6f8; --line:#e3e6ea; --text:#1f2933; --muted:#66707d; --good:#2f7d4f; --bad:#b5443a; --warn:#946b12; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Public Sans", "Segoe UI", sans-serif; background: var(--bg); color: var(--text); font-size: 14px; display: none; min-height: 100vh; font-variant-numeric: tabular-nums; }
+    body.ready { display: flex; }
+
+    aside { width: 232px; flex-shrink: 0; background: var(--side); color: #fff; padding: 20px 12px; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+    .logo { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 1.1rem; padding: 0 8px 22px; }
+    nav { display: flex; flex-direction: column; gap: 2px; flex: 1; overflow-y: auto; }
+    nav a { color: #b9c3cd; padding: 9px 10px; border-radius: 5px; font-weight: 500; display: flex; gap: 10px; align-items: center; cursor: pointer; }
+    nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+    nav a.active { background: rgba(255,255,255,.12); color: #fff; }
+    nav svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    .me { border-top: 1px solid rgba(255,255,255,.14); padding-top: 14px; margin-top: 10px; font-size: .8rem; }
+    .me strong { display: block; font-size: .88rem; word-break: break-word; }
+    .me small { color: #93a0ad; word-break: break-all; }
+    .logout { margin-top: 10px; width: 100%; background: transparent; border: 1px solid rgba(255,255,255,.3); color: #fff; padding: 8px; border-radius: 5px; font: inherit; cursor: pointer; }
+    .logout:hover { background: rgba(255,255,255,.1); }
+
+    main { flex: 1; min-width: 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 28px; background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+    .search { flex: 1; max-width: 320px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); font: inherit; }
+    .top-right { display: flex; align-items: center; gap: 14px; }
+    .status { color: var(--muted); display: flex; align-items: center; gap: 6px; font-size: .8rem; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #b0b8c4; }
+    .dot.ok { background: #3a9d5d; } .dot.err { background: var(--bad); }
+    .role { color: var(--muted); font-size: .8rem; text-transform: capitalize; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--side); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: .85rem; }
+    .content { padding: 24px 28px 40px; }
+
+    .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+    .head h1 { font-size: 1.5rem; font-weight: 600; }
+    .head p { color: var(--muted); margin-top: 3px; }
+    .filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .seg { display: flex; border: 1px solid var(--line); border-radius: 5px; background: #fff; overflow: hidden; }
+    .seg button { border: 0; border-right: 1px solid var(--line); background: transparent; padding: 6px 12px; font: inherit; font-size: .82rem; color: var(--muted); cursor: pointer; }
+    .seg button:last-child { border-right: 0; }
+    .seg button:hover { color: var(--text); }
+    .seg button.active { background: var(--side); color: #fff; }
+    select { padding: 6px 8px; border: 1px solid var(--line); border-radius: 5px; font: inherit; font-size: .82rem; background: #fff; color: var(--text); }
+    .link-btn { border: 0; background: none; color: var(--accent); font: inherit; font-size: .82rem; cursor: pointer; text-decoration: underline; padding: 4px; }
+
+    .notice { color: var(--muted); font-size: .8rem; margin-bottom: 14px; }
+    .notice.err { color: var(--bad); background: #fbeeed; border: 1px solid #efc9c5; padding: 8px 12px; border-radius: 5px; }
+    .panel { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 16px; min-width: 0; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .panel h2 { font-size: .95rem; font-weight: 600; }
+    .panel .sub { font-size: .78rem; color: var(--muted); font-weight: 400; margin-left: 6px; }
+
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .kpi .label { font-size: .8rem; color: var(--muted); }
+    .kpi .value { font-size: 1.55rem; font-weight: 600; margin: 4px 0 2px; }
+    .delta { font-size: .76rem; }
+    .up { color: var(--good); } .down { color: var(--bad); } .flat { color: var(--muted); }
+
+    .row { display: grid; gap: 14px; margin-bottom: 16px; }
+    .r-2-1 { grid-template-columns: 2fr 1fr; }
+    .r-1-1 { grid-template-columns: 1fr 1fr; }
+    .chart-box { position: relative; height: 270px; }
+    .chart-box.mid { height: 200px; }
+    .legend { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .legend div { display: flex; align-items: center; gap: 8px; }
+    .legend i, .pd { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; display: inline-block; }
+    .legend span.n { margin-left: auto; font-weight: 600; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 500; font-size: .8rem; }
+    tr:last-child td { border-bottom: 0; }
+    .num { text-align: right; }
+    .pc { display: inline-flex; align-items: center; gap: 7px; }
+
+    .rev-total { font-size: 1.7rem; font-weight: 600; }
+    .src { margin: 10px 0; }
+    .src .top { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .bar { background: #eceef1; border-radius: 2px; height: 6px; overflow: hidden; }
+    .bar i { display: block; height: 100%; background: var(--accent); }
+    .acc { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .acc:last-child { border-bottom: 0; }
+    .acc .info { flex: 1; } .acc .info small { display: block; color: var(--muted); }
+    .acc .tag { font-size: .78rem; color: var(--muted); }
+    .fineprint { font-size: .76rem; color: var(--muted); margin-top: 10px; line-height: 1.45; }
+
+    .empty { text-align: center; padding: 56px 20px; }
+    .empty h2 { font-size: 1.15rem; margin-bottom: 6px; }
+    .empty p { color: var(--muted); margin-bottom: 16px; }
+    .btn { border: 0; background: var(--accent); color: #fff; padding: 10px 20px; border-radius: 5px; font: inherit; font-weight: 500; cursor: pointer; }
+    .btn:hover { background: #185c63; } .btn:disabled { opacity: .6; cursor: not-allowed; }
+    .st.Active { color: var(--good); } .st.Paused { color: var(--warn); } .st.Completed, .st.Disabled { color: var(--muted); }
+    .hidden { display: none !important; }
+    .muted-msg { color: var(--muted); padding: 16px 0; text-align: center; }
+
+    @media (max-width: 980px) { .r-2-1, .r-1-1 { grid-template-columns: 1fr; } }
+    @media (max-width: 860px) {
+      body.ready { flex-direction: column; }
+      aside { width: 100%; height: auto; position: static; padding: 14px; }
+      nav { flex-direction: row; flex-wrap: wrap; flex: none; }
+      .topbar, .content { padding-left: 16px; padding-right: 16px; }
+      .search { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="12" width="4" height="9" fill="#5fb3ba"/><rect x="10" y="7" width="4" height="14" fill="#5fb3ba"/><rect x="17" y="3" width="4" height="18" fill="#5fb3ba"/></svg>
+      CreatorIQ
+    </div>
+    <nav id="nav"></nav>
+    <div class="me">
+      <strong id="me-name"></strong>
+      <small id="me-email"></small>
+      <button class="logout" id="logout">Log out</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <input class="search" id="search" type="search" placeholder="Filter tables" aria-label="Filter tables">
+      <div class="top-right">
+        <span class="status"><span class="dot" id="status-dot"></span><span id="status-text">Connecting</span></span>
+        <span class="role" id="role-badge"></span>
+        <div class="avatar" id="avatar" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="view-dashboard">
+        <div class="head">
+          <div>
+            <h1 id="welcome">Welcome</h1>
+            <p id="head-sub"></p>
+          </div>
+          <div class="filters" id="filters">
+            <div class="seg" id="platform-chips"></div>
+            <select id="range" aria-label="Date range">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+          </div>
+          <button class="link-btn hidden" id="reset-demo" type="button">Reset sample data</button>
+        </div>
+
+        <div class="notice hidden" id="notice"></div>
+
+        <div class="panel empty hidden" id="empty">
+          <h2 id="empty-title">No analytics data yet</h2>
+          <p id="empty-text"></p>
+          <button class="btn hidden" id="load-demo">Load sample data</button>
+        </div>
+
+        <!-- creator -->
+        <div id="data-area" class="hidden">
+          <section class="kpis" id="kpis"></section>
+          <section class="row r-2-1" id="sec-growth">
+            <div class="panel">
+              <div class="panel-head"><h2>Follower growth<span class="sub" id="growth-sub"></span></h2></div>
+              <div class="chart-box"><canvas id="chart-followers"></canvas></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h2>Followers by platform</h2></div>
+              <div class="chart-box mid"><canvas id="chart-platforms"></canvas></div>
+              <div class="legend" id="platform-legend"></div>
+            </div>
+          </section>
+          <section class="row r-1-1">
+            <div class="panel">
+              <div class="panel-head"><h2>Content performance<span class="sub">by weekday</span></h2><div class="seg" id="metric-tabs"></div></div>
+              <div class="chart-box"><canvas id="chart-content"></canvas></div>
+            </div>
+            <div class="panel" id="sec-audience">
+              <div class="panel-head"><h2>Audience</h2><div class="seg" id="aud-tabs"></div></div>
+              <div class="chart-box mid"><canvas id="chart-audience"></canvas></div>
+              <div class="legend" id="aud-legend"></div>
+            </div>
+          </section>
+          <section class="panel" id="sec-posts" style="margin-bottom:16px">
+            <div class="panel-head"><h2>Top posts<span class="sub">in the selected period</span></h2></div>
+            <div style="overflow-x:auto"><table>
+              <thead><tr><th>#</th><th>Post</th><th>Platform</th><th class="num">Views</th><th class="num">Likes</th><th class="num">Comments</th><th class="num">Engagement</th></tr></thead>
+              <tbody id="posts-body"></tbody>
+            </table></div>
+            <div class="muted-msg hidden" id="posts-empty">No posts for this platform and period.</div>
+          </section>
+          <section class="row r-1-1">
+            <div class="panel" id="sec-revenue">
+              <div class="panel-head"><h2>Revenue</h2><span class="sub" id="rev-month"></span></div>
+              <div class="rev-total" id="rev-total"></div>
+              <div class="delta" id="rev-delta" style="margin-bottom:8px"></div>
+              <div id="rev-sources"></div>
+            </div>
+            <div class="panel" id="sec-accounts">
+              <div class="panel-head"><h2>Social accounts</h2></div>
+              <div id="accounts"></div>
+              <p class="fineprint">These accounts hold sample data from your database. Real OAuth connections come with the social media integration module.</p>
+            </div>
+          </section>
+        </div>
+
+        <!-- agency -->
+        <div id="area-agency" class="hidden">
+          <section class="kpis" id="ag-kpis"></section>
+          <section class="row r-2-1">
+            <div class="panel"><div class="panel-head"><h2>Followers by creator</h2></div><div class="chart-box"><canvas id="chart-ag-followers"></canvas></div></div>
+            <div class="panel" id="sec-ag-revenue"><div class="panel-head"><h2>Monthly revenue share</h2></div><div class="chart-box mid"><canvas id="chart-ag-revenue"></canvas></div><div class="legend" id="ag-rev-legend"></div></div>
+          </section>
+          <section class="panel" id="sec-ag-creators" style="margin-bottom:16px">
+            <div class="panel-head"><h2>Managed creators<span class="sub">sorted by followers</span></h2></div>
+            <div style="overflow-x:auto"><table>
+              <thead><tr><th>#</th><th>Creator</th><th>Platform</th><th>Niche</th><th class="num">Followers</th><th class="num">Growth</th><th class="num">Engagement</th><th class="num">Revenue / month</th></tr></thead>
+              <tbody id="ag-body"></tbody></table></div>
+          </section>
+          <section class="panel" id="sec-ag-platform" style="margin-bottom:16px">
+            <div class="panel-head"><h2>Platform comparison<span class="sub">followers of all managed creators</span></h2></div>
+            <div class="chart-box mid"><canvas id="chart-ag-platform"></canvas></div>
+          </section>
+        </div>
+
+        <!-- marketing -->
+        <div id="area-marketing" class="hidden">
+          <section class="kpis" id="mk-kpis"></section>
+          <section class="row r-1-1">
+            <div class="panel"><div class="panel-head"><h2>Budget and spend by campaign</h2></div><div class="chart-box"><canvas id="chart-mk-spend"></canvas></div></div>
+            <div class="panel"><div class="panel-head"><h2>Reach by platform</h2></div><div class="chart-box mid"><canvas id="chart-mk-reach"></canvas></div><div class="legend" id="mk-reach-legend"></div></div>
+          </section>
+          <section class="panel" id="sec-mk-campaigns" style="margin-bottom:16px">
+            <div class="panel-head"><h2>Campaigns</h2></div>
+            <div style="overflow-x:auto"><table>
+              <thead><tr><th>Campaign</th><th>Platform</th><th>Status</th><th class="num">Budget</th><th class="num">Spend</th><th class="num">Reach</th><th class="num">Clicks</th><th class="num">CTR</th><th class="num">Conversions</th></tr></thead>
+              <tbody id="mk-body"></tbody></table></div>
+          </section>
+        </div>
+
+        <!-- admin (real data) -->
+        <div id="area-admin" class="hidden">
+          <section class="kpis" id="ad-kpis"></section>
+          <section class="row r-1-1">
+            <div class="panel"><div class="panel-head"><h2>Users by role</h2></div><div class="chart-box mid"><canvas id="chart-ad-roles"></canvas></div><div class="legend" id="ad-role-legend"></div></div>
+            <div class="panel"><div class="panel-head"><h2>New registrations<span class="sub">last 30 days</span></h2></div><div class="chart-box"><canvas id="chart-ad-reg"></canvas></div></div>
+          </section>
+          <section class="panel" id="sec-ad-top" style="margin-bottom:16px">
+            <div class="panel-head"><h2>Top creators<span class="sub">by total followers</span></h2></div>
+            <div style="overflow-x:auto"><table>
+              <thead><tr><th>#</th><th>Name</th><th>Email</th><th class="num">Followers</th></tr></thead>
+              <tbody id="ad-top-body"></tbody></table></div>
+            <div class="muted-msg hidden" id="ad-top-empty">No creator has analytics data yet.</div>
+          </section>
+          <section class="panel" id="sec-ad-users" style="margin-bottom:16px">
+            <div class="panel-head"><h2>Recent users<span class="sub">latest 10 registrations</span></h2></div>
+            <div style="overflow-x:auto"><table>
+              <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th></tr></thead>
+              <tbody id="ad-body"></tbody></table></div>
+          </section>
+        </div>
+      </div>
+
+      <div id="view-other" class="panel empty hidden">
+        <h2 id="other-title"></h2>
+        <p>This page is not built yet.</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_URL = location.port === "8000" ? "" : "http://localhost:8000";
+    const token = localStorage.getItem("token");
+    const AUTH = { Authorization: "Bearer " + token };
+    function goLogin() { localStorage.clear(); location.replace("index.html"); }
+    if (!token) goLogin();
+
+    const PLATFORM_COLORS = { YouTube: "#c4453c", Instagram: "#a64b7a", TikTok: "#3a3f47", X: "#4b86b4" };
+    const METRICS = [["views", "Views"], ["likes", "Likes"], ["comments", "Comments"], ["shares", "Shares"]];
+    const AUD_TABS = [["age", "Age"], ["gender", "Gender"], ["location", "Location"], ["device", "Device"]];
+    const PALETTE = ["#3f6f8f", "#7fa6a3", "#c9a66b", "#a0766f", "#8b8fa3", "#6d8b74"];
+    const BAR = "#5d7f99";
+
+    const ICONS = {
+      grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+      user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+      link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+      play: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/>',
+      chart: '<path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/>',
+      users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 15c2 .7 3.5 2.3 3.5 5"/>',
+      coin: '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1 0-2-.5-2.5-1.5M12 6.5V8m0 8v1.5"/>',
+      file: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+      sliders: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
+      building: '<path d="M4 21V4h10v17M14 9h6v12M4 21h16M8 8h2M8 12h2M8 16h2"/>',
+      megaphone: '<path d="M3 10v4h3l8 4V6L6 10z"/><path d="M18 9a4 4 0 0 1 0 6"/>',
+      search: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/>',
+      shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+    };
+    const NAV = {
+      creator: [["grid","Dashboard","top"],["user","My Profile"],["link","Social Accounts","sec-accounts"],["play","Content","sec-posts"],["chart","Analytics","sec-growth"],["users","Audience","sec-audience"],["coin","Revenue","sec-revenue"],["file","Reports"],["sliders","Settings"]],
+      agency: [["grid","Dashboard","top"],["users","Managed Creators","sec-ag-creators"],["chart","Platform Comparison","sec-ag-platform"],["coin","Revenue","sec-ag-revenue"],["building","Agency Profile"],["sliders","Settings"]],
+      marketing_team: [["grid","Dashboard","top"],["megaphone","Campaigns","sec-mk-campaigns"],["search","Creator Insights"],["file","Reports"],["sliders","Settings"]],
+      admin: [["grid","Dashboard","top"],["chart","Top Creators","sec-ad-top"],["shield","User Management","sec-ad-users"],["file","Platform Reports"],["sliders","Settings"]],
+    };
+    const SUBTITLE = {
+      creator: "How your content is doing across your platforms.",
+      agency: "The creators your agency manages.",
+      marketing_team: "How your campaigns are performing.",
+      admin: "Users and sign-ups across the platform. Everything here comes from the database.",
+    };
+    const AREAS = { creator: "data-area", agency: "area-agency", marketing_team: "area-marketing", admin: "area-admin" };
+
+    const state = { days: 30, platform: "all", metric: "views", aud: "age", data: null, role: null };
+    const charts = {};
+    const hasChart = typeof Chart !== "undefined";
+    if (hasChart) {
+      Chart.defaults.font.family = '"Public Sans", "Segoe UI", sans-serif';
+      Chart.defaults.font.size = 12;
+      Chart.defaults.color = "#66707d";
+      Chart.defaults.borderColor = "#eceef1";
+    }
+    const nf = new Intl.NumberFormat("en-IN");
+    const money = v => "$" + nf.format(Math.round(v));
+    const base = { responsive: true, maintainAspectRatio: false };
+    const noGridX = { grid: { display: false } };
+
+    function el(tag, text, props) { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; return Object.assign(e, props || {}); }
+    function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+    function $(id) { return document.getElementById(id); }
+    function shortDate(iso) { return new Date(iso + "T00:00:00").toLocaleDateString(undefined, { day: "numeric", month: "short" }); }
+    function signed(n, suffix) { return (n > 0 ? "+" : n < 0 ? "-" : "") + Math.abs(n) + suffix; }
+    function deltaNode(delta, suffix, label) {
+      if (delta === null || delta === undefined) return el("div", "No earlier data", { className: "delta flat" });
+      return el("div", signed(delta, suffix) + " " + label, { className: "delta " + (delta > 0 ? "up" : delta < 0 ? "down" : "flat") });
+    }
+    function setStatus(ok, text) { $("status-dot").className = "dot " + (ok ? "ok" : "err"); $("status-text").textContent = text; }
+    function showNotice(text, isErr) { const n = $("notice"); n.textContent = text; n.className = "notice" + (isErr ? " err" : "") + (text ? "" : " hidden"); }
+    function drawChart(key, canvasId, config, rebuild) {
+      if (!hasChart) return;
+      if (charts[key] && rebuild) { charts[key].destroy(); delete charts[key]; }
+      if (charts[key]) { charts[key].data = config.data; charts[key].update(); return; }
+      const stale = Chart.getChart($(canvasId)); if (stale) stale.destroy();
+      charts[key] = new Chart($(canvasId), config);
+    }
+    function kpiCards(boxId, items) {          // items: [label, valueText, deltaNode|null]
+      const box = $(boxId); clear(box);
+      items.forEach(([label, value, delta]) => {
+        const card = el("div", undefined, { className: "panel kpi" });
+        card.append(el("div", label, { className: "label" }), el("div", value, { className: "value" }));
+        if (delta) card.appendChild(delta);
+        box.appendChild(card);
+      });
+    }
+    function legend(boxId, rows, fmt, colors) {
+      const lg = $(boxId); clear(lg);
+      rows.forEach((r, i) => {
+        const row = el("div"), sw = el("i"); sw.style.background = colors ? colors[i] : PALETTE[i % PALETTE.length];
+        row.append(sw, el("span", r.label), el("span", fmt ? fmt(r.value) : nf.format(r.value), { className: "n" })); lg.appendChild(row);
+      });
+    }
+    function doughnut(key, canvasId, rows, colors) {
+      drawChart(key, canvasId, { type: "doughnut",
+        data: { labels: rows.map(r => r.label), datasets: [{ data: rows.map(r => r.value), backgroundColor: colors || PALETTE, borderWidth: 2, borderColor: "#fff" }] },
+        options: { ...base, cutout: "66%", plugins: { legend: { display: false } } } });
+    }
+    function fillTable(bodyId, rows) {
+      const body = $(bodyId); clear(body);
+      rows.forEach(cells => {
+        const tr = el("tr");
+        cells.forEach(c => { if (c instanceof Node) tr.appendChild(c); else tr.appendChild(el("td", String(c[0]), { className: c[1] || "" })); });
+        body.appendChild(tr);
+      });
+    }
+    function platCell(p) {
+      const td = el("td"), wrap = el("span", undefined, { className: "pc" }), sw = el("i", undefined, { className: "pd" });
+      sw.style.background = PLATFORM_COLORS[p] || "#999"; wrap.append(sw, document.createTextNode(p)); td.appendChild(wrap); return td;
+    }
+    function statusCell(text, cls) { const td = el("td"); td.appendChild(el("span", text, { className: "st " + cls })); return td; }
+
+    // ---------------- CREATOR ----------------
+    function renderCreator(d) {
+      const k = d.kpis;
+      kpiCards("kpis", [
+        ["Followers", nf.format(k.followers.value), deltaNode(k.followers.delta, "%", "since period start")],
+        ["Views", nf.format(k.views.value), deltaNode(k.views.delta, "%", "vs previous period")],
+        ["Likes", nf.format(k.likes.value), deltaNode(k.likes.delta, "%", "vs previous period")],
+        ["Comments", nf.format(k.comments.value), deltaNode(k.comments.delta, "%", "vs previous period")],
+        ["Shares", nf.format(k.shares.value), deltaNode(k.shares.delta, "%", "vs previous period")],
+        ["Engagement rate", k.engagement_rate.value + "%", deltaNode(k.engagement_rate.delta, " pts", "vs previous period")],
+      ]);
+
+      // one line, one axis: the combined total, or the single platform that is selected
+      const g = d.follower_growth, all = d.platform === "all";
+      const line = all ? g.total : g.series[d.platform];
+      const color = all ? "#1d6f77" : PLATFORM_COLORS[d.platform];
+      $("growth-sub").textContent = all ? "all platforms" : d.platform;
+      drawChart("followers", "chart-followers", { type: "line",
+        data: { labels: g.labels.map(shortDate), datasets: [{ label: all ? "All platforms" : d.platform, data: line, borderColor: color, borderWidth: 1.75, tension: .25, pointRadius: 0, pointHoverRadius: 4, fill: false }] },
+        options: { ...base, interaction: { mode: "index", intersect: false }, plugins: { legend: { display: false } },
+          scales: { x: { ...noGridX, ticks: { maxTicksLimit: 8 } }, y: { grace: "5%", ticks: { callback: v => nf.format(v) } } } } }, true);
+
+      const colors = d.accounts.map(a => PLATFORM_COLORS[a.platform] || "#999");
+      const accRows = d.accounts.map(a => ({ label: a.platform, value: a.followers }));
+      doughnut("platforms", "chart-platforms", accRows, colors); legend("platform-legend", accRows, null, colors);
+
+      renderContent(d.content_performance); renderAudience(d.audience);
+
+      $("posts-empty").classList.toggle("hidden", d.top_posts.length > 0);
+      fillTable("posts-body", d.top_posts.map((p, i) => [[i + 1], [p.title], platCell(p.platform), [nf.format(p.views), "num"], [nf.format(p.likes), "num"], [nf.format(p.comments), "num"], [p.engagement + "%", "num"]]));
+
+      const r = d.revenue;
+      if (r) {
+        $("rev-month").textContent = new Date(r.month + "T00:00:00").toLocaleDateString(undefined, { month: "long", year: "numeric" });
+        $("rev-total").textContent = money(r.total);
+        const dl = $("rev-delta"); dl.textContent = r.delta === null ? "" : signed(r.delta, "%") + " vs last month"; dl.className = "delta " + (r.delta >= 0 ? "up" : "down");
+        const box = $("rev-sources"); clear(box); const max = Math.max(...r.sources.map(s => s.amount));
+        r.sources.forEach(sr => { const row = el("div", undefined, { className: "src" }), top = el("div", undefined, { className: "top" }); top.append(el("span", sr.source), el("strong", money(sr.amount)));
+          const bar = el("div", undefined, { className: "bar" }), fill = el("i"); fill.style.width = (sr.amount / max * 100) + "%"; bar.appendChild(fill); row.append(top, bar); box.appendChild(row); });
+      }
+      const ab = $("accounts"); clear(ab);
+      d.accounts.forEach(a => { const row = el("div", undefined, { className: "acc" }), info = el("div", undefined, { className: "info" });
+        info.append(el("strong", a.platform), el("small", (a.handle || "") + "  ·  " + nf.format(a.followers) + " followers"));
+        row.append(info, el("span", a.connected ? "Sample data" : "Not connected", { className: "tag" })); ab.appendChild(row); });
+    }
+    function renderContent(c) {
+      const [key, label] = METRICS.find(m => m[0] === state.metric);
+      drawChart("content", "chart-content", { type: "bar", data: { labels: c.labels, datasets: [{ label, data: c[key], backgroundColor: BAR, borderRadius: 2, maxBarThickness: 38 }] },
+        options: { ...base, plugins: { legend: { display: false } }, scales: { x: noGridX, y: { ticks: { callback: v => nf.format(v) } } } } });
+    }
+    function renderAudience(a) { const rows = a[state.aud] || []; doughnut("audience", "chart-audience", rows); legend("aud-legend", rows, v => v + "%"); }
+
+    // ---------------- AGENCY ----------------
+    function renderAgency(d) {
+      const k = d.kpis;
+      kpiCards("ag-kpis", [
+        ["Managed creators", String(k.creators), null],
+        ["Combined followers", nf.format(k.followers), deltaNode(k.followers_delta, "%", "vs 30 days ago")],
+        ["Views (30 days)", nf.format(k.views), null],
+        ["Average engagement", k.engagement + "%", null],
+        ["Monthly revenue", money(k.revenue), null],
+      ]);
+      drawChart("agFollowers", "chart-ag-followers", { type: "bar",
+        data: { labels: d.creators.map(c => c.name), datasets: [{ label: "Followers", data: d.creators.map(c => c.followers), backgroundColor: d.creators.map(c => PLATFORM_COLORS[c.platform] || BAR), borderRadius: 2 }] },
+        options: { ...base, indexAxis: "y", plugins: { legend: { display: false } }, scales: { y: noGridX, x: { ticks: { callback: v => nf.format(v) } } } } });
+      doughnut("agRevenue", "chart-ag-revenue", d.revenue_share); legend("ag-rev-legend", d.revenue_share, money);
+      drawChart("agPlatform", "chart-ag-platform", { type: "bar",
+        data: { labels: d.by_platform.map(p => p.label), datasets: [{ label: "Followers", data: d.by_platform.map(p => p.value), backgroundColor: d.by_platform.map(p => PLATFORM_COLORS[p.label] || BAR), borderRadius: 2, maxBarThickness: 60 }] },
+        options: { ...base, plugins: { legend: { display: false } }, scales: { x: noGridX, y: { ticks: { callback: v => nf.format(v) } } } } });
+      fillTable("ag-body", d.creators.map((c, i) => [[i + 1], [c.name + " (" + c.handle + ")"], platCell(c.platform), [c.niche],
+        [nf.format(c.followers), "num"], [c.growth === null ? "-" : signed(c.growth, "%"), "num"], [c.engagement + "%", "num"], [money(c.revenue), "num"]]));
+    }
+
+    // ---------------- MARKETING ----------------
+    function renderMarketing(d) {
+      const k = d.kpis;
+      kpiCards("mk-kpis", [
+        ["Campaigns", k.campaigns + " (" + k.active + " active)", null],
+        ["Total budget", money(k.budget), null],
+        ["Total spend", money(k.spend), null],
+        ["Reach", nf.format(k.reach), null],
+        ["Clicks", nf.format(k.clicks), el("div", "CTR " + k.ctr + "%", { className: "delta flat" })],
+        ["Conversions", nf.format(k.conversions), el("div", "Avg CPC $" + k.cpc, { className: "delta flat" })],
+      ]);
+      drawChart("mkSpend", "chart-mk-spend", { type: "bar",
+        data: { labels: d.campaigns.map(c => c.name), datasets: [
+          { label: "Budget", data: d.campaigns.map(c => c.budget), backgroundColor: "#c9d0d8", borderRadius: 2 },
+          { label: "Spend", data: d.campaigns.map(c => c.spend), backgroundColor: BAR, borderRadius: 2 }] },
+        options: { ...base, plugins: { legend: { position: "bottom", labels: { boxWidth: 10, boxHeight: 10 } } },
+          scales: { x: { ...noGridX, ticks: { callback: function (v) { const t = this.getLabelForValue(v); return t.length > 12 ? t.slice(0, 12) + "..." : t; } } } } } });
+      const colors = d.by_platform.map(p => PLATFORM_COLORS[p.label] || "#999");
+      doughnut("mkReach", "chart-mk-reach", d.by_platform, colors); legend("mk-reach-legend", d.by_platform, null, colors);
+      fillTable("mk-body", d.campaigns.map(c => [[c.name], platCell(c.platform), statusCell(c.status, c.status),
+        [money(c.budget), "num"], [money(c.spend), "num"], [nf.format(c.reach), "num"], [nf.format(c.clicks), "num"], [c.ctr + "%", "num"], [nf.format(c.conversions), "num"]]));
+    }
+
+    // ---------------- ADMIN (real data) ----------------
+    function renderAdmin(d) {
+      const k = d.kpis;
+      kpiCards("ad-kpis", [
+        ["Total users", nf.format(k.total), el("div", k.active + " active", { className: "delta flat" })],
+        ["Creators", nf.format(k.creators), el("div", k.creators_with_data + " with analytics data", { className: "delta flat" })],
+        ["Agencies", nf.format(k.agencies), null],
+        ["Marketing teams", nf.format(k.marketing), null],
+        ["Administrators", nf.format(k.admins), null],
+        ["New in 7 days", nf.format(k.new_7d), null],
+      ]);
+      doughnut("adRoles", "chart-ad-roles", d.by_role); legend("ad-role-legend", d.by_role);
+      drawChart("adReg", "chart-ad-reg", { type: "bar",
+        data: { labels: d.registrations.labels.map(shortDate), datasets: [{ label: "Registrations", data: d.registrations.values, backgroundColor: BAR, borderRadius: 2 }] },
+        options: { ...base, plugins: { legend: { display: false } }, scales: { x: { ...noGridX, ticks: { maxTicksLimit: 8 } }, y: { beginAtZero: true, ticks: { precision: 0 } } } } });
+      const top = d.top_creators || [];
+      $("ad-top-empty").classList.toggle("hidden", top.length > 0);
+      fillTable("ad-top-body", top.map((c, i) => [[i + 1], [c.name], [c.email], [nf.format(c.followers), "num"]]));
+      fillTable("ad-body", d.recent_users.map(u => [[u.id], [u.full_name], [u.email], [u.role.replace("_", " ")], [u.joined ? shortDate(u.joined) : "-"],
+        statusCell(u.is_active ? "Active" : "Disabled", u.is_active ? "Active" : "Disabled")]));
+    }
+
+    // ---------------- LOADERS (each role calls its own endpoint) ----------------
+    const ROLE_CONFIG = {
+      creator: { path: () => `/analytics/dashboard?days=${state.days}&platform=${encodeURIComponent(state.platform)}`, demo: "/analytics/demo-data", render: renderCreator,
+        emptyText: "Your account has no analytics data yet. Load sample data to fill the dashboard. It is saved in your database.",
+        info: d => "Sample data, " + shortDate(d.range.start) + " to " + shortDate(d.range.end) + ". Real platform APIs are not connected yet." },
+      agency: { path: () => "/analytics/agency", demo: "/analytics/agency/demo-data", render: renderAgency,
+        emptyText: "You are not managing any creators yet. Load sample data to see how this dashboard will look.",
+        info: () => "Sample creators stored in your database. Real creator accounts will be linked in a later module." },
+      marketing_team: { path: () => "/analytics/marketing", demo: "/analytics/marketing/demo-data", render: renderMarketing,
+        emptyText: "You have no campaigns yet. Load sample data to see how this dashboard will look.",
+        info: () => "Sample campaigns stored in your database. Real numbers will come from the platform APIs later." },
+      admin: { path: () => "/analytics/admin", demo: null, render: renderAdmin, emptyText: "", info: () => "" },
+    };
+
+    async function loadRole() {
+      const cfg = ROLE_CONFIG[state.role];
+      let res;
+      try { res = await fetch(API_URL + cfg.path(), { headers: AUTH }); }
+      catch (e) { setStatus(false, "API offline"); showNotice("Cannot reach the server. Start the backend and refresh.", true); return; }
+      if (res.status === 401) return goLogin();
+      if (!res.ok) { setStatus(false, "API error"); showNotice("Could not load dashboard data (error " + res.status + ").", true); return; }
+
+      const d = await res.json(); state.data = d; setStatus(true, "API connected");
+      const area = $(AREAS[state.role]), empty = $("empty");
+      if (d.has_data === false) {
+        area.classList.add("hidden"); empty.classList.remove("hidden"); showNotice("", false); $("filters").classList.add("hidden"); $("reset-demo").classList.add("hidden");
+        $("empty-text").textContent = cfg.emptyText; $("load-demo").classList.toggle("hidden", !cfg.demo);
+        return;
+      }
+      empty.classList.add("hidden"); area.classList.remove("hidden"); $("filters").classList.toggle("hidden", state.role !== "creator");
+      $("reset-demo").classList.toggle("hidden", !cfg.demo);
+      showNotice(cfg.info(d), false);
+      cfg.render(d);
+    }
+
+    function buildPlatformChips(platforms) {
+      const box = $("platform-chips"); clear(box);
+      ["all", ...platforms].forEach(p => {
+        const b = el("button", p === "all" ? "All" : p, { type: "button", className: p === state.platform ? "active" : "" });
+        b.addEventListener("click", () => { state.platform = p; buildPlatformChips(platforms); loadRole(); }); box.appendChild(b);
+      });
+    }
+    function buildTabs(boxId, items, current, onPick) {
+      const box = $(boxId); clear(box);
+      items.forEach(([key, label]) => { const b = el("button", label, { type: "button" }); if (key === current) b.classList.add("active");
+        b.addEventListener("click", () => { onPick(key); buildTabs(boxId, items, key, onPick); }); box.appendChild(b); });
+    }
+    function buildNav(role) {
+      const nav = $("nav"); clear(nav);
+      (NAV[role] || NAV.creator).forEach(([icon, name, target], i) => {
+        const a = el("a"), svg = el("span"); svg.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS[icon] + "</svg>";
+        a.append(svg.firstChild, el("span", name)); if (i === 0) a.classList.add("active");
+        a.addEventListener("click", () => {
+          nav.querySelectorAll("a").forEach(x => x.classList.remove("active")); a.classList.add("active");
+          const onDash = !!target; $("view-dashboard").classList.toggle("hidden", !onDash); $("view-other").classList.toggle("hidden", onDash);
+          if (!onDash) { $("other-title").textContent = name; return; }
+          const node = target === "top" ? null : $(target);
+          if (node) node.scrollIntoView({ behavior: "smooth", block: "start" }); else window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+        nav.appendChild(a);
+      });
+    }
+
+    let started = false;
+    async function init() {
+      if (started) return; started = true;
+      let res;
+      try { res = await fetch(`${API_URL}/users/me`, { headers: AUTH }); }
+      catch (e) { document.body.classList.add("ready"); document.body.textContent = "Cannot reach the server. Start the backend and refresh."; return; }
+      if (!res.ok) return goLogin();
+      const me = await res.json(); state.role = ROLE_CONFIG[me.role] ? me.role : "creator";
+
+      const h = new Date().getHours(), greet = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+      $("welcome").textContent = greet + ", " + me.full_name.trim().split(" ")[0];
+      $("head-sub").textContent = SUBTITLE[state.role];
+      $("role-badge").textContent = me.role.replace("_", " ");
+      $("avatar").textContent = me.full_name.trim().charAt(0).toUpperCase();
+      $("me-name").textContent = me.full_name; $("me-email").textContent = me.email;
+      document.title = "CreatorIQ | " + me.role.replace("_", " ");
+      buildNav(state.role);
+
+      if (state.role === "creator") {
+        buildPlatformChips(["YouTube", "Instagram", "TikTok", "X"]);
+        buildTabs("metric-tabs", METRICS, state.metric, k => { state.metric = k; if (state.data && state.data.has_data) renderContent(state.data.content_performance); });
+        buildTabs("aud-tabs", AUD_TABS, state.aud, k => { state.aud = k; if (state.data && state.data.has_data) renderAudience(state.data.audience); });
+        $("range").addEventListener("change", e => { state.days = Number(e.target.value); loadRole(); });
+      } else { $("range").classList.add("hidden"); $("platform-chips").classList.add("hidden"); }
+      document.body.classList.add("ready");
+
+      $("load-demo").addEventListener("click", async e => {
+        const demo = ROLE_CONFIG[state.role].demo; if (!demo) return;
+        e.target.disabled = true; e.target.textContent = "Loading...";
+        const r = await fetch(API_URL + demo, { method: "POST", headers: AUTH });
+        e.target.disabled = false; e.target.textContent = "Load sample data";
+        if (r.ok || r.status === 409) loadRole(); else showNotice("Could not load sample data (error " + r.status + ").", true);
+      });
+      $("reset-demo").addEventListener("click", async e => {
+        const demo = ROLE_CONFIG[state.role].demo; if (!demo) return;
+        e.target.disabled = true;
+        await fetch(API_URL + demo, { method: "DELETE", headers: AUTH });
+        const r = await fetch(API_URL + demo, { method: "POST", headers: AUTH });
+        e.target.disabled = false;
+        if (r.ok) loadRole(); else showNotice("Could not reset sample data (error " + r.status + ").", true);
+      });
+      $("search").addEventListener("input", e => {
+        const q = e.target.value.trim().toLowerCase();
+        document.querySelectorAll("#posts-body tr, #ag-body tr, #mk-body tr, #ad-top-body tr, #ad-body tr")
+          .forEach(tr => tr.classList.toggle("hidden", q !== "" && !tr.textContent.toLowerCase().includes(q)));
+      });
+      await loadRole();
+    }
+    $("logout").addEventListener("click", goLogin);
+    init();
+  </script>
+</body>
+</html>
