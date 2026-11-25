@@ -1,0 +1,61 @@
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from .database import Base, engine, SessionLocal
+from . import models
+from .routers import auth, profiles, admin, analytics, youtube
+
+
+# Create database tables if they do not exist
+Base.metadata.create_all(bind=engine)
+
+
+# Create default roles if they do not exist
+with SessionLocal() as db:
+    for name in ["creator", "agency", "marketing", "admin"]:
+        existing_role = (
+            db.query(models.Role)
+            .filter_by(name=name)
+            .first()
+        )
+
+        if not existing_role:
+            db.add(models.Role(name=name))
+
+    db.commit()
+
+
+# Initialize FastAPI application
+app = FastAPI(title="CreatorIQ API")
+
+
+# Configure CORS for React frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# Milestone 1: Existing routers
+app.include_router(auth.router)
+app.include_router(profiles.router)
+app.include_router(admin.router)
+
+
+# Milestone 2: Analytics router
+app.include_router(analytics.router)
+
+
+# Milestone 2: YouTube integration
+app.include_router(youtube.router)
+
+
+@app.get("/")
+def home():
+    return {
+        "message": "CreatorIQ API is running successfully"
+    }
