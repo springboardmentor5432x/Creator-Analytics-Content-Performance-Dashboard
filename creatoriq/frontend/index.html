@@ -7,43 +7,384 @@
 <title>CreatorIQ | Login and Signup</title>
 
 <style>
-*{box-sizing:border-box}
-body{
-    margin:0;min-height:100vh;display:grid;place-items:center;
-    padding:20px;background:#f3f5fb;color:#19213a;
-    font-family:Arial,Helvetica,sans-serif
+:root {
+    --primary: #6755e8;
+    --primary-dark: #4f3acb;
+    --ink: #1d2240;
+    --muted: #77809a;
+    --border: #e7e9f2;
+    --surface: #ffffff;
+    --page: #f5f6fc;
 }
-.card{
-    width:min(430px,100%);padding:30px;background:#fff;
-    border:1px solid #e7eaf2;border-radius:18px;
-    box-shadow:0 15px 50px #17203312
+* { box-sizing: border-box; }
+html { min-height: 100%; }
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: clamp(14px, 3vw, 42px);
+    background:
+        radial-gradient(circle at 8% 12%, rgba(112, 96, 235, .10), transparent 30%),
+        radial-gradient(circle at 92% 88%, rgba(158, 145, 255, .11), transparent 30%),
+        var(--page);
+    color: var(--ink);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
-.logo{text-align:center;font-size:29px;font-weight:800;color:#625bff}
-.subtitle{text-align:center;color:#75809a;font-size:14px;margin:9px 0 25px}
-h2{font-size:21px;margin:0 0 7px}
-.description{color:#75809a;font-size:13px;margin:0 0 20px}
-label{display:block;margin:15px 0 7px;font-size:13px;font-weight:700}
-input,select{
-    width:100%;padding:12px 13px;border:1px solid #dce1ed;
-    border-radius:9px;font-size:14px;background:white;color:#19213a
+button, input, select { font: inherit; }
+.auth-shell {
+    width: min(1120px, 100%);
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(360px, 440px);
+    gap: clamp(22px, 4vw, 54px);
+    align-items: center;
 }
-input:focus,select:focus{outline:2px solid #c5c2ff;border-color:#625bff}
-button{
-    width:100%;padding:13px;margin-top:20px;border:0;border-radius:9px;
-    background:#625bff;color:white;font-weight:700;font-size:14px;cursor:pointer
+.auth-intro {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+    min-height: 620px;
+    padding: clamp(28px, 4vw, 46px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 28px;
+    color: #fff;
+    background: linear-gradient(145deg, #201d57 0%, #453bb3 54%, #7668ef 100%);
+    box-shadow: 0 24px 65px rgba(43, 36, 112, .22);
 }
-button:hover{background:#5048e5}
-button:disabled{opacity:.6;cursor:wait}
-.switch{text-align:center;margin-top:21px;font-size:13px;color:#75809a}
-.switch a{color:#625bff;text-decoration:none;font-weight:700}
-#message{font-size:13px;line-height:1.6;margin-top:15px;overflow-wrap:anywhere}
-.success{color:#07875a}
-.error{color:#c52d43}
-.hidden{display:none!important}
+.auth-intro::before,
+.auth-intro::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    pointer-events: none;
+}
+.auth-intro::before {
+    width: 390px;
+    height: 390px;
+    right: -150px;
+    top: -165px;
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 0 0 32px rgba(255,255,255,.035), 0 0 0 68px rgba(255,255,255,.025);
+}
+.auth-intro::after {
+    width: 280px;
+    height: 280px;
+    left: -175px;
+    bottom: -150px;
+    background: rgba(255,255,255,.055);
+    filter: blur(2px);
+}
+.intro-brand {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    font-size: 23px;
+    font-weight: 850;
+    letter-spacing: -.7px;
+}
+.brand-mark {
+    width: 35px;
+    height: 35px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    font-size: 20px;
+}
+.brand-tag {
+    margin-left: 4px;
+    color: rgba(255,255,255,.65);
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 1.5px;
+}
+.intro-copy {
+    max-width: 550px;
+    padding: 42px 0 30px;
+}
+.intro-kicker {
+    margin: 0 0 14px;
+    color: #d7d2ff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+}
+.intro-copy h1 {
+    margin: 0;
+    font-size: clamp(34px, 4vw, 49px);
+    line-height: 1.08;
+    letter-spacing: -1.6px;
+}
+.intro-copy h1 span { color: #c9c2ff; }
+.intro-copy > p:last-of-type {
+    max-width: 440px;
+    margin: 18px 0 0;
+    color: rgba(255,255,255,.76);
+    font-size: 14px;
+    line-height: 1.8;
+}
+.intro-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 23px;
+}
+.intro-features span {
+    padding: 8px 11px;
+    border: 1px solid rgba(255,255,255,.17);
+    border-radius: 20px;
+    background: rgba(255,255,255,.09);
+    color: rgba(255,255,255,.9);
+    font-size: 10px;
+    font-weight: 650;
+}
+.visual-card {
+    width: min(100%, 465px);
+    margin: 0 auto;
+    padding: 17px 18px 16px;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 17px;
+    background: rgba(255,255,255,.12);
+    box-shadow: 0 12px 28px rgba(23, 20, 75, .12);
+    backdrop-filter: blur(10px);
+}
+.visual-head, .visual-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255,255,255,.86);
+    font-size: 10px;
+    font-weight: 700;
+}
+.visual-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #d9ffef;
+    font-size: 9px;
+}
+.visual-live::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #7ce5b8;
+}
+.visual-chart {
+    height: 93px;
+    display: flex;
+    align-items: end;
+    gap: 9px;
+    margin: 18px 0 14px;
+    padding: 0 4px;
+    border-bottom: 1px solid rgba(255,255,255,.23);
+}
+.visual-chart span {
+    flex: 1;
+    min-width: 0;
+    border-radius: 5px 5px 0 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(202,194,255,.35));
+}
+.visual-foot {
+    color: rgba(255,255,255,.65);
+    font-size: 9px;
+    font-weight: 550;
+}
+.card {
+    width: 100%;
+    min-width: 0;
+    padding: 34px 34px 30px;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background: var(--surface);
+    box-shadow: 0 18px 55px rgba(32, 38, 72, .10);
+}
+.logo {
+    text-align: center;
+    color: var(--primary);
+    font-size: 28px;
+    font-weight: 850;
+    letter-spacing: -.9px;
+}
+.subtitle {
+    margin: 8px 0 28px;
+    color: var(--muted);
+    text-align: center;
+    font-size: 12px;
+}
+h2 {
+    margin: 0 0 7px;
+    color: var(--ink);
+    font-size: 21px;
+    letter-spacing: -.35px;
+}
+.description {
+    margin: 0 0 20px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+label {
+    display: block;
+    margin: 15px 0 7px;
+    color: #414966;
+    font-size: 11px;
+    font-weight: 750;
+}
+input, select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 11px 13px;
+    border: 1px solid #dfe2ed;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+    font-size: 13px;
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+input::placeholder { color: #a3a9bb; }
+input:focus, select:focus {
+    outline: none;
+    border-color: #8f82f3;
+    box-shadow: 0 0 0 3px rgba(103,85,232,.13);
+}
+button {
+    width: 100%;
+    min-height: 45px;
+    margin-top: 21px;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+    box-shadow: 0 7px 16px rgba(103,85,232,.19);
+    transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+button:hover {
+    background: var(--primary-dark);
+    box-shadow: 0 9px 19px rgba(79,58,203,.23);
+    transform: translateY(-1px);
+}
+button:disabled { opacity: .6; cursor: wait; transform: none; }
+.switch {
+    margin-top: 21px;
+    color: var(--muted);
+    text-align: center;
+    font-size: 12px;
+}
+.switch a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 750;
+}
+.switch a:hover { text-decoration: underline; }
+#message {
+    margin-top: 15px;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+.success { color: #07875a; }
+.error { color: #c52d43; }
+.hidden { display: none !important; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 3px solid rgba(103,85,232,.24);
+    outline-offset: 2px;
+}
+@media(max-width: 860px) {
+    body { place-items: start center; padding: 22px 16px; }
+    .auth-shell {
+        width: min(480px, 100%);
+        grid-template-columns: minmax(0,1fr);
+        gap: 14px;
+    }
+    .auth-intro {
+        min-height: 0;
+        padding: 24px;
+        border-radius: 20px;
+    }
+    .intro-brand { font-size: 20px; }
+    .intro-copy { padding: 25px 0 17px; }
+    .intro-copy h1 { font-size: clamp(27px, 6vw, 36px); letter-spacing: -1px; }
+    .intro-copy > p:last-of-type { margin-top: 12px; font-size: 12px; }
+    .intro-features { margin-top: 15px; }
+    .visual-card { display: none; }
+    .card { padding: 28px 26px 25px; border-radius: 18px; }
+}
+@media(max-width: 480px) {
+    body { padding: 12px; }
+    .auth-intro { padding: 20px; }
+    .intro-brand { font-size: 18px; }
+    .brand-tag { font-size: 8px; }
+    .intro-copy { padding: 19px 0 8px; }
+    .intro-copy h1 { font-size: 27px; }
+    .intro-features span { padding: 7px 9px; font-size: 9px; }
+    .card { padding: 24px 19px 22px; }
+    .logo { font-size: 25px; }
+    .subtitle { margin-bottom: 23px; }
+}
+@media(max-width: 350px) {
+    .brand-tag { display: none; }
+    .card { padding-left: 16px; padding-right: 16px; }
+}
 </style>
 </head>
 
 <body>
+<div class="auth-shell">
+<section class="auth-intro" aria-label="CreatorIQ platform introduction">
+    <div class="intro-brand">
+        <span class="brand-mark" aria-hidden="true">◈</span>
+        <span>CreatorIQ</span>
+        <span class="brand-tag">CREATOR INTELLIGENCE</span>
+    </div>
+
+    <div class="intro-copy">
+        <p class="intro-kicker">YOUR CREATOR WORKSPACE</p>
+        <h1>Make every creator metric <span>work together.</span></h1>
+        <p>Bring your audience, content performance and social channels into one clear workspace. Spend less time switching platforms and more time understanding your growth.</p>
+        <div class="intro-features">
+            <span>Audience insights</span>
+            <span>Content analytics</span>
+            <span>Social performance</span>
+        </div>
+    </div>
+
+    <div class="visual-card" aria-hidden="true">
+        <div class="visual-head">
+            <span>Creator performance overview</span>
+            <span class="visual-live">Live workspace</span>
+        </div>
+        <div class="visual-chart">
+            <span style="height:28%"></span>
+            <span style="height:42%"></span>
+            <span style="height:36%"></span>
+            <span style="height:57%"></span>
+            <span style="height:49%"></span>
+            <span style="height:72%"></span>
+            <span style="height:64%"></span>
+            <span style="height:91%"></span>
+        </div>
+        <div class="visual-foot">
+            <span>Audience</span>
+            <span>Content</span>
+            <span>Engagement</span>
+            <span>Growth</span>
+        </div>
+    </div>
+</section>
 <main class="card">
     <div class="logo">CreatorIQ</div>
     <p class="subtitle">Your creator journey starts here.</p>
@@ -102,12 +443,13 @@ button:disabled{opacity:.6;cursor:wait}
 
     <div id="message" role="status" aria-live="polite"></div>
 </main>
+</div>
 
 <script>
 "use strict";
 
 /* FastAPI runs on port 8000 with the command given below. */
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://my-creatoriq.onrender.com";
 const TOKEN_KEY = "creatoriq_token";
 const USER_KEY = "creatoriq_user";
 
