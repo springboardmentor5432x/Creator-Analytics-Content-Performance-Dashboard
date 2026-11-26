@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -432,6 +431,16 @@ tbody tr:last-child td { border-bottom: 0; }
 .content-meta { color: var(--muted); font-size: 9px; margin-top: 4px; }
 .inline-actions { display: flex; gap: 7px; flex-wrap: wrap; }
 .section-anchor { scroll-margin-top: 18px; }
+.youtube-connect-form { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
+.youtube-connect-form input { flex:1; min-width:210px; padding:10px 11px; border:1px solid var(--border); border-radius:8px; }
+.youtube-status { color:var(--muted); font-size:11px; line-height:1.6; margin:8px 0; overflow-wrap:anywhere; }
+.youtube-video-list { display:grid; gap:9px; }
+.youtube-video { display:grid; grid-template-columns:56px minmax(0,1fr) auto; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
+.youtube-video img { width:56px; height:40px; object-fit:cover; border-radius:6px; background:var(--primary-light); }
+.youtube-video-title { font-weight:700; font-size:11px; white-space:normal; line-height:1.5; }
+.youtube-video-meta { color:var(--muted); font-size:10px; margin-top:3px; }
+.youtube-video-stats { color:var(--muted); font-size:10px; text-align:right; white-space:normal; }
+@media(max-width:600px) { .youtube-video { grid-template-columns:48px minmax(0,1fr); } .youtube-video-stats { grid-column:2; text-align:left; } }
 .footer { text-align: center; padding: 24px 0 8px; font-size: 10px; color: var(--muted); }
 
 @media(max-width:1200px) {
@@ -463,6 +472,725 @@ tbody tr:last-child td { border-bottom: 0; }
     .panel { padding: 13px; }
     .donut-wrap { flex-wrap: wrap; }
 }
+
+.campaign-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.campaign-form label { display:grid; gap:5px; color:var(--muted); font-size:10px; font-weight:700; }
+.campaign-form input,.campaign-form select,.campaign-form textarea { width:100%; min-width:0; padding:10px; border:1px solid var(--border); border-radius:8px; background:#fff; color:var(--text); }
+.campaign-form textarea { min-height:75px; resize:vertical; grid-column:1/-1; }
+.campaign-form .wide { grid-column:1/-1; }
+.campaign-actions { display:flex; gap:7px; flex-wrap:wrap; margin-top:11px; }
+.campaign-table-actions { display:flex; gap:6px; }
+.btn-small { padding:6px 8px; font-size:10px; }
+@media(max-width:650px) { .campaign-form { grid-template-columns:1fr; } .campaign-form textarea,.campaign-form .wide { grid-column:auto; } }
+
+
+.table-tools { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 10px; }
+.table-tools input { flex:1; min-width:150px; padding:8px 10px; border:1px solid var(--border); border-radius:8px; }
+.table-tools select { padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:#fff; }
+.local-record-form { margin-bottom:10px; }
+.local-record-form label { min-width:0; }
+
+
+/* ============================================================
+   CREATORIQ VISUAL REFRESH
+   Styling-only layer: preserves existing markup, routes and JS.
+   ============================================================ */
+:root {
+    --primary: #6755e8;
+    --primary-dark: #4f3acb;
+    --primary-light: #f0edff;
+    --primary-soft: #f8f6ff;
+    --background: #f6f7fb;
+    --surface: #ffffff;
+    --text: #1b2038;
+    --muted: #737b93;
+    --border: #e8eaf2;
+    --shadow: 0 8px 24px rgba(28, 34, 67, .055);
+}
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 18px;
+}
+body {
+    background: var(--background);
+    color: var(--text);
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+.app {
+    width: 100%;
+    min-width: 0;
+    min-height: 100vh;
+}
+.sidebar {
+    width: 248px;
+    padding: 27px 16px 18px;
+    background: #fff;
+    border-right: 1px solid #e9eaf2;
+    box-shadow: 3px 0 22px rgba(35, 39, 76, .025);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+    z-index: 5;
+}
+.logo {
+    margin: 0 10px 5px;
+    font-size: 25px;
+    letter-spacing: -.9px;
+}
+.logo-caption {
+    margin: 0 10px 31px;
+    font-size: 11px;
+}
+.workspace-label {
+    margin: 0 11px 11px;
+    color: #9298ad;
+    letter-spacing: 1.35px;
+}
+.nav {
+    gap: 6px;
+}
+.nav a {
+    min-height: 42px;
+    padding: 11px 13px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    color: #68708a;
+    font-size: 12px;
+    font-weight: 550;
+    transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease;
+}
+.nav a:hover {
+    background: #f8f7ff;
+    border-color: #eeeaff;
+    color: var(--primary-dark);
+    transform: translateX(2px);
+}
+.nav a.active {
+    background: linear-gradient(100deg, #f0edff, #f8f7ff);
+    border-color: #e6e1ff;
+    color: var(--primary-dark);
+    font-weight: 750;
+    box-shadow: inset 3px 0 0 var(--primary);
+}
+.nav-icon {
+    width: 20px;
+    color: var(--primary);
+}
+.sidebar-bottom {
+    padding-top: 20px;
+}
+.account {
+    padding: 17px 6px 14px;
+}
+.avatar {
+    width: 39px;
+    height: 39px;
+    border-radius: 13px;
+}
+.logout {
+    border-radius: 10px;
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+.logout:hover {
+    border-color: #ded8ff;
+}
+.main {
+    min-width: 0;
+    width: 100%;
+    padding: 29px clamp(20px, 2.6vw, 38px) 34px;
+    overflow-x: hidden;
+}
+.topbar {
+    margin-bottom: 23px;
+}
+h1 {
+    font-size: 28px;
+    letter-spacing: -.8px;
+    line-height: 1.2;
+}
+.subtitle {
+    font-size: 12px;
+    max-width: 720px;
+}
+.top-actions {
+    gap: 10px;
+}
+.select-date, .btn {
+    min-height: 38px;
+    border-radius: 10px;
+    border-color: #e5e7f0;
+    padding: 10px 13px;
+    font-size: 11px;
+    transition: background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.btn:hover, .select-date:hover {
+    border-color: #d8d2ff;
+    box-shadow: 0 4px 12px rgba(74, 59, 170, .07);
+}
+.btn:active {
+    transform: translateY(1px);
+}
+.btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 5px 12px rgba(103, 85, 232, .16);
+}
+.btn-primary:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid rgba(103, 85, 232, .24);
+    outline-offset: 2px;
+}
+.icon-btn {
+    border-radius: 11px;
+}
+.error {
+    border: 1px solid #ffd5dd;
+    border-radius: 12px;
+}
+.notice {
+    border-radius: 12px;
+    padding: 13px 16px;
+}
+.welcome {
+    min-height: 112px;
+    padding: 23px 25px;
+    border-radius: 17px;
+    border-color: #e4dfff;
+    background: linear-gradient(112deg, #eeeaff 0%, #f8f6ff 55%, #fff 100%);
+    box-shadow: 0 8px 22px rgba(69, 54, 151, .045);
+    margin-bottom: 19px;
+}
+.welcome h2 {
+    font-size: 20px;
+    letter-spacing: -.35px;
+}
+.welcome p {
+    max-width: 760px;
+    font-size: 12px;
+}
+.pill {
+    padding: 7px 11px;
+    border: 1px solid #e8e3ff;
+    border-radius: 20px;
+    box-shadow: 0 2px 7px rgba(59, 49, 120, .04);
+}
+.metrics {
+    gap: 14px;
+    margin-bottom: 19px;
+}
+.metric {
+    padding: 18px 18px 17px;
+    border-radius: 15px;
+    border-color: #e9eaf2;
+    box-shadow: var(--shadow);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.metric:hover {
+    transform: translateY(-2px);
+    border-color: #ded8ff;
+    box-shadow: 0 12px 26px rgba(40, 43, 82, .075);
+}
+.metric-head {
+    margin-bottom: 16px;
+}
+.metric-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08px;
+}
+.metric-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    background: linear-gradient(145deg, #f0edff, #e9e4ff);
+}
+.metric-value {
+    font-size: clamp(21px, 1.85vw, 27px);
+    letter-spacing: -.65px;
+    line-height: 1.2;
+}
+.metric-foot {
+    margin-top: 9px;
+    font-size: 10px;
+}
+.grid-main, .grid-half, .grid-thirds {
+    gap: 17px;
+    margin-bottom: 17px;
+}
+.grid-main > *, .grid-half > *, .grid-thirds > * {
+    min-width: 0;
+}
+.panel {
+    padding: 19px;
+    border-radius: 16px;
+    border-color: #e9eaf2;
+    box-shadow: var(--shadow);
+    min-width: 0;
+}
+.panel-head {
+    align-items: center;
+    margin-bottom: 17px;
+}
+.panel h3 {
+    font-size: 14px;
+    letter-spacing: -.15px;
+}
+.panel-sub {
+    font-size: 10px;
+    color: #858ca2;
+}
+.badge {
+    padding: 6px 9px;
+    border-radius: 9px;
+    font-size: 10px;
+}
+.chart {
+    width: 100%;
+    max-width: 100%;
+    height: 235px;
+}
+.chart-empty {
+    border: 1px dashed #e4e5ef;
+    border-radius: 12px;
+    background: #fbfbfe;
+    min-height: 135px;
+}
+.donut-wrap {
+    gap: 20px;
+    min-height: 180px;
+}
+.donut {
+    width: 142px;
+    height: 142px;
+    box-shadow: 0 5px 16px rgba(60, 52, 130, .08);
+}
+.donut:after {
+    inset: 30px;
+    background: #fff;
+}
+.donut-center {
+    font-size: 18px;
+    letter-spacing: -.3px;
+}
+.donut-center small {
+    font-size: 10px;
+}
+.donut-legend {
+    gap: 13px;
+}
+.legend-row {
+    align-items: center;
+    font-size: 11px;
+}
+.legend-label {
+    font-size: 11px;
+}
+.legend-color {
+    width: 9px;
+    height: 9px;
+}
+.platform-grid {
+    gap: 11px;
+}
+.platform-card {
+    padding: 14px;
+    border-radius: 13px;
+    border-color: #e9eaf2;
+    background: linear-gradient(160deg, #fff 70%, #fbfaff 100%);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.platform-card:hover {
+    transform: translateY(-2px);
+    border-color: #ded8ff;
+    box-shadow: 0 9px 19px rgba(49, 45, 105, .06);
+}
+.platform-name {
+    gap: 9px;
+    font-size: 12px;
+    margin-bottom: 13px;
+}
+.platform-logo {
+    width: 29px;
+    height: 29px;
+    border-radius: 9px;
+    font-size: 12px;
+}
+.platform-count {
+    font-size: 22px;
+    letter-spacing: -.45px;
+}
+.platform-note {
+    font-size: 10px;
+}
+.table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+table {
+    font-size: 11px;
+}
+th {
+    padding: 12px 11px;
+    background: #f7f6fc;
+    letter-spacing: .55px;
+}
+td {
+    padding: 12px 11px;
+}
+tbody tr:hover {
+    background: #fbfaff;
+}
+.status {
+    padding: 5px 9px;
+}
+.person-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+}
+.activity-list {
+    gap: 17px;
+}
+.activity-icon {
+    border-radius: 10px;
+}
+.youtube-connect-form {
+    gap: 9px;
+    margin: 14px 0;
+}
+.youtube-connect-form input {
+    min-height: 39px;
+    border-radius: 10px;
+    border-color: #e5e7f0;
+    background: #fff;
+}
+.youtube-status {
+    font-size: 11px;
+}
+.youtube-video-list {
+    gap: 5px;
+}
+.youtube-video {
+    grid-template-columns: 68px minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 12px 9px;
+    border-radius: 11px;
+    border-bottom-color: #eff0f6;
+    transition: background .16s ease;
+}
+.youtube-video:hover {
+    background: #fbfaff;
+}
+.youtube-video img {
+    width: 68px;
+    height: 49px;
+    border-radius: 9px;
+}
+.youtube-video-title {
+    font-size: 12px;
+}
+.youtube-video-meta {
+    font-size: 10px;
+    line-height: 1.45;
+}
+.content-thumb {
+    width: 48px;
+    height: 40px;
+    border-radius: 9px;
+}
+.footer {
+    padding: 28px 0 12px;
+}
+
+/* Tablet layout */
+@media(max-width:1100px) {
+    .sidebar {
+        width: 220px;
+    }
+    .main {
+        padding: 22px 20px 28px;
+    }
+    .metrics {
+        gap: 11px;
+    }
+    .metric {
+        padding: 15px;
+    }
+    .grid-main, .grid-half, .grid-thirds {
+        gap: 13px;
+    }
+}
+
+/* Compact devices */
+@media(max-width:850px) {
+    .app {
+        display: block;
+    }
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        padding: 16px 18px 12px;
+    }
+    .logo-caption {
+        margin-bottom: 17px;
+    }
+    .nav {
+        grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+        gap: 6px;
+    }
+    .sidebar-bottom {
+        padding-top: 10px;
+    }
+    .account {
+        padding-top: 11px;
+    }
+    .main {
+        padding: 20px 18px 28px;
+    }
+    .grid-main, .grid-half, .grid-thirds {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .topbar {
+        flex-direction: row;
+        align-items: center;
+    }
+    .donut-wrap {
+        justify-content: flex-start;
+    }
+}
+
+/* Phone layout */
+@media(max-width:650px) {
+    .sidebar {
+        padding: 14px 13px 10px;
+    }
+    .logo {
+        font-size: 22px;
+    }
+    .nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .nav a {
+        min-height: 40px;
+        padding: 9px 10px;
+        font-size: 11px;
+    }
+    .main {
+        padding: 16px 12px 24px;
+    }
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    h1 {
+        font-size: 23px;
+    }
+    .top-actions {
+        width: 100%;
+    }
+    .welcome {
+        padding: 18px;
+        border-radius: 15px;
+    }
+    .welcome h2 {
+        font-size: 18px;
+    }
+    .metrics, .metrics.five {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+    }
+    .metric {
+        padding: 13px;
+        border-radius: 13px;
+    }
+    .metric-value {
+        font-size: 20px;
+    }
+    .grid-main, .grid-half, .grid-thirds {
+        gap: 11px;
+        margin-bottom: 12px;
+    }
+    .panel {
+        padding: 15px;
+        border-radius: 14px;
+    }
+    .chart {
+        height: 205px;
+    }
+    .donut-wrap {
+        gap: 15px;
+        justify-content: center;
+    }
+    .donut {
+        width: 125px;
+        height: 125px;
+    }
+    .donut:after {
+        inset: 26px;
+    }
+    .donut-legend {
+        min-width: 150px;
+    }
+    .platform-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .youtube-video {
+        grid-template-columns: 54px minmax(0, 1fr);
+        gap: 9px;
+        padding: 10px 5px;
+    }
+    .youtube-video img {
+        width: 54px;
+        height: 42px;
+    }
+    .youtube-video-stats {
+        grid-column: 2;
+        text-align: left;
+    }
+}
+@media(max-width:390px) {
+    .metrics, .metrics.five, .platform-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .nav {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .donut-wrap {
+        flex-direction: column;
+    }
+    .donut-legend {
+        width: 100%;
+    }
+}
+
+
+/* Zoom-safe layout for the post comparison controls. */
+.compare-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(88px, auto);
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 12px;
+}
+.compare-controls > * {
+    min-width: 0;
+    max-width: 100%;
+}
+.compare-controls .compare-select {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.compare-controls .compare-button {
+    width: auto;
+    min-width: 88px;
+    min-height: 38px;
+    margin: 0;
+    padding: 8px 12px;
+    white-space: normal;
+    line-height: 1.25;
+}
+@media(max-width: 1100px) {
+    .compare-controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .compare-controls .compare-button {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+}
+@media(max-width: 560px) {
+    .compare-controls {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .compare-controls .compare-button {
+        grid-column: auto;
+    }
+}
+
+
+/* Fill unused dashboard grid columns across every role. */
+.grid-main > :only-child,
+.grid-half > :only-child,
+.grid-thirds > :only-child {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+}
+.grid-half > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+}
+.grid-thirds > :last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
+}
+
+
+/* Compact summary metrics inside report panels (Admin, Agency, Marketing). */
+.panel .metrics {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 118px), 1fr));
+    gap: 10px;
+}
+.panel .metrics .metric {
+    min-width: 0;
+    padding: 13px 10px;
+}
+.panel .metrics .metric-head {
+    gap: 5px;
+    margin-bottom: 11px;
+}
+.panel .metrics .metric-title {
+    min-width: 0;
+    line-height: 1.35;
+}
+.panel .metrics .metric-icon {
+    width: 29px;
+    height: 29px;
+    flex: 0 0 29px;
+}
+.panel .metrics .metric-value {
+    font-size: clamp(12px, 1.15vw, 17px);
+    line-height: 1.2;
+    letter-spacing: -.35px;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+.panel .metrics .metric-foot {
+    line-height: 1.4;
+}
+.content-library-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+}
+.content-library-toggle {
+    width: auto;
+    min-width: 105px;
+    min-height: 34px;
+    margin: 0;
+    padding: 7px 15px;
+    border-radius: 9px;
+    font-size: 11px;
+}
+@media(max-width: 520px) {
+    .panel .metrics {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 105px), 1fr));
+    }
+}
+
 </style>
 </head>
 
@@ -515,7 +1243,7 @@ tbody tr:last-child td { border-bottom: 0; }
 <script>
 "use strict";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://my-creatoriq.onrender.com";
 const TOKEN_KEY = "creatoriq_token";
 const USER_KEY = "creatoriq_user";
 const token = sessionStorage.getItem(TOKEN_KEY);
@@ -529,6 +1257,7 @@ const PLATFORM_NAMES = {
     linkedin: "LinkedIn"
 };
 
+/* Preserved all original sub-routes exactly as shown in your video */
 const ROLE_CONFIG = {
     creator: {
         title: "Creator Dashboard",
@@ -540,6 +1269,7 @@ const ROLE_CONFIG = {
             ["content", "▣", "My Content"],
             ["analytics", "▥", "Analytics"],
             ["social", "◎", "Social Accounts"],
+            ["public-account-search", "⌕", "Public Account Search"],
             ["audience", "♙", "Audience"],
             ["earnings", "▤", "Earnings"],
             ["brands", "◇", "Brand Deals"],
@@ -745,32 +1475,54 @@ function activity(items) {
 function bars(items) {
     return `<div class="bars">${items.map(item => `
         <div class="bar-item">
-            <div class="bar-top"><span>${esc(item.label)}</span><strong>${esc(item.value)}</strong></div>
+            <div class="bar-top"><span>${esc(item.label)}</span><strong>${esc(item.value || item.percent + "%")}</strong></div>
             <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0, Math.min(100, Number(item.percent) || 0))}%"></div></div>
         </div>`).join("")}</div>`;
 }
 
 function donut(items, centerValue, centerLabel) {
-    const total = items.reduce((sum, item) => sum + Number(item.value || 0), 0);
+    // A missing platform snapshot is not the same as zero followers.
+    const knownItems = items.filter(item =>
+        item.value !== null &&
+        item.value !== undefined &&
+        Number.isFinite(Number(item.value)) &&
+        Number(item.value) >= 0
+    );
+    const total = knownItems.reduce((sum, item) => sum + Number(item.value), 0);
     let cumulative = 0;
-    const stops = items.map((item, i) => {
-        const start = cumulative;
-        cumulative += total ? Number(item.value || 0) / total * 100 : 0;
-        return `${COLORS[i % COLORS.length]} ${start}% ${cumulative}%`;
-    }).join(", ");
+    const stops = total > 0 ? knownItems
+        .filter(item => Number(item.value) > 0)
+        .map(item => {
+            const start = cumulative;
+            cumulative += Number(item.value) / total * 100;
+            const color = COLORS[items.indexOf(item) % COLORS.length];
+            return `${color} ${start}% ${cumulative}%`;
+        }).join(", ") : "";
 
-    const legend = items.map((item, i) => `
-        <div class="legend-row">
-            <span class="legend-label">
-                <span class="legend-color" style="background:${COLORS[i % COLORS.length]}"></span>
-                ${esc(item.label)}
-            </span>
-            <strong>${total ? Math.round(Number(item.value || 0) / total * 100) : 0}%</strong>
-        </div>`).join("");
+    const legend = items.map((item, i) => {
+        const hasSnapshot = item.value !== null &&
+            item.value !== undefined &&
+            Number.isFinite(Number(item.value)) &&
+            Number(item.value) >= 0;
+        const reading = !hasSnapshot
+            ? "Not synced"
+            : total > 0
+                ? `${Math.round(Number(item.value) / total * 100)}%`
+                : "0%";
+        return `
+            <div class="legend-row">
+                <span class="legend-label">
+                    <span class="legend-color" style="background:${COLORS[i % COLORS.length]}"></span>
+                    ${esc(item.label)}
+                </span>
+                <strong>${reading}</strong>
+            </div>`;
+    }).join("");
 
+    const hasAnySnapshot = knownItems.length > 0;
     return `<div class="donut-wrap">
         <div class="donut" style="background:conic-gradient(${stops || "#e9e3ff 0 100%"})">
-            <div class="donut-center">${esc(centerValue)}<small>${esc(centerLabel)}</small></div>
+            <div class="donut-center">${hasAnySnapshot ? esc(centerValue) : "—"}<small>${hasAnySnapshot ? esc(centerLabel) : "No snapshots"}</small></div>
         </div>
         <div class="donut-legend">${legend}</div>
     </div>`;
@@ -828,43 +1580,125 @@ function legendSeries(series) {
 
 function platformCards(platforms) {
     const items = Object.keys(PLATFORM_NAMES);
-    return `<div class="platform-grid">${items.map((key, i) => {
-        const exists = Object.prototype.hasOwnProperty.call(platforms, key);
+    return `<div class="platform-grid">${items.map((key) => {
+        const exists = Object.prototype.hasOwnProperty.call(platforms, key) &&
+            platforms[key] !== null &&
+            platforms[key] !== undefined &&
+            Number.isFinite(Number(platforms[key]));
+        const followerValue = exists ? fmt(platforms[key]) : "—";
+        const instagramActions = key === "instagram" ? `
+            <button class="btn btn-primary" style="margin-top:8px;padding:5px 8px;font-size:10px" data-connect-platform="instagram">Connect Instagram</button>
+            <button class="btn" style="margin-top:8px;padding:5px 8px;font-size:10px" data-sync-platform="instagram">Sync connected account</button>
+            <div class="platform-note">Sign in directly through Instagram. Your Instagram User token is encrypted and stored per CreatorIQ user.</div>
+        ` : "";
+        const otherActions = key !== "youtube" && key !== "instagram"
+            ? `<button class="btn btn-primary" style="margin-top:8px;padding:4px 8px;font-size:10px" data-sync-platform="${key}">Sync Now</button>`
+            : "";
         return `<div class="platform-card">
             <div class="platform-name"><span class="platform-logo">${esc(PLATFORM_NAMES[key].charAt(0))}</span>${esc(PLATFORM_NAMES[key])}</div>
-            <div class="platform-count">${fmt(platforms[key] || 0)}</div>
-            <div class="platform-note">${exists ? "Latest saved followers" : "No data saved yet"}</div>
+            <div class="platform-count">${followerValue}</div>
+            <div class="platform-note">${exists ? "Latest saved followers" : "No follower snapshot yet"}</div>
+            ${instagramActions}${otherActions}
         </div>`;
     }).join("")}</div>`;
 }
 
-function Notice() {
-    return `<div class="notice">
-        Some campaign, revenue, views, engagement and account-wide figures on this page are illustrative  data.
-        Your follower totals and growth history are fetched from the existing API.  figures are not live database records.
-    </div>`;
+function campaignManagerPanel(heading = "Campaign Management", allowCreate = true) {
+    return `
+    <section class="panel section-anchor" id="campaigns">
+      <div class="panel-head"><div><h3>${esc(heading)}</h3><div class="panel-sub">Create and manage campaigns saved in your database.</div></div><span class="badge">API</span></div>
+      ${allowCreate ? `
+      <form id="campaign-form" class="campaign-form">
+        <label>Campaign name<input id="campaign-name" name="name" maxlength="150" required placeholder="e.g. Product launch campaign"></label>
+        <label>Platform<select id="campaign-platform" name="platform" required>
+          <option value="instagram">Instagram</option><option value="youtube">YouTube</option>
+          <option value="x">X (Twitter)</option><option value="linkedin">LinkedIn</option>
+          <option value="multi-platform">Multi-platform</option>
+        </select></label>
+        <label>Budget (₹)<input id="campaign-budget" name="budget" type="number" min="0" step="0.01" placeholder="Optional"></label>
+        <label>Status<select id="campaign-status" name="status"><option value="planning">Planning</option><option value="active">Active</option><option value="paused">Paused</option><option value="completed">Completed</option></select></label>
+        <label>Start date<input id="campaign-start" name="start_date" type="date"></label>
+        <label>End date<input id="campaign-end" name="end_date" type="date"></label>
+        <label class="wide">Description<textarea id="campaign-description" name="description" maxlength="5000" placeholder="Campaign goals, audience, and notes"></textarea></label>
+        <div class="campaign-actions wide">
+          <button type="submit" class="btn btn-primary" id="campaign-save">Save campaign</button>
+          <button type="button" class="btn" id="campaign-cancel" hidden>Cancel edit</button>
+        </div>
+      </form>
+      <div id="campaign-message" class="youtube-status" role="status"></div>
+      ` : `<div id="campaign-message" class="youtube-status" role="status">Campaigns are visible here according to the API's ownership rules.</div>`}
+      <div style="margin-top:16px"><h3 style="margin-bottom:10px">Saved campaigns</h3><div id="campaign-list" class="chart-empty">Loading campaigns…</div></div>
+    </section>`;
 }
 
-/* CREATOR DASHBOARD */
-function creatorDashboard(user, analytics, growth, config) {
+/* ============================================================
+   CREATOR DASHBOARD (Preserves original UI + Adds Milestone 2 features)
+   ============================================================ */
+function creatorDashboard(user, analytics, growth, contentData, config, instagramData = {}) {
     const p = analytics.platforms || {};
     const total = Number(analytics.total_followers || 0);
-    const platformCount = Object.keys(p).length;
     const dates = growth.slice(-7);
     const labels = dates.map((r, i) => {
         const d = String(r.date || "").slice(5, 10);
         return d || `Day ${i + 1}`;
     });
 
-
+    const m = contentData.metrics || {};
+    const totalViews = Number(m.total_views || 0);
+    const totalLikes = Number(m.total_likes || 0);
+    const totalComments = Number(m.total_comments || 0);
+    const instagramAccount = instagramData.account || {};
+    const instagramPosts = Array.isArray(instagramData.posts) ? instagramData.posts : [];
+    const safeInstagramImage = (value) => /^https:\/\//i.test(String(value || "")) ? esc(value) : "";
+    const safeInstagramPostUrl = (value) => {
+        try {
+            const parsed = new URL(value);
+            return parsed.protocol === "https:" &&
+                (parsed.hostname === "instagram.com" || parsed.hostname.endsWith(".instagram.com"))
+                ? esc(parsed.href) : "";
+        } catch (_) {
+            return "";
+        }
+    };
+    const instagramPanelContent = !instagramData.connected
+        ? `<div class="chart-empty">${instagramData.error ? `Could not load Instagram status: ${esc(instagramData.error)}` : "Connect your Instagram professional account to load profile metrics and recent posts here."}</div>`
+        : instagramData.legacy_connection
+            ? `<div class="chart-empty">${esc(instagramData.message || "Reconnect Instagram using Instagram Login to sync dashboard data.")}</div>`
+            : `
+                <div class="platform-name" style="margin-bottom:10px">
+                    ${safeInstagramImage(instagramAccount.profile_image_url) ? `<img src="${safeInstagramImage(instagramAccount.profile_image_url)}" alt="" width="42" height="42" style="border-radius:50%;object-fit:cover">` : ""}
+                    <strong>@${esc(instagramAccount.username || "Instagram account")}</strong>
+                </div>
+                <div class="metric-foot">Followers: <strong>${instagramAccount.followers == null ? "Not returned by Instagram" : fmt(instagramAccount.followers)}</strong></div>
+                <div class="metric-foot">Recent media saved: <strong>${fmt(instagramData.posts_synced || instagramPosts.length)}</strong></div>
+                <div class="metric-foot">Last synced: <strong>${instagramAccount.last_synced_at ? esc(new Date(instagramAccount.last_synced_at).toLocaleString()) : "Not synced yet"}</strong></div>
+                <div class="youtube-video-list" style="margin-top:12px">
+                    ${instagramPosts.length ? instagramPosts.map(post => {
+                        const image = safeInstagramImage(post.thumbnail_url);
+                        const postUrl = safeInstagramPostUrl(post.url || post.permalink);
+                        const caption = post.caption || post.title || "Instagram post";
+                        const published = post.published_at ? new Date(post.published_at).toLocaleString() : "Date unavailable";
+                        return `
+                            <div class="youtube-video">
+                                ${image ? `<img src="${image}" alt="" loading="lazy">` : `<div class="content-thumb">IG</div>`}
+                                <div>
+                                    <div class="youtube-video-title">${esc(caption.slice(0, 110))}</div>
+                                    <div class="youtube-video-meta">${esc(published)}</div>
+                                    <div class="youtube-video-meta">Likes: ${post.likes == null ? "N/A" : fmt(post.likes)} · Comments: ${post.comments == null ? "N/A" : fmt(post.comments)}</div>
+                                    ${postUrl ? `<div class="youtube-video-meta"><a href="${postUrl}" target="_blank" rel="noopener noreferrer">Open Instagram post ↗</a></div>` : ""}
+                                </div>
+                            </div>`;
+                    }).join("") : `<div class="chart-empty">Your Instagram account is connected. Click “Sync connected account” to load recent posts.</div>`}
+                </div>
+            `;
 
     return `
         ${welcome(user, config)}
         ${metrics([
             metric("Total Followers", fmt(total), "♙", "Latest saved platform totals"),
-            metric("Total Views", "1.8M", "◉", " data · connect views API"),
-            metric("Total Likes", "98,240", "♡", " data · connect engagement API"),
-            metric("Comments", "8,932", "▣", " data · connect comments API")
+            metric("Total Views", fmt(totalViews), "◉", totalViews ? "Live synced views" : "No saved view data"),
+            metric("Total Likes", fmt(totalLikes), "♡", totalLikes ? "Live synced likes" : "No saved like data"),
+            metric("Comments", fmt(totalComments), "▣", totalComments ? "Live synced comments" : "No saved comment data")
         ])}
 
         <div class="grid-main section-anchor" id="analytics">
@@ -874,224 +1708,1039 @@ function creatorDashboard(user, analytics, growth, config) {
                  `<div class="chart-empty">No follower history recorded yet.<br>Save snapshots to build your growth chart.</div>`}`,
                 "Real data from your account", "Live API")}
             ${panel("Followers by Platform",
-                donut(Object.keys(PLATFORM_NAMES).map(key => ({label:PLATFORM_NAMES[key], value:Number(p[key] || 0)})), fmt(total), "Followers"),
+                donut(Object.keys(PLATFORM_NAMES).map(key => ({
+                    label: PLATFORM_NAMES[key],
+                    value: Object.prototype.hasOwnProperty.call(p, key) && p[key] != null
+                        ? Number(p[key])
+                        : null
+                })), fmt(total), "Followers"),
                 "Latest saved platform counts")}
+        </div>
+
+        <!-- MILESTONE 2: Added Top Performing Posts & Post Comparison within My Content Anchor -->
+        <div class="grid-half section-anchor" id="content">
+            ${panel("Top-Performing Posts", `
+                <div id="topPostsList" class="youtube-video-list">
+                    ${contentData.top_by_views && contentData.top_by_views.length ? contentData.top_by_views.map(video => `
+                        <div class="youtube-video">
+                            ${video.thumbnail_url ? `<img src="${esc(video.thumbnail_url)}" alt="">` : `<div class="content-thumb">▶</div>`}
+                            <div>
+                                <div class="youtube-video-title">${esc(video.title)}</div>
+                                <div class="youtube-video-meta">Views: <strong>${fmt(video.views)}</strong> · Likes: ${fmt(video.likes)} · Comments: ${fmt(video.comments)}</div>
+                            </div>
+                        </div>
+                    `).join("") : `<div class="chart-empty">Connect your YouTube channel below to track top uploads.</div>`}
+                </div>
+            `, "Ranked by views and engagement", `${contentData.total_posts || 0} Posts Published`)}
+
+            ${panel("Compare Post Performance", `
+                <div class="compare-controls">
+                    <select id="compareSelect1" class="select-date compare-select">
+                        <option value="">Select Post 1</option>
+                        ${(contentData.posts_list || []).map(p => `<option value="${esc(p.video_id)}">${esc(p.title.substring(0, 30))}...</option>`).join("")}
+                    </select>
+                    <select id="compareSelect2" class="select-date compare-select">
+                        <option value="">Select Post 2</option>
+                        ${(contentData.posts_list || []).map(p => `<option value="${esc(p.video_id)}">${esc(p.title.substring(0, 30))}...</option>`).join("")}
+                    </select>
+                    <button id="compareBtn" class="btn btn-primary compare-button">Compare</button>
+                </div>
+                <div id="comparisonResult">
+                    <div class="chart-empty">Select two posts above to compare views and engagement metrics.</div>
+                </div>
+            `, "Side-by-side post metrics")}
         </div>
 
         <div class="grid-main section-anchor" id="social">
             ${panel("Social Accounts", platformCards(p), "Supported social platforms", "Live API")}
+            ${panel("Instagram Account & Recent Posts", instagramPanelContent, "Your connected Instagram professional account", instagramData.connected ? "Instagram Login" : "Not connected")}
             ${panel("Creator Settings", activity([
                 {title:"Account profile",description:`Signed in as ${user.email || "your account"}.`},
                 {title:"Social connections",description:"Platform connection and publishing actions require additional integrations."},
                 {title:"Analytics settings",description:"Your follower totals and historical growth are loaded from the API."}
             ]), "Account and integration settings")}
         </div>
+
+
+        <!-- Public Account Search: separate from the signed-in creator's own saved metrics -->
+        <div class="grid-half section-anchor" id="public-account-search">
+            ${panel("Public Account Search", `
+                <form id="public-search-form" class="youtube-connect-form">
+                    <select id="public-search-platform" class="select-date" aria-label="Platform to search">
+                        <option value="youtube">YouTube</option>
+                        <option value="x">X (Twitter)</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="linkedin">LinkedIn</option>
+                    </select>
+                    <input id="public-search-identifier" type="text" maxlength="300"
+                        placeholder="Public channel ID, @handle, or profile URL"
+                        required aria-label="Public account identifier">
+                    <button class="btn btn-primary" type="submit" id="public-search-btn">Search account</button>
+                </form>
+                <div class="youtube-status" id="public-search-status">
+                    Search public accounts where official APIs allow it. Results do not change your own follower history.
+                </div>
+                <div id="public-search-results"></div>
+            `, "Followers, views, likes, comments and recent public posts", "Public API")}
+        </div>
+
+        <!-- Preserved exact YouTube Video list and sync UI from original layout -->
+        <div class="grid-half section-anchor" id="youtube-analytics">
+            ${panel("YouTube API Integration", `
+                <form id="youtube-connect-form" class="youtube-connect-form">
+                    <input id="youtube-identifier" type="text" maxlength="200" placeholder="Channel ID or @handle" required aria-label="YouTube channel ID or handle">
+                    <button class="btn btn-primary" type="submit" id="youtube-connect-btn">Fetch real data</button>
+                </form>
+                <div class="youtube-status" id="youtube-status">Connect a public YouTube channel to fetch channel and recent video statistics.</div>
+                <div id="youtube-channel-result"></div>
+            `, "Public channel and video statistics from YouTube Data API v3", "API")}
+            ${panel("Recent YouTube Videos", `<div id="youtube-video-list" class="youtube-video-list"><div class="chart-empty">Connect a channel to load recent videos.</div></div>`, "Latest public uploads")}
+        </div>
+
+        <!-- MILESTONE 2: Audience Demographics -->
+        <div class="grid-half section-anchor" id="audience">
+            ${panel("Audience Age Distribution", `
+                <div id="ageDemographics" class="chart-empty">No age-demographic data returned by the connected platform. Connect an eligible account and grant insight permissions to display real data.</div>
+            `, "Real API data only")}
+
+            ${panel("Audience Gender Split", `
+                <div id="genderDemographics" class="chart-empty">No gender-demographic data returned by the connected platform. No sample percentages are shown.</div>
+            `, "Real API data only")}
+        </div>
+
+        <div class="section-anchor" id="earnings"></div>
         <div class="section-anchor" id="brands"></div>
+        <div class="section-anchor" id="activity"></div>
     `;
 }
 
-/* AGENCY DASHBOARD */
-function agencyDashboard(user, analytics, growth, config) {
-    const creators = [
-        ["Tech With Aryan","Technology","450K","5.2M","7.4%","₹85,000","Active"],
-        ["Foodie Diaries","Food & lifestyle","320K","3.1M","6.3%","₹62,000","Active"],
-        ["Travel With Anjali","Travel","280K","4.8M","5.8%","₹70,000","Active"],
-        ["Fitness Hub","Fitness","210K","2.4M","5.7%","₹45,000","Inactive"],
-        ["Study Capsule","Education","190K","2.1M","6.1%","₹38,000","Active"]
-    ];
-    const campaigns = [
-        ["Summer Sale","5 Creators",65,"Active"],
-        ["Back to College","4 Creators",40,"Active"],
-        ["New Product Launch","3 Creators",80,"Planning"],
-        ["Festive Offer","4 Creators",30,"Active"],
-        ["Brand Awareness","2 Creators",50,"Pending"]
-    ];
+function roleGrowthPanel(growth, title) {
+    const rows = Array.isArray(growth) ? growth.slice(-7) : [];
+    if (!rows.length) {
+        return panel(title, `<div class="chart-empty">No historical follower snapshots are available for this account yet. Save follower snapshots first; the graph will appear when the API returns dated growth records.</div>`, "Historical database data only");
+    }
+    const labels = rows.map((r, i) => {
+        const raw = String(r.date || r.created_at || "");
+        return raw ? raw.slice(5, 10) : `Entry ${i + 1}`;
+    });
+    const values = rows.map(r => Number(r.followers ?? r.total_followers ?? 0));
+    return panel(title, lineChart([{name:"Followers", values}], labels, {label:title}), "Latest saved follower snapshots", "API");
+}
 
+/* ============================================================
+   AGENCY DASHBOARD (Preserved Original Layout & Sections)
+   ============================================================ */
+function setupAgencyContentLibrary() {
+    const container = document.getElementById("agency-content-library");
+    const toggle = document.getElementById("agency-content-toggle");
+    if (!container || !toggle) return;
+
+    const extraRows = Array.from(
+        container.querySelectorAll("[data-agency-content-extra]")
+    );
+    if (!extraRows.length) return;
+
+    toggle.addEventListener("click", () => {
+        const expanded = toggle.getAttribute("aria-expanded") === "true";
+        extraRows.forEach(row => { row.hidden = expanded; });
+        toggle.setAttribute("aria-expanded", String(!expanded));
+        toggle.textContent = expanded ? "Show more" : "Show less";
+    });
+}
+
+
+function setupAgencyForms() {
+    for (const [id, path, transform] of [
+        ["agency-assign-form", "/agency/creators", v=>({creator_user_id:Number(v.creator_user_id)})],
+        ["agency-team-form", "/agency/team", v=>({name:v.name,email:v.email||null,job_title:v.job_title||"Member"})]
+    ]) {
+        const form=document.getElementById(id);
+        if (!form) continue;
+        form.addEventListener("submit",async e=>{
+            e.preventDefault();
+            const payload=transform(Object.fromEntries(new FormData(form)));
+            try {await campaignRequest(path,"POST",payload); await loadDashboard();}
+            catch(err){alert(err.message);}
+        });
+    }
+}
+function agencyDashboard(user, analytics, growth, config, roleData = {}) {
+    const creators = Number(roleData.total_creators || 0);
+    const followers = Number(roleData.total_followers || 0);
+    const views = Number(roleData.total_views || 0);
+    const videos = Number(roleData.total_videos || 0);
+    const likes = Number(roleData.total_likes || 0);
+    const comments = Number(roleData.total_comments || 0);
+    const roster = Array.isArray(roleData.creators) ? roleData.creators : [];
+    const agency = roleData.agency_workspace || {};
+    const agencyContent = Array.isArray(agency.content) ? agency.content : [];
+    const agencyContentTable = agencyContent.length
+        ? `
+            <div class="table-wrap" id="agency-content-library">
+                <table>
+                    <thead><tr><th>Creator</th><th>Video</th><th>Views</th><th>Likes</th></tr></thead>
+                    <tbody>
+                        ${agencyContent.map((video, index) => `
+                            <tr ${index >= 5 ? 'data-agency-content-extra hidden' : ""}>
+                                <td>${esc(video.creator || "—")}</td>
+                                <td>${esc(video.title || "Untitled video")}</td>
+                                <td>${fmt(video.views)}</td>
+                                <td>${fmt(video.likes)}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+            ${agencyContent.length > 5 ? `
+                <div class="content-library-actions">
+                    <button type="button" class="btn btn-primary content-library-toggle"
+                        id="agency-content-toggle" aria-expanded="false">Show more</button>
+                </div>
+            ` : ""}
+        `
+        : `<div class="chart-empty">No saved videos for assigned creators.</div>`;
+    const rosterRows = roster.map(c => [
+        person(c.name || c.full_name || c.username || "Creator", c.email || c.handle || "Creator account"),
+        fmt(c.followers || c.total_followers || 0),
+        fmt(c.views || c.total_views || 0),
+        status(c.status || "Active")
+    ]);
     return `
         ${welcome(user, config)}
-        ${Notice()}
         ${metrics([
-            metric("Total Creators","12","♙"," managed roster"),
-            metric("Total Followers","2.4M","◉"," portfolio total"),
-            metric("Total Views","18.7M","▣"," campaign analytics"),
-            metric("Active Campaigns","5","▤"," campaign records"),
-            metric("Total Revenue",money(348600),"₹"," revenue")
+            metric("Creators", fmt(creators), "♙", "Creator accounts in the available database scope"),
+            metric("Latest Followers", fmt(followers), "◉", "Latest saved follower snapshots"),
+            metric("YouTube Views", fmt(views), "▶", "Saved creator video statistics"),
+            metric("Saved Videos", fmt(videos), "▤", "Database video records"),
+            metric("Likes", fmt(likes), "♡", "Saved video statistics"),
+            metric("Comments", fmt(comments), "☷", "Saved video statistics")
         ], true)}
-
-        <div class="grid-main section-anchor" id="analytics">
-            ${panel("Overall Performance",
-                `${legendSeries([{name:"Followers"},{name:"Views"},{name:"Engagement"}])}
-                ${lineChart([
-                    {name:"Followers",values:[1.1,1.6,2.1,2.7,3.1,3.9]},
-                    {name:"Views",values:[.4,.8,1.2,1.6,2,2.3]},
-                    {name:"Engagement",values:[1.6,2.1,2.8,3.4,4.1,4.8]}
-                ],["Aug 1","Aug 8","Aug 15","Aug 22","Aug 29","Sep 5"])}`,
-                "Illustrative portfolio trends"," data")}
-            ${panel("Platform Distribution",
-                donut([
-                    {label:"Instagram",value:42},
-                    {label:"YouTube",value:28},
-                    {label:"X (Twitter)",value:12},
-                    {label:"LinkedIn",value:10},
-                    {label:"Others",value:8}
-                ],"2.4M","Followers"),
-                "Example roster audience distribution"," data")}
+        <div class="grid-half section-anchor" id="analytics">
+            ${panel("Creator Performance Comparison", roster.length ? bars(roster.slice(0, 6).map(c => ({label: c.name || c.username || "Creator", value: fmt(c.views || c.total_views || 0) + " views", percent: views ? Math.min(100, Number(c.views || c.total_views || 0) / views * 100) : 0}))) : bars([{label:"Views",value:fmt(views),percent:views ? 100 : 0},{label:"Likes",value:fmt(likes),percent:views ? Math.min(100, likes / views * 100) : 0},{label:"Comments",value:fmt(comments),percent:views ? Math.min(100, comments / views * 100) : 0}]), "Based on saved creator/video metrics; creator-level bars appear when roster data is available", "API")}
+            ${panel("Creator Network Performance", bars([
+                {label:"Views",value:fmt(views),percent:views ? 100 : 0},
+                {label:"Likes",value:fmt(likes),percent:views ? Math.min(100, likes / views * 100) : 0},
+                {label:"Comments",value:fmt(comments),percent:views ? Math.min(100, comments / views * 100) : 0}
+            ]), "Engagement ratios calculated from saved database totals", "API")}
         </div>
-
-        <div class="grid-main section-anchor" id="creators">
-            ${panel("Top Creators",
-                table(["Creator","Followers","Views","Engagement","Revenue","Status"],
-                    creators.map(r => [
-                        person(r[0],r[1]),r[2],r[3],
-                        `<span class="status">${esc(r[4])}</span>`,r[5],status(r[6])
-                    ])),
-                "Illustrative managed roster"," data")}
-            ${panel("Active Campaigns",
-                `<div class="bars">${campaigns.map(c => `
-                    <div class="bar-item">
-                        <div class="bar-top"><span>${esc(c[0])}<br><span class="muted">${esc(c[1])}</span></span><strong>${c[2]}%</strong></div>
-                        <div class="bar-track"><div class="bar-fill" style="width:${c[2]}%"></div></div>
-                        <div class="metric-foot">${esc(c[3])}</div>
-                    </div>`).join("")}</div>`,
-                "Illustrative campaign completion"," data")}
+        <div class="grid-half section-anchor" id="creators">
+            ${panel("Creator Roster", table(["Creator", "Followers", "Views", "Status"], rosterRows),
+                roster.length ? "Creator records returned by the API" : "Creator records appear here when /dashboard/role-data returns a creators array",
+                "Agency")}
+            ${panel("Creator Management", `<form id="agency-assign-form" class="campaign-form"><label>Creator user ID<input name="creator_user_id" type="number" min="1" required placeholder="Existing creator user ID"></label><button class="btn btn-primary" type="submit">Assign creator</button></form><div id="agency-assign-status" class="panel-sub"></div>` + activity([
+                {title:"Creator discovery",description:"Use the creator roster to review creators available to your agency."},
+                {title:"Performance reviews",description:"Compare saved follower and video metrics before preparing reports."},
+                {title:"Access boundary",description:"Agency views must be restricted to creators assigned to this agency by the backend."}
+            ]), "Workflow guidance")}
         </div>
-
+        <div class="grid-half section-anchor" id="campaigns">
+            ${panel("Campaign Workspace", agency.campaigns?.length ? table(["Campaign","Platform","Budget","Status"],agency.campaigns.map(c=>[esc(c.name),esc(c.platform||"—"),esc(c.budget??"—"),status(c.status)])) : `<div class="chart-empty">No campaigns linked to assigned creators yet.</div>`, "Assigned creators' campaigns")}
+            ${panel("Agency Reports", `<div class="metrics">${metric("Assigned creators",fmt(roster.length),"♙","Agency assignments")}${metric("Saved views",fmt(views),"▶","Assigned creators only")}${metric("Campaigns",fmt((agency.campaigns||[]).length),"▤","Linked campaigns")}</div>`, "Database summary")}
+        </div>
+        <div class="grid-half section-anchor" id="content">
+            ${panel("Content Library", agencyContentTable, "Assigned creator videos")}
+            ${panel("Team Members", `<form id="agency-team-form" class="campaign-form"><label>Name<input name="name" required></label><label>Email<input name="email" type="email"></label><label>Role<input name="job_title" placeholder="e.g. Analyst"></label><button class="btn btn-primary" type="submit">Add team member</button></form>` + (agency.team?.length ? table(["Name","Email","Role"],agency.team.map(t=>[esc(t.name),esc(t.email||"—"),esc(t.job_title||"—")])) : `<div class="chart-empty">No agency team members have been registered yet.</div>`), "Agency workspace")}
+        </div>
         <div class="section-anchor" id="reports"></div>
-        <div class="section-anchor" id="content"></div>
         <div class="section-anchor" id="team"></div>
         <div class="section-anchor" id="billing"></div>
     `;
 }
 
-/* MARKETING TEAM DASHBOARD */
-function marketingDashboard(user, analytics, growth, config) {
-    const campaigns = [
-        ["Summer Sale 2026","Instagram","2.4M","186K",money(120000),"Active"],
-        ["Back to College","YouTube","1.8M","124K",money(90000),"Active"],
-        ["New Product Launch","X","1.2M","98K",money(80000),"Completed"],
-        ["Festive Offer","Instagram","860K","62K",money(80000),"Active"],
-        ["Brand Awareness","LinkedIn","620K","41K",money(40000),"Planning"]
-    ];
+/* ============================================================
+   MARKETING TEAM DASHBOARD
+   Campaign create/edit/delete remains exclusive to this role.
+   ============================================================ */
 
+/* Editable workspace lists. These are browser-local until matching backend tables/endpoints are added. */
+function localRecordsPanel(key, buttonLabel, fields, headers) {
+    const formId = `local-form-${key}`;
+    const listId = `local-list-${key}`;
+    const inputs = fields.map(field => {
+        let control;
+        if (field.type === "select") {
+            control = `<select name="${esc(field.id)}" ${field.required ? "required" : ""}>${(field.options || []).map(option => `<option value="${esc(option)}">${esc(option)}</option>`).join("")}</select>`;
+        } else {
+            control = `<input name="${esc(field.id)}" type="${esc(field.type || "text")}" placeholder="${esc(field.placeholder || "")}" ${field.required ? "required" : ""} ${field.type === "number" ? 'min="0"' : ""}>`;
+        }
+        return `<label>${esc(field.label)}${control}</label>`;
+    }).join("");
+    return `<form class="campaign-form local-record-form" id="${formId}" data-local-key="${esc(key)}">${inputs}
+        <div class="campaign-actions wide"><button class="btn btn-primary" type="submit">${esc(buttonLabel)}</button></div>
+        </form><div class="youtube-status" id="local-message-${esc(key)}"></div>
+        <div class="table-wrap" id="${listId}" data-local-table="${esc(key)}"></div>`;
+}
+
+function setupLocalWorkspaceRecords() {
+    const definitions = {
+        plans: {fields:["title","platform","date","status"], labels:["Content idea","Platform","Publish date","Status"]},
+        tasks: {fields:["title","owner","due","status"], labels:["Task","Owner","Due date","Status"]},
+        influencers: {fields:["name","platform","followers","status"], labels:["Name / handle","Platform","Followers","Status"]},
+        assets: {fields:["name","url","type"], labels:["Asset name","URL","Type"]}
+    };
+    const storageKey = key => `creatoriq_workspace_${key}_${(JSON.parse(sessionStorage.getItem(USER_KEY) || "{}").email || "user")}`;
+    function read(key) {
+        try { const value = JSON.parse(localStorage.getItem(storageKey(key)) || "[]"); return Array.isArray(value) ? value : []; }
+        catch (_) { return []; }
+    }
+    function write(key, items) { localStorage.setItem(storageKey(key), JSON.stringify(items)); }
+    function render(key) {
+        const target = document.querySelector(`[data-local-table="${key}"]`);
+        if (!target) return;
+        const def = definitions[key], items = read(key);
+        if (!items.length) {
+            target.innerHTML = `<div class="chart-empty">No records yet. Use the form above to add the first record.</div>`;
+            return;
+        }
+        target.innerHTML = `<table><thead><tr>${def.labels.map(h => `<th>${esc(h)}</th>`).join("")}<th>Action</th></tr></thead><tbody>${items.map((item, index) =>
+            `<tr>${def.fields.map(field => `<td>${field === "url" && item[field] ? `<a href="${esc(item[field])}" target="_blank" rel="noopener noreferrer">Open link ↗</a>` : esc(item[field] || "—")}</td>`).join("")}<td><button type="button" class="btn btn-small" data-local-delete="${index}" data-local-key="${key}">Delete</button></td></tr>`
+        ).join("")}</tbody></table>`;
+    }
+    Object.keys(definitions).forEach(key => {
+        const form = document.getElementById(`local-form-${key}`);
+        if (!form) return;
+        render(key);
+        form.addEventListener("submit", event => {
+            event.preventDefault();
+            const item = {};
+            new FormData(form).forEach((value, field) => item[field] = String(value).trim());
+            const items = read(key);
+            items.unshift({...item, created_at:new Date().toISOString()});
+            write(key, items);
+            form.reset();
+            const message = document.getElementById(`local-message-${key}`);
+            if (message) message.textContent = "Saved in this browser.";
+            render(key);
+        });
+        const target = document.querySelector(`[data-local-table="${key}"]`);
+        target.addEventListener("click", event => {
+            const button = event.target.closest("[data-local-delete]");
+            if (!button) return;
+            const items = read(key);
+            items.splice(Number(button.dataset.localDelete), 1);
+            write(key, items);
+            render(key);
+        });
+    });
+}
+
+async function setupCampaignReporting() {
+    const summary = document.getElementById("campaignReportSummary");
+    const target = document.getElementById("campaignReportTable");
+    if (!summary || !target) return;
+    try {
+        const data = await campaignRequest("/campaigns");
+        const items = Array.isArray(data.campaigns) ? data.campaigns : [];
+        const totalBudget = items.reduce((sum, item) => sum + Number(item.budget || 0), 0);
+        summary.className = "";
+        summary.innerHTML = `<div class="metrics"><div class="metric"><div class="metric-title">Saved campaigns</div><div class="metric-value">${fmt(items.length)}</div></div><div class="metric"><div class="metric-title">Total planned budget</div><div class="metric-value">${esc(money(totalBudget))}</div></div><div class="metric"><div class="metric-title">Active campaigns</div><div class="metric-value">${fmt(items.filter(item => String(item.status).toLowerCase() === "active").length)}</div></div></div>`;
+        target.innerHTML = items.length ? table(["Campaign","Platform","Budget","Status"], items.map(item => [
+            esc(item.name || "Untitled"), esc(item.platform || "—"),
+            item.budget == null ? "—" : esc(money(item.budget)), status(item.status || "planning")
+        ])) : `<div class="chart-empty">No saved campaigns yet. Add a campaign in Campaign Management to populate this report.</div>`;
+    } catch (error) {
+        summary.className = "chart-empty";
+        summary.textContent = `Could not load campaign report: ${error.message}`;
+    }
+}
+
+function marketingDashboard(user, analytics, growth, config, roleData = {}) {
+    const views = Number(roleData.total_views || 0);
+    const subscribers = Number(roleData.total_followers || 0);
+    const videos = Number(roleData.total_videos || 0);
+    const channels = Number(roleData.total_channels || 0);
+    const likes = Number(roleData.total_likes || 0);
+    const comments = Number(roleData.total_comments || 0);
+    const influencers = Array.isArray(roleData.influencers) ? roleData.influencers : [];
+    const influencerRows = influencers.map(c => [
+        person(c.name || c.full_name || c.username || "Influencer", c.handle || c.platform || "Social account"),
+        fmt(c.followers || c.total_followers || 0),
+        esc(c.platform || "—"),
+        status(c.status || "Review")
+    ]);
     return `
         ${welcome(user, config)}
-        ${Notice()}
         ${metrics([
-            metric("Total Campaigns","8","▣"," campaign count"),
-            metric("Total Reach","12.4M","◉"," audience reach"),
-            metric("Total Engagement","986K","♙"," interactions"),
-            metric("Total Spend",money(420000),"₹"," marketing spend"),
-            metric("ROI","3.2x","↗"," return on investment")
+            metric("YouTube Channels", fmt(channels), "▶", "Saved channel records"),
+            metric("Channel Subscribers", fmt(subscribers), "◉", "Latest saved follower snapshots"),
+            metric("Total Views", fmt(views), "▤", "Saved public video statistics"),
+            metric("Videos", fmt(videos), "▣", "Saved video records"),
+            metric("Likes", fmt(likes), "♡", "Saved video statistics"),
+            metric("Comments", fmt(comments), "☷", "Saved video statistics")
         ], true)}
-
-        <div class="grid-main section-anchor" id="analytics">
-            ${panel("Campaign Performance",
-                `${legendSeries([{name:"Reach"},{name:"Engagement"},{name:"Conversions"}])}
-                ${lineChart([
-                    {name:"Reach",values:[2.4,3.1,3.8,4.5,5.2,6]},
-                    {name:"Engagement",values:[1.2,1.7,2.3,2.7,3.2,4.4]},
-                    {name:"Conversions",values:[.5,.8,1.1,1.5,2.1,3]}
-                ],["Aug 1","Aug 8","Aug 15","Aug 22","Aug 29","Sep 5"])}`,
-                "Illustrative marketing trends"," data")}
-            ${panel("Top Performing Campaigns",
-                bars([
-                    {label:"Summer Sale",value:"4.2M",percent:100},
-                    {label:"Back to College",value:"2.4M",percent:72},
-                    {label:"New Product",value:"2.4M",percent:65},
-                    {label:"Festive Offer",value:"1.6M",percent:50},
-                    {label:"Brand Awareness",value:"1.1M",percent:35}
-                ]),
-                "Example campaign reach"," data")}
+        <div class="grid-half section-anchor" id="analytics">
+            ${panel("Content Performance", bars([
+                {label:"Views",value:fmt(views),percent:views ? 100 : 0},
+                {label:"Likes",value:fmt(likes),percent:views ? Math.min(100, likes / views * 100) : 0},
+                {label:"Comments",value:fmt(comments),percent:views ? Math.min(100, comments / views * 100) : 0}
+            ]), "Engagement ratios from saved database metrics; not campaign-attributed results", "API")}
+            ${panel("Content Engagement Mix", donut([{label:"Views",value:views},{label:"Likes",value:likes},{label:"Comments",value:comments}], fmt(views + likes + comments), "Interactions"), "Distribution of saved content metrics; not campaign-attributed results", "API")}
         </div>
-
-        <div class="grid-main section-anchor" id="campaigns">
-            ${panel("Recent Campaigns",
-                table(["Campaign","Creators","Platform","Reach","Engagement","Spend","Status"],
-                    campaigns.map(c => [
-                        `<strong>${esc(c[0])}</strong>`,
-                        `<span class="tag">3 creators</span>`,
-                        `<span class="tag">${esc(c[1])}</span>`,
-                        c[2],c[3],c[4],status(c[5])
-                    ])),
-                "Illustrative campaign management"," data")}
-            ${panel("Content Distribution",
-                donut([
-                    {label:"Video",value:52},
-                    {label:"Image",value:28},
-                    {label:"Carousel",value:12},
-                    {label:"Text",value:6},
-                    {label:"Live",value:2}
-                ],"722","Total Content"),
-                "Example content format distribution"," data")}
+        ${campaignManagerPanel("Marketing Campaign Management")}
+        <div class="grid-half section-anchor" id="planning">
+            ${panel("Content Planning", localRecordsPanel("plans", "Plan content", [
+                {id:"title",label:"Content idea",placeholder:"e.g. Product launch Reel",required:true},
+                {id:"platform",label:"Platform",type:"select",options:["Instagram","YouTube","X","LinkedIn"],required:true},
+                {id:"date",label:"Publish date",type:"date"},
+                {id:"status",label:"Status",type:"select",options:["Idea","Planned","Ready","Published"],required:true}
+            ], ["Content idea","Platform","Publish date","Status"]), "Editable planning list · saved in this browser")}
+            ${panel("Task Management", localRecordsPanel("tasks", "Add task", [
+                {id:"title",label:"Task",placeholder:"e.g. Review campaign creative",required:true},
+                {id:"owner",label:"Owner",placeholder:"Team member"},
+                {id:"due",label:"Due date",type:"date"},
+                {id:"status",label:"Status",type:"select",options:["To do","In progress","Done"],required:true}
+            ], ["Task","Owner","Due date","Status"]), "Editable task list · saved in this browser")}
         </div>
-
-        <div class="section-anchor" id="reports"></div>
+        <div class="grid-half section-anchor" id="influencers">
+            ${panel("Influencer Directory", localRecordsPanel("influencers", "Add influencer", [
+                {id:"name",label:"Name / handle",placeholder:"@creator",required:true},
+                {id:"platform",label:"Platform",type:"select",options:["Instagram","YouTube","X","LinkedIn"],required:true},
+                {id:"followers",label:"Followers",type:"number",placeholder:"Optional"},
+                {id:"status",label:"Status",type:"select",options:["Prospect","Contacted","Negotiating","Approved"],required:true}
+            ], ["Name / handle","Platform","Followers","Status"]), "Editable directory · saved in this browser")}
+            ${panel("Brand Assets", localRecordsPanel("assets", "Add asset reference", [
+                {id:"name",label:"Asset name",placeholder:"e.g. Brand guidelines",required:true},
+                {id:"url",label:"Public file URL",placeholder:"https://...",required:true},
+                {id:"type",label:"Type",type:"select",options:["Logo","Guidelines","Image","Video","Other"],required:true}
+            ], ["Asset name","URL","Type"]), "Stores links only; upload files to your chosen storage service")}
+        </div>
+        <div class="grid-half section-anchor" id="reports">
+            ${panel("Campaign Reporting", `<div id="campaignReportSummary" class="chart-empty">Loading campaign report…</div><div id="campaignReportTable"></div>`, "Live records from the campaigns API")}
+            ${panel("Marketing Workflow", activity([
+                {title:"Plan",description:"Create and update content plans in the editable planning list."},
+                {title:"Coordinate",description:"Track tasks, owners, and due dates in Task Management."},
+                {title:"Measure",description:"Campaign reporting uses saved campaign records. Campaign-attributed reach/ROI requires metrics from platform APIs."}
+            ]), "Workflow")}
+        </div>
         <div class="section-anchor" id="assets"></div>
         <div class="section-anchor" id="tasks"></div>
     `;
 }
 
-/* ADMIN DASHBOARD */
-function adminDashboard(user, analytics, growth, config) {
-
-
+/* ============================================================
+   ADMIN DASHBOARD
+   ============================================================ */
+function adminDashboard(user, analytics, growth, config, roleData = {}) {
+    const byRole = roleData.users_by_role || {};
+    const users = Number(roleData.total_users || 0);
+    const active = Number(roleData.active_users || 0);
+    const views = Number(roleData.total_views || 0);
+    const videos = Number(roleData.total_videos || 0);
+    const followers = Number(roleData.total_followers || 0);
+    const userRecords = Array.isArray(roleData.users) ? roleData.users : [];
+    const userRows = userRecords.map(u => [
+        person(u.name || u.full_name || u.email || "User", u.email || "No email supplied"),
+        esc(normalizeRole(u.role) || u.role || "Unassigned"),
+        status(u.status || (u.is_active === false ? "Inactive" : "Active"))
+    ]);
     return `
         ${welcome(user, config)}
-        ${Notice()}
         ${metrics([
-            metric("Total Users","148","♙"," platform-wide total"),
-            metric("Creators","120","◎"," role count"),
-            metric("Agencies","18","♧"," role count"),
-            metric("Marketing Teams","7","▣"," role count"),
-            metric("Active Users","132","✓"," account status count")
+            metric("Total Users", fmt(users), "♙", "Database accounts"),
+            metric("Creators", fmt(byRole.creator || 0), "◎", "Registered creator accounts"),
+            metric("Agencies", fmt(byRole.agency || 0), "♧", "Registered agency accounts"),
+            metric("Marketing Teams", fmt(byRole.marketing_team || 0), "▣", "Registered marketing accounts"),
+            metric("Active Users", fmt(active), "✓", "Active database accounts"),
+            metric("YouTube Views", fmt(views), "▶", "Saved public video statistics"),
+            metric("Saved Videos", fmt(videos), "▤", "Database video records"),
+            metric("Latest Followers", fmt(followers), "◉", "Latest saved follower snapshots")
         ], true)}
-
-        <div class="grid-main section-anchor" id="analytics">
-            ${panel("User Growth",
-                `${legendSeries([{name:"Creators"},{name:"Agencies"},{name:"Marketing Teams"}])}
-                ${lineChart([
-                    {name:"Creators",values:[50,85,120,155,210,280]},
-                    {name:"Agencies",values:[20,25,32,42,51,65]},
-                    {name:"Marketing Teams",values:[15,24,39,54,67,85]}
-                ],["Aug 1","Aug 8","Aug 15","Aug 22","Aug 29","Sep 5"])}`,
-                "Illustrative platform-wide growth"," data")}
-            ${panel("Platform Usage",
-                bars([
-                    {label:"Instagram",value:"120K",percent:90},
-                    {label:"YouTube",value:"95K",percent:75},
-                    {label:"X (Twitter)",value:"68K",percent:55},
-                    {label:"LinkedIn",value:"42K",percent:35}
-                ]),
-                "Illustrative platform usage"," data")}
+        <div class="grid-half section-anchor" id="analytics">
+            ${panel("Accounts by Role", donut([
+                {label:"Creators",value:Number(byRole.creator || 0)},
+                {label:"Agencies",value:Number(byRole.agency || 0)},
+                {label:"Marketing Teams",value:Number(byRole.marketing_team || 0)},
+                {label:"Admins",value:Number(byRole.admin || 0)}
+            ], fmt(users), "Users"), "Role counts from the dashboard API", "API")}
+            ${panel("Saved YouTube Engagement", bars([
+                {label:"Views",value:fmt(views),percent:views ? 100 : 0},
+                {label:"Likes",value:fmt(roleData.total_likes || 0),percent:views ? Math.min(100, Number(roleData.total_likes || 0) / views * 100) : 0},
+                {label:"Comments",value:fmt(roleData.total_comments || 0),percent:views ? Math.min(100, Number(roleData.total_comments || 0) / views * 100) : 0}
+            ]), "Saved video metrics, not campaign-attributed analytics", "API")}
+            ${panel("Content Activity Overview", bars([{label:"Views",value:fmt(views),percent:views ? 100 : 0},{label:"Likes",value:fmt(roleData.total_likes || 0),percent:views ? Math.min(100, Number(roleData.total_likes || 0) / views * 100) : 0},{label:"Comments",value:fmt(roleData.total_comments || 0),percent:views ? Math.min(100, Number(roleData.total_comments || 0) / views * 100) : 0},{label:"Saved videos",value:fmt(videos),percent:videos ? 100 : 0}]), "Platform-wide saved content totals; no follower-growth graph on the admin dashboard", "API")}
         </div>
-
-        <div class="grid-half section-anchor" id="creators">
-            ${panel("Accounts by Role",
-                donut([
-                    {label:"Creators",value:120},
-                    {label:"Agencies",value:18},
-                    {label:"Marketing Teams",value:7},
-                    {label:"Admins",value:3}
-                ],"148","Users"),
-                "Illustrative role distribution"," data")}
-            ${panel("Platform Integrations",
-                activity([
-                    {title:"Instagram",description:"Connection status requires an integration endpoint."},
-                    {title:"YouTube",description:"Connection status requires an integration endpoint."},
-                    {title:"X",description:"Connection status requires an integration endpoint."},
-                    {title:"LinkedIn",description:"Connection status requires an integration endpoint."}
-                ]),
-                "Integration status not available from current API")}
+        <div class="grid-half section-anchor" id="users">
+            ${panel("User Management", table(["User", "Role", "Status"], userRows),
+                userRecords.length ? "User records returned by the API" : "The current API response includes role counts but no user list. Add an authorized admin-only users endpoint to manage individual accounts.",
+                "Admin")}
+            ${panel("Role Permissions", table(["Role", "Primary access"], [
+                [esc("Creator"), esc("Own content, social accounts, and personal analytics")],
+                [esc("Agency"), esc("Assigned creator roster and agency reports")],
+                [esc("Marketing Team"), esc("Campaigns, planning, influencers, and reports")],
+                [esc("Admin"), esc("User administration and platform oversight")]
+            ]), "Frontend navigation is not a security boundary; enforce permissions in FastAPI.", "Access control")}
         </div>
-
-        <div class="section-anchor" id="agencies"></div>
+        <div class="grid-half section-anchor" id="integrations">
+            ${panel("Platform Integrations", table(["Platform", "Current dashboard status"], [
+                [esc("YouTube"), esc("Metrics are shown when saved data is available")],
+                [esc("Instagram"), esc("Requires configured credentials and API permissions")],
+                [esc("X (Twitter)"), esc("Requires configured credentials and API permissions")],
+                [esc("LinkedIn"), esc("Requires configured credentials and API permissions")]
+            ]), "Connection status should be confirmed by a backend integration-health endpoint.", "Integrations")}
+            ${panel("Content Monitoring", roleData.admin_workspace?.activity?.length ? table(["Event","Account","Time"],roleData.admin_workspace.activity.map(a=>[esc(a.event_type),esc(a.actor),esc(a.occurred_at||"—")])) : `<div class="chart-empty">No recent YouTube sync events.</div>`, "Recent sync activity; not content moderation")}
+        </div>
+        <div class="grid-half section-anchor" id="reports">
+            ${panel("System Reports", `<div class="metrics">${metric("Campaigns",fmt(roleData.admin_workspace?.campaign_summary?.total_campaigns||0),"▤","Saved campaigns")}${metric("Active campaigns",fmt(roleData.admin_workspace?.campaign_summary?.active_campaigns||0),"◉","Active status")}${metric("Planned budget",fmt(roleData.admin_workspace?.campaign_summary?.planned_budget||0),"▣","Database total")}</div>`, "Database reporting")}
+            ${panel("System Settings", `<div class="chart-empty">Server settings are read-only here. Configure API keys, database access and deployment settings in the backend .env.</div>`, "Read-only configuration")}
+        </div>
+        <div class="grid-half section-anchor" id="agencies">
+            ${panel("Agency Accounts", table(["Name","Email","Status"],(roleData.admin_workspace?.accounts||[]).filter(a=>a.role==="agency").map(a=>[esc(a.name),esc(a.email),status(a.is_active?"Active":"Inactive")])), "Account directory")}
+            ${panel("Marketing Teams", table(["Name","Email","Status"],(roleData.admin_workspace?.accounts||[]).filter(a=>a.role==="marketing_team").map(a=>[esc(a.name),esc(a.email),status(a.is_active?"Active":"Inactive")])), "Account directory")}
+        </div>
+        <div class="section-anchor" id="creators"></div>
         <div class="section-anchor" id="marketing"></div>
-        <div class="section-anchor" id="integrations"></div>
         <div class="section-anchor" id="monitoring"></div>
-        <div class="section-anchor" id="reports"></div>
         <div class="section-anchor" id="settings"></div>
         <div class="section-anchor" id="activity"></div>
     `;
+}
+/* ============================================================
+   YOUTUBE & SOCIAL CONNECTORS
+   ============================================================ */
+
+function setupPublicAccountSearch() {
+    const form = document.getElementById("public-search-form");
+    if (!form) return;
+    const platform = document.getElementById("public-search-platform");
+    const identifier = document.getElementById("public-search-identifier");
+    const button = document.getElementById("public-search-btn");
+    const statusEl = document.getElementById("public-search-status");
+    const resultsEl = document.getElementById("public-search-results");
+
+    const updateSearchHint = () => {
+        if (!identifier) return;
+        const instagramSelected = platform.value === "instagram";
+        identifier.placeholder = instagramSelected
+            ? "Business Discovery unavailable with Instagram Login"
+            : "Public channel ID, @handle, or profile URL";
+        button.disabled = instagramSelected;
+        statusEl.textContent = instagramSelected
+            ? "This CreatorIQ connection uses Instagram Login. Meta Business Discovery requires Facebook Login, so public Instagram account search is unavailable. You can still connect and sync your own Instagram account."
+            : "Search public accounts where official APIs allow it. Results do not change your own follower history.";
+        if (instagramSelected) resultsEl.innerHTML = "";
+    };
+    platform.addEventListener("change", updateSearchHint);
+    updateSearchHint();
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (platform.value === "instagram") {
+            updateSearchHint();
+            return;
+        }
+        const accountIdentifier = identifier.value.trim();
+        if (!accountIdentifier) return;
+        button.disabled = true;
+        button.textContent = "Searching...";
+        statusEl.textContent = `Requesting public ${platform.value.toUpperCase()} metrics from the official API...`;
+        resultsEl.innerHTML = "";
+        try {
+            const result = await apiGet(`/public-search?platform=${encodeURIComponent(platform.value)}&identifier=${encodeURIComponent(accountIdentifier)}`);
+            renderPublicAccountSearch(result);
+            statusEl.textContent = `${result.source || "Official API"} · Results include only fields returned by the platform.`;
+        } catch (error) {
+            statusEl.textContent = error.message;
+        } finally {
+            button.disabled = platform.value === "instagram";
+            button.textContent = "Search account";
+        }
+    });
+}
+function renderPublicAccountSearch(result) {
+    const root = document.getElementById("public-search-results");
+    if (!root) return;
+    const account = result.account || {};
+    const posts = Array.isArray(result.posts) ? result.posts : [];
+    const value = (n) => n == null ? "Not available from API" : fmt(n);
+    let websiteUrl = null;
+    try {
+        const candidate = new URL(account.website);
+        if (candidate.protocol === "https:") websiteUrl = candidate.href;
+    } catch (_) { /* Ignore malformed or unsafe website URLs from public profiles. */ }
+    root.innerHTML = `
+        <div class="platform-card" style="margin-top:10px;">
+            <div class="platform-name">
+                ${account.thumbnail_url ? `<img src="${esc(account.thumbnail_url)}" alt="" width="30" height="30" style="border-radius:7px;object-fit:cover">` : `<span class="platform-logo">${esc((result.platform || "?").charAt(0).toUpperCase())}</span>`}
+                <strong>${esc(account.name || account.handle || "Public account")}</strong>
+            </div>
+            <div class="metric-foot">${esc(account.handle || "")}</div>
+            <div class="metric-foot">Followers / subscribers: <strong>${value(account.followers)}</strong></div>
+            ${account.biography ? `<div class="metric-foot">${esc(account.biography)}</div>` : ""}
+            ${websiteUrl ? `<div class="metric-foot"><a href="${esc(websiteUrl)}" target="_blank" rel="noopener noreferrer">Website ↗</a></div>` : ""}
+            <div class="metric-foot">Total account views: <strong>${value(account.total_views)}</strong></div>
+            <div class="metric-foot">Posts / videos: <strong>${value(account.posts)}</strong></div>
+            ${account.url ? `<div class="metric-foot"><a href="${esc(account.url)}" target="_blank" rel="noopener noreferrer">Open account ↗</a></div>` : ""}
+        </div>
+        <div style="margin-top:14px;">
+            <h4 style="margin:0 0 8px;">Recent public posts / videos</h4>
+            ${posts.length ? `<div class="youtube-video-list">${posts.map(post => `
+                <div class="youtube-video">
+                    ${post.thumbnail_url ? `<img src="${esc(post.thumbnail_url)}" alt="">` : `<div class="content-thumb">${esc((result.platform || "•").charAt(0).toUpperCase())}</div>`}
+                    <div>
+                        <div class="youtube-video-title">${esc(post.title || "Post")}</div>
+                        <div class="youtube-video-meta">${post.published_at ? esc(new Date(post.published_at).toLocaleString()) : "Date unavailable"}</div>
+                        <div class="youtube-video-meta">Views: ${value(post.views)} · Likes: ${value(post.likes)} · Comments/replies: ${value(post.comments)}</div>
+                    </div>
+                    <div class="youtube-video-stats">${post.url ? `<a href="${esc(post.url)}" target="_blank" rel="noopener noreferrer">Open ↗</a>` : ""}</div>
+                </div>`).join("")}</div>` : `<div class="chart-empty">No public posts or post metrics were returned by the API for this account.</div>`}
+        </div>
+        ${result.note ? `<div class="panel-sub" style="margin-top:10px;">${esc(result.note)}</div>` : ""}
+    `;
+}
+
+function setupYouTubeIntegration() {
+    const form = document.getElementById("youtube-connect-form");
+    if (!form) return;
+
+    const input = document.getElementById("youtube-identifier");
+    const statusEl = document.getElementById("youtube-status");
+    const button = document.getElementById("youtube-connect-btn");
+    const savedIdentifier = sessionStorage.getItem("creatoriq_youtube_identifier");
+    if (savedIdentifier) input.value = savedIdentifier;
+
+    // Load the most recently saved channel automatically for this logged-in creator.
+    // The backend filters by the current user's ID, so other creators' channels are not exposed.
+    loadSavedYouTubeChannel();
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const identifier = input.value.trim();
+        if (!identifier) return;
+
+        button.disabled = true;
+        button.textContent = "Fetching...";
+        statusEl.textContent = "Fetching public channel and video metrics from YouTube...";
+
+        try {
+            const data = await apiGet(`/youtube/channel?identifier=${encodeURIComponent(identifier)}`);
+            sessionStorage.setItem("creatoriq_youtube_identifier", identifier);
+            await loadDashboard();
+            renderYouTubeResult(data);
+        } catch (error) {
+            const currentStatus = document.getElementById("youtube-status");
+            if (currentStatus) currentStatus.textContent = error.message;
+            else showError(error.message);
+        } finally {
+            const currentButton = document.getElementById("youtube-connect-btn");
+            if (currentButton) {
+                currentButton.disabled = false;
+                currentButton.textContent = "Fetch real data";
+            }
+        }
+    });
+}
+
+async function loadSavedYouTubeChannel() {
+    const statusEl = document.getElementById("youtube-status");
+    try {
+        const data = await apiGet("/youtube/my-channel");
+        if (data && data.channel) {
+            renderYouTubeResult(data);
+            const input = document.getElementById("youtube-identifier");
+            if (input && !input.value) input.value = data.channel.custom_url || data.channel.channel_id || "";
+        } else if (statusEl) {
+            statusEl.textContent = "No saved YouTube channel yet. Enter a channel ID or @handle and select Fetch real data.";
+        }
+    } catch (error) {
+        if (statusEl) statusEl.textContent = `Saved channel could not be loaded: ${error.message}`;
+    }
+}
+
+function renderYouTubeResult(data) {
+    const channel = data.channel || {};
+    const channelResult = document.getElementById("youtube-channel-result");
+    const videoList = document.getElementById("youtube-video-list");
+    const statusEl = document.getElementById("youtube-status");
+    if (!channelResult || !videoList || !statusEl) return;
+
+    channelResult.innerHTML = `
+        <div class="platform-card" style="margin-top:10px;">
+            <div class="platform-name">
+                ${channel.thumbnail_url ? `<img src="${esc(channel.thumbnail_url)}" alt="" width="30" height="30" style="border-radius:7px;object-fit:cover">` : `<span class="platform-logo">Y</span>`}
+                ${esc(channel.title || "YouTube channel")}
+            </div>
+            <div class="metric-foot">Channel ID: ${esc(channel.channel_id || "—")}</div>
+            <div class="metric-foot">Subscribers: <strong>${channel.subscriber_count == null ? "Hidden by channel" : fmt(channel.subscriber_count)}</strong></div>
+            <div class="metric-foot">Total views: <strong>${fmt(channel.view_count)}</strong></div>
+            <div class="metric-foot">Videos: <strong>${fmt(channel.video_count)}</strong></div>
+            <div class="metric-foot">Last synced: ${esc(new Date(channel.last_synced_at || Date.now()).toLocaleString())}</div>
+        </div>`;
+
+    const videos = Array.isArray(data.videos) ? data.videos : [];
+    let showAllVideos = false;
+
+    function renderVideoList() {
+        const visibleVideos = showAllVideos ? videos : videos.slice(0, 5);
+        const videoRows = visibleVideos.map(video => `
+            <div class="youtube-video">
+                ${video.thumbnail_url ? `<img src="${esc(video.thumbnail_url)}" alt="">` : `<div class="content-thumb">▶</div>`}
+                <div>
+                    <div class="youtube-video-title">${esc(video.title)}</div>
+                    <div class="youtube-video-meta">${video.published_at ? esc(new Date(video.published_at).toLocaleDateString()) : "Publish date unavailable"}</div>
+                    <div class="youtube-video-meta">Views ${fmt(video.views)} · Likes ${fmt(video.likes)} · Comments ${fmt(video.comments)}</div>
+                </div>
+                <div class="youtube-video-stats"><a href="https://www.youtube.com/watch?v=${encodeURIComponent(video.video_id)}" target="_blank" rel="noopener noreferrer">Open video ↗</a></div>
+            </div>`).join("");
+
+        const toggleButton = videos.length > 5
+            ? `<div style="padding-top:10px;text-align:center">
+                   <button type="button" class="btn btn-primary" id="toggle-youtube-videos">${showAllVideos ? "Show less" : `Show more`}</button>
+               </div>`
+            : "";
+
+        videoList.innerHTML = videoRows
+            ? videoRows + toggleButton
+            : `<div class="chart-empty">No public videos were returned for this channel.</div>`;
+
+        const toggle = document.getElementById("toggle-youtube-videos");
+        if (toggle) {
+            toggle.addEventListener("click", () => {
+                showAllVideos = !showAllVideos;
+                renderVideoList();
+            });
+        }
+    }
+
+    renderVideoList();
+    statusEl.textContent = "YouTube data fetched and saved to the database. Public metrics can be delayed by YouTube.";
+}
+
+async function setupAudienceDemographics() {
+    const ageEl = document.getElementById("ageDemographics");
+    const genderEl = document.getElementById("genderDemographics");
+    if (!ageEl || !genderEl) return;
+    try {
+        const result = await apiGet("/analytics/audience/demographics");
+        const records = Array.isArray(result.records) ? result.records : [];
+        if (!records.length) {
+            const message = result.message || "No verified demographic data is available from the connected platform.";
+            ageEl.textContent = message;
+            genderEl.textContent = message;
+            return;
+        }
+        const renderDimension = (type, el) => {
+            const rows = records.filter(r => String(r.dimension_type || "").toLowerCase() === type);
+            if (!rows.length) {
+                el.textContent = `No verified ${type} demographic data is available.`;
+                return;
+            }
+            el.innerHTML = rows.map(r => {
+                const value = Math.max(0, Math.min(100, Number(r.percentage || 0)));
+                return `<div class="demographic-row" style="margin:10px 0"><div style="display:flex;justify-content:space-between;gap:12px"><span>${esc(r.dimension_value || "Unknown")}</span><strong>${value.toFixed(1)}%</strong></div><div style="height:7px;background:#ece9ff;border-radius:8px;overflow:hidden;margin-top:5px"><div style="height:100%;width:${value}%;background:var(--primary,#6847f5);border-radius:8px"></div></div></div>`;
+            }).join("");
+        };
+        renderDimension("age", ageEl);
+        renderDimension("gender", genderEl);
+    } catch (error) {
+        ageEl.textContent = `Could not load verified age demographics: ${error.message}`;
+        genderEl.textContent = `Could not load verified gender demographics: ${error.message}`;
+    }
+}
+
+function setupPlatformSync() {
+    const connectButtons = document.querySelectorAll("[data-connect-platform]");
+    connectButtons.forEach(btn => {
+        btn.addEventListener("click", async () => {
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = "Opening Instagram...";
+            try {
+                // Let Instagram identify the account on its own login screen.
+                // The OAuth state still binds the callback to this CreatorIQ user.
+                const result = await apiGet("/auth/instagram/connect");
+                if (!result.authorization_url) {
+                    throw new Error("The backend did not return an Instagram authorization URL.");
+                }
+                window.location.href = result.authorization_url;
+            } catch (error) {
+                alert(`Could not start Instagram connection: ${error.message}`);
+                btn.disabled = false;
+                btn.textContent = originalText || "Connect Instagram";
+            }
+        });
+    });
+
+    const syncButtons = document.querySelectorAll("[data-sync-platform]");
+    syncButtons.forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const platform = btn.dataset.syncPlatform;
+            let query = "";
+
+            // X uses a Bearer Token for public profile lookup. Enter your own
+            // handle for initial testing, e.g. @yourusername.
+            if (platform === "x") {
+                const handle = prompt("Enter the X username to look up (e.g. @yourusername):");
+                if (!handle || !handle.trim()) return;
+                query = `?username=${encodeURIComponent(handle.trim())}`;
+            }
+
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = "Syncing...";
+            try {
+                const res = await fetch(`${API_URL}/social/sync/${platform}${query}`, {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                let data = {};
+                try {
+                    data = await res.json();
+                } catch (_) {
+                    data = {};
+                }
+                if (!res.ok) {
+                    const detail = typeof data.detail === "string"
+                        ? data.detail
+                        : JSON.stringify(data.detail || data);
+                    throw new Error(detail || `Sync failed (HTTP ${res.status})`);
+                }
+
+                let message = `${(data.platform || platform).toUpperCase()} synced successfully.\nFollowers: ${fmt(data.followers)}`;
+                if (platform === "instagram") {
+                    message += `\nPosts: ${fmt(data.media_count ?? data.posts ?? 0)}`;
+                    message += `\nFollowers: ${data.followers == null ? "Not provided by this API response" : fmt(data.followers)}`;
+                    if (data.username) message += `\nAccount: @${data.username}`;
+                    if (data.recent_media && data.recent_media.length) {
+                        message += `\nRecent posts returned: ${data.recent_media.length}`;
+                    }
+                    if (data.media_error) {
+                        message += `\nNote: profile synced, but recent posts could not be loaded: ${data.media_error}`;
+                    }
+                    if (data.followers_error) {
+                        message += `\nFollower count: ${data.followers_error}`;
+                    }
+                } else if (platform === "x") {
+                    message += `\nPosts: ${fmt(data.posts ?? 0)}`;
+                    if (data.username) message += `\nAccount: @${data.username}`;
+                } else if (platform === "linkedin") {
+                    message += "\nSource: configured LinkedIn organization page";
+                }
+
+                alert(message);
+                await loadDashboard();
+            } catch (err) {
+                alert(`Error syncing ${platform}: ${err.message}\n\nCheck your API token, permissions, account ID, API access tier, and backend terminal for details.`);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText || "Sync Now";
+            }
+        });
+    });
+}
+
+function setupCompareHandler() {
+    const btn = document.getElementById("compareBtn");
+    if (!btn) return;
+
+    btn.addEventListener("click", async () => {
+        const p1 = document.getElementById("compareSelect1").value;
+        const p2 = document.getElementById("compareSelect2").value;
+        const container = document.getElementById("comparisonResult");
+
+        if (!p1 || !p2) {
+            alert("Please select two posts to compare.");
+            return;
+        }
+        if (p1 === p2) {
+            alert("Please choose two different posts.");
+            return;
+        }
+
+        container.innerHTML = `<div class="chart-empty">Comparing posts...</div>`;
+
+        try {
+            const res = await apiGet(`/analytics/content/compare?post_id_1=${encodeURIComponent(p1)}&post_id_2=${encodeURIComponent(p2)}`);
+            const [a, b] = res.comparison;
+
+            container.innerHTML = `
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>${esc(a.title.substring(0, 24))}...</th>
+                                <th>${esc(b.title.substring(0, 24))}...</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Views</strong></td><td>${fmt(a.views)}</td><td>${fmt(b.views)}</td></tr>
+                            <tr><td><strong>Likes</strong></td><td>${fmt(a.likes)}</td><td>${fmt(b.likes)}</td></tr>
+                            <tr><td><strong>Comments</strong></td><td>${fmt(a.comments)}</td><td>${fmt(b.comments)}</td></tr>
+                            <tr><td><strong>Engagement</strong></td><td>${fmt(a.engagement)}</td><td>${fmt(b.engagement)}</td></tr>
+                            <tr><td><strong>Engagement Rate</strong></td><td>${a.engagement_rate}%</td><td>${b.engagement_rate}%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } catch (err) {
+            container.innerHTML = `<div class="chart-empty" style="color:var(--red);">${esc(err.message)}</div>`;
+        }
+    });
+}
+
+async function campaignRequest(path, method = "GET", body = undefined) {
+    let response;
+    try {
+        const options = {
+            method,
+            headers: { "Accept": "application/json", "Authorization": `Bearer ${token}` }
+        };
+        if (body !== undefined) {
+            options.headers["Content-Type"] = "application/json";
+            options.body = JSON.stringify(body);
+        }
+        response = await fetch(`${API_URL}${path}`, options);
+    } catch (_) {
+        throw new Error(`Cannot connect to ${API_URL}. Make sure FastAPI is running.`);
+    }
+    const raw = await response.text();
+    let data = {};
+    try { data = raw ? JSON.parse(raw) : {}; } catch (_) { data = { detail: raw }; }
+    if (response.status === 401) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(USER_KEY);
+        window.location.replace("index.html");
+        throw new Error("Your login session expired. Please sign in again.");
+    }
+    if (!response.ok) throw new Error(data.detail || `Campaign request failed (${response.status}).`);
+    return data;
+}
+
+function setupCampaignManager() {
+    const list = document.getElementById("campaign-list");
+    if (!list) return;
+    const form = document.getElementById("campaign-form");
+    const message = document.getElementById("campaign-message");
+    let editingId = null;
+    let cachedCampaigns = [];
+
+    function setMessage(text, isError = false) {
+        if (!message) return;
+        message.textContent = text;
+        message.style.color = isError ? "var(--red)" : "var(--muted)";
+    }
+    function formPayload() {
+        const name = document.getElementById("campaign-name").value.trim();
+        const platform = document.getElementById("campaign-platform").value;
+        const budgetText = document.getElementById("campaign-budget").value.trim();
+        const startDate = document.getElementById("campaign-start").value;
+        const endDate = document.getElementById("campaign-end").value;
+        if (!name) throw new Error("Campaign name is required.");
+        if (startDate && endDate && endDate < startDate) throw new Error("End date cannot be before start date.");
+        return {
+            name, platform,
+            description: document.getElementById("campaign-description").value.trim(),
+            budget: budgetText === "" ? null : Number(budgetText),
+            status: document.getElementById("campaign-status").value,
+            start_date: startDate || null,
+            end_date: endDate || null
+        };
+    }
+    function resetForm() {
+        if (!form) return;
+        form.reset();
+        editingId = null;
+        const save = document.getElementById("campaign-save");
+        const cancel = document.getElementById("campaign-cancel");
+        if (save) save.textContent = "Save campaign";
+        if (cancel) cancel.hidden = true;
+    }
+    function renderCampaigns(items) {
+        cachedCampaigns = items;
+        if (!items.length) {
+            list.className = "chart-empty";
+            list.textContent = "No campaigns saved yet. Use the form above to create your first campaign.";
+            return;
+        }
+        list.className = "table-wrap";
+        list.innerHTML = `<table><thead><tr><th>Campaign</th><th>Platform</th><th>Budget</th><th>Status</th><th>Dates</th><th>Actions</th></tr></thead><tbody>${
+            items.map(c => `<tr>
+                <td><strong>${esc(c.name || "Untitled")}</strong><div class="person-sub">${esc(c.description || "")}</div></td>
+                <td>${esc(c.platform || "—")}</td>
+                <td>${c.budget == null ? "—" : esc(money(c.budget))}</td>
+                <td>${status(c.status || "planning")}</td>
+                <td>${esc(c.start_date || "—")} – ${esc(c.end_date || "—")}</td>
+                <td><div class="campaign-table-actions">
+                    <button type="button" class="btn btn-small" data-campaign-edit="${Number(c.campaign_id)}">Edit</button>
+                    <button type="button" class="btn btn-small" data-campaign-delete="${Number(c.campaign_id)}">Delete</button>
+                </div></td>
+            </tr>`).join("")
+        }</tbody></table>`;
+    }
+    async function loadCampaigns() {
+        list.className = "chart-empty";
+        list.textContent = "Loading campaigns…";
+        try {
+            const data = await campaignRequest("/campaigns");
+            renderCampaigns(Array.isArray(data.campaigns) ? data.campaigns : []);
+        } catch (error) {
+            list.className = "chart-empty";
+            list.textContent = error.message;
+            setMessage(error.message, true);
+        }
+    }
+
+    if (form) {
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            const save = document.getElementById("campaign-save");
+            save.disabled = true;
+            try {
+                const payload = formPayload();
+                const path = editingId === null ? "/campaigns" : `/campaigns/${editingId}`;
+                const result = await campaignRequest(path, editingId === null ? "POST" : "PUT", payload);
+                setMessage(result.message || (editingId === null ? "Campaign created." : "Campaign updated."));
+                resetForm();
+                await loadCampaigns();
+            } catch (error) {
+                setMessage(error.message, true);
+            } finally {
+                save.disabled = false;
+            }
+        });
+        document.getElementById("campaign-cancel").addEventListener("click", () => {
+            resetForm();
+            setMessage("Edit cancelled.");
+        });
+    }
+
+    list.addEventListener("click", async event => {
+        const editButton = event.target.closest("[data-campaign-edit]");
+        const deleteButton = event.target.closest("[data-campaign-delete]");
+        if (editButton) {
+            const item = cachedCampaigns.find(c => Number(c.campaign_id) === Number(editButton.dataset.campaignEdit));
+            if (!item || !form) return;
+            editingId = Number(item.campaign_id);
+            document.getElementById("campaign-name").value = item.name || "";
+            document.getElementById("campaign-platform").value = item.platform || "instagram";
+            document.getElementById("campaign-budget").value = item.budget ?? "";
+            document.getElementById("campaign-status").value = item.status || "planning";
+            document.getElementById("campaign-start").value = item.start_date || "";
+            document.getElementById("campaign-end").value = item.end_date || "";
+            document.getElementById("campaign-description").value = item.description || "";
+            document.getElementById("campaign-save").textContent = "Update campaign";
+            document.getElementById("campaign-cancel").hidden = false;
+            form.scrollIntoView({behavior:"smooth", block:"center"});
+        } else if (deleteButton) {
+            const id = Number(deleteButton.dataset.campaignDelete);
+            const item = cachedCampaigns.find(c => Number(c.campaign_id) === id);
+            if (!item || !window.confirm(`Delete campaign "${item.name || "Untitled"}"? This cannot be undone.`)) return;
+            deleteButton.disabled = true;
+            try {
+                const result = await campaignRequest(`/campaigns/${id}`, "DELETE");
+                setMessage(result.message || "Campaign deleted.");
+                await loadCampaigns();
+            } catch (error) {
+                setMessage(error.message, true);
+                deleteButton.disabled = false;
+            }
+        }
+    });
+    loadCampaigns();
 }
 
 function setupNavigation(config) {
@@ -1148,8 +2797,7 @@ async function loadDashboard() {
             total_followers: Number(analyticsResponse.total_followers || 0),
             platforms: analyticsResponse.platforms || {}
         };
-        const growth = Array.isArray(growthResponse.growth)
-            ? growthResponse.growth : [];
+        const growth = Array.isArray(growthResponse.growth) ? growthResponse.growth : [];
 
         sessionStorage.setItem(USER_KEY, JSON.stringify({...user, role}));
 
@@ -1158,38 +2806,58 @@ async function loadDashboard() {
         document.getElementById("eyebrow").textContent = config.eyebrow;
         document.getElementById("pageSubtitle").textContent = config.subtitle;
         document.getElementById("workspaceLabel").textContent = config.title;
-        document.getElementById("accountName").textContent =
-            user.name || user.full_name || user.email || "User";
+        document.getElementById("accountName").textContent = user.name || user.full_name || user.email || "User";
         document.getElementById("accountRole").textContent = role.replace(/_/g, " ");
-        document.getElementById("avatar").textContent =
-            String(user.name || user.email || "U").charAt(0).toUpperCase();
+        document.getElementById("avatar").textContent = String(user.name || user.email || "U").charAt(0).toUpperCase();
 
         setupNavigation(config);
 
-        const renderers = {
-            creator: creatorDashboard,
-            agency: agencyDashboard,
-            marketing_team: marketingDashboard,
-            admin: adminDashboard
-        };
+        if (role === "creator") {
+            let contentData = { total_posts: 0, metrics: {}, top_by_views: [], posts_list: [] };
+            let instagramData = { connected: false, account: null, posts: [] };
+            try {
+                contentData = await apiGet("/analytics/content/overview");
+            } catch (_) {}
+            try {
+                instagramData = await apiGet("/social/instagram/overview");
+            } catch (error) {
+                instagramData = { connected: false, account: null, posts: [], error: error.message };
+            }
 
-        document.getElementById("dashboardContent").innerHTML =
-            renderers[role](user, analytics, growth, config);
-
-        const dbButton = document.getElementById("dbCheckBtn");
-        if (dbButton) {
-            dbButton.addEventListener("click", async () => {
-                const output = document.getElementById("dbResult");
-                output.textContent = "Checking...";
-                try {
-                    const result = await apiGet("/db-check");
-                    output.textContent = result.database === "connected"
-                        ? "Database connection successful."
-                        : "Database response received.";
-                } catch (error) {
-                    output.textContent = error.message;
-                }
-            });
+            document.getElementById("dashboardContent").innerHTML = creatorDashboard(user, analytics, growth, contentData, config, instagramData);
+            setupYouTubeIntegration();
+            setupPublicAccountSearch();
+            setupPlatformSync();
+            setupAudienceDemographics();
+            setupCompareHandler();
+        } else {
+            const roleData = await apiGet("/dashboard/role-data");
+            if (role === "agency") {
+                const agency = await apiGet("/agency/workspace");
+                roleData.agency_workspace = agency;
+                roleData.creators = agency.creators || [];
+                roleData.total_creators = roleData.creators.length;
+                roleData.total_followers = roleData.creators.reduce((a,c)=>a+Number(c.followers||0),0);
+                roleData.total_views = roleData.creators.reduce((a,c)=>a+Number(c.views||0),0);
+                roleData.total_likes = roleData.creators.reduce((a,c)=>a+Number(c.likes||0),0);
+                roleData.total_videos = roleData.creators.reduce((a,c)=>a+Number(c.videos||0),0);
+            }
+            if (role === "admin") roleData.admin_workspace = await apiGet("/admin/workspace");
+            const renderers = {
+                agency: agencyDashboard,
+                marketing_team: marketingDashboard,
+                admin: adminDashboard
+            };
+            document.getElementById("dashboardContent").innerHTML = renderers[role](user, analytics, growth, config, roleData);
+        }
+        if (role === "agency") {
+            setupAgencyForms();
+            setupAgencyContentLibrary();
+        }
+        if (role === "marketing_team") {
+            setupCampaignManager();
+            setupLocalWorkspaceRecords();
+            setupCampaignReporting();
         }
 
     } catch (error) {
